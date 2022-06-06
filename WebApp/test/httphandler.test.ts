@@ -55,6 +55,16 @@ describe('http signaling test in public mode', () => {
     expect(res.json).toBeCalledWith({ connections: [{ connectionId: connectionId }] });
   });
 
+  test('get all from session1', async () => {
+    await httpHandler.getAll(req, res);
+    expect(res.json).toBeCalledWith({ 
+      connections: [{ connectionId: connectionId }],
+      offers: [],
+      answers: [],
+      candidates: []
+     });
+  });
+
   test('post offer from session1', async () => {
     const body = { connectionId: connectionId, sdp: testsdp };
     req.body = body;

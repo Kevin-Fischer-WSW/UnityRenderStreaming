@@ -52,17 +52,11 @@ function checkSessionId(req: Request, res: Response, next): void {
   next();
 }
 
-function getConnection(req: Request, res: Response): void {
-  const sessionId: string = req.header('session-id');
-  const arrayConnection = Array.from(clients.get(sessionId));
-  const obj = arrayConnection.map((v) => ({ connectionId: v }));
-  res.json({ connections: obj });
+function _getConnection(sessionId: string, fromTime: number): string[] {
+  return Array.from(clients.get(sessionId));
 }
 
-function getOffer(req: Request, res: Response): void {
-  // get `fromtime` parameter from request query
-  const fromTime: number = req.query.fromtime ? Number(req.query.fromtime) : 0;
-  const sessionId: string = req.header('session-id');
+function _getOffer(sessionId: string, fromTime: number): [string, Offer][] {
   let arrayOffers: [string, Offer][] = [];
 
   if (offers.size != 0) {
@@ -79,25 +73,44 @@ function getOffer(req: Request, res: Response): void {
   if (fromTime > 0) {
     arrayOffers = arrayOffers.filter((v) => v[1].datetime > fromTime);
   }
-  const obj = arrayOffers.map((v) => ({ connectionId: v[0], sdp: v[1].sdp, polite: v[1].polite }));
-  res.json({ offers: obj });
+  return arrayOffers;
+}
+
+function _getAnswer(sessionId: string, fromTime: number): [string, Answer][] {
+  let arrayAnswers: [string, Answer][] = [];
+
+  if (answers.size != 0 && answers.has(sessionId)) {
+    arrayAnswers = Array.from(answers.get(sessionId));
+  }
+
+  if (fromTime > 0) {
+    arrayAnswers = arrayAnswers.filter((v) => v[1].datetime > fromTime);
+  }
+  return arrayAnswers;
 }
 
 function getAnswer(req: Request, res: Response): void {
   // get `fromtime` parameter from request query
   const fromTime: number = req.query.fromtime ? Number(req.query.fromtime) : 0;
   const sessionId: string = req.header('session-id');
-  let arrayOffers: [string, Answer][] = [];
+  const answers: [string, Answer][] = _getAnswer(sessionId, fromTime);
+  res.json({ answers: answers.map((v) => ({ connectionId: v[0], sdp: v[1].sdp })) });
+}
 
-  if (answers.size != 0 && answers.has(sessionId)) {
-    arrayOffers = Array.from(answers.get(sessionId));
-  }
+function getConnection(req: Request, res: Response): void {
+  // get `fromtime` parameter from request query
+  const fromTime: number = req.query.fromtime ? Number(req.query.fromtime) : 0;
+  const sessionId: string = req.header('session-id');
+  const connections = _getConnection(sessionId, fromTime);
+  res.json({ connections: connections.map((v) => ({ connectionId: v })) });
+}
 
-  if (fromTime > 0) {
-    arrayOffers = arrayOffers.filter((v) => v[1].datetime > fromTime);
-  }
-  const obj = arrayOffers.map((v) => ({ connectionId: v[0], sdp: v[1].sdp }));
-  res.json({ answers: obj });
+function getOffer(req: Request, res: Response): void {
+  // get `fromtime` parameter from request query
+  const fromTime: number = req.query.fromtime ? Number(req.query.fromtime) : 0;
+  const sessionId: string = req.header('session-id');
+  const offers = _getOffer(sessionId, fromTime);
+  res.json({ offers: offers.map((v) => ({ connectionId: v[0], sdp: v[1].sdp, polite: v[1].polite })) });
 }
 
 function getCandidate(req: Request, res: Response): void {
@@ -124,6 +137,18 @@ function getCandidate(req: Request, res: Response): void {
     arr.push({ connectionId, candidates: arrayCandidates });
   }
   res.json({ candidates: arr });
+}
+
+function getAll(req: Request, res: Response): void {
+  const fromTime: number = req.query.fromtime ? Number(req.query.fromtime) : 0;
+  const sessionId: string = req.header('session-id');
+  const connections = _getConnection(sessionId, fromTime);
+  res.json({ 
+    connections: connections.map((v) => ({ connectionId: v })),
+    offers: [],
+    answers: [],
+    candidates: [],
+ });
 }
 
 function createSession(sessionId: string, res: Response): void {
@@ -274,4 +299,4 @@ function postCandidate(req: Request, res: Response): void {
   res.sendStatus(200);
 }
 
-export { reset, checkSessionId, getConnection, getOffer, getAnswer, getCandidate, createSession, deleteSession, createConnection, deleteConnection, postOffer, postAnswer, postCandidate };
+export { reset, checkSessionId, getAll, getConnection, getOffer, getAnswer, getCandidate, createSession, deleteSession, createConnection, deleteConnection, postOffer, postAnswer, postCandidate };
