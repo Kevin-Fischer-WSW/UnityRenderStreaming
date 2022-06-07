@@ -76,7 +76,7 @@ function _getDisconnection(sessionId: string, fromTime: number): Disconnection[]
   }
 
   if (fromTime > 0) {
-    arrayDisconnections = arrayDisconnections.filter((v) => v[1].datetime > fromTime);
+    arrayDisconnections = arrayDisconnections.filter((v) => v.datetime > fromTime);
   }
   return arrayDisconnections;
 }
