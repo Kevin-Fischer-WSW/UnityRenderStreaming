@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -19,6 +18,7 @@ namespace Unity.RenderStreaming.Signaling
         private Thread m_signalingThread;
 
         private string m_sessionId;
+        private long m_lastTimeGetAllRequest;
         private long m_lastTimeGetOfferRequest;
         private long m_lastTimeGetAnswerRequest;
         private long m_lastTimeGetCandidateRequest;
@@ -126,10 +126,10 @@ namespace Unity.RenderStreaming.Signaling
         private void HTTPPooling()
         {
             // ignore messages arrived before 30 secs ago
+            m_lastTimeGetAllRequest = DateTime.UtcNow.Millisecond - 30000;
             m_lastTimeGetOfferRequest = DateTime.UtcNow.Millisecond - 30000;
             m_lastTimeGetAnswerRequest = DateTime.UtcNow.Millisecond - 30000;
             m_lastTimeGetCandidateRequest = DateTime.UtcNow.Millisecond - 30000;
-
 
             while (m_running && string.IsNullOrEmpty(m_sessionId))
             {
@@ -149,12 +149,7 @@ namespace Unity.RenderStreaming.Signaling
             {
                 try
                 {
-                    HTTPGetConnections();
-                    //ToDo workaround: The processing order needs to be determined by the time stamp
-                    HTTPGetAnswers();
-                    HTTPGetOffers();
-                    HTTPGetCandidates();
-
+                    HTTPGetAll();
                     Thread.Sleep((int)(m_timeout * 1000));
                 }
                 catch (ThreadAbortException)
@@ -319,7 +314,7 @@ namespace Unity.RenderStreaming.Signaling
 
             if (data == null) return false;
 
-            Debug.Log("Signaling: HTTP create connection, connectionId : " + connectionId);
+            Debug.Log($"Signaling: HTTP create connection, connectionId: {connectionId}, polite:{data.polite}");
             m_mainThreadContext.Post(d => OnCreateConnection?.Invoke(this, data.connectionId, data.polite), null);
             return true;
         }
@@ -376,6 +371,78 @@ namespace Unity.RenderStreaming.Signaling
 
             return true;
         }
+
+        enum DataType
+        {
+            Connection,
+            Offers,
+            Answers
+        }
+
+        private bool HTTPGetAll()
+        {
+            HttpWebRequest request =
+    (HttpWebRequest)WebRequest.Create($"{m_url}/signaling?fromtime={m_lastTimeGetAllRequest}");
+            request.Method = "GET";
+            request.ContentType = "application/json";
+            request.Headers.Add("Session-Id", m_sessionId);
+            request.KeepAlive = false;
+
+            HttpWebResponse response = HTTPGetResponse(request);
+            AllResData data = HTTPParseJsonResponse<AllResData>(response);
+
+            if (data == null) return false;
+
+            m_lastTimeGetAllRequest = DateTimeExtension.ParseHttpDate(response.Headers[HttpResponseHeader.Date])
+                .ToJsMilliseconds();
+
+            foreach (var msg in data.messages)
+            {
+                if (string.IsNullOrEmpty(msg.type))
+                    continue;
+
+                if(msg.type == "connect")
+                {
+                    if(!m_connection.Contains(msg.connectionId))
+                        m_connection.Add(msg.connectionId);
+                }
+                else if(msg.type == "disconnect")
+                {
+                    m_mainThreadContext.Post(d => OnDestroyConnection?.Invoke(this, msg.connectionId), null);
+                    m_connection.Remove(msg.connectionId);
+                }
+                else if (msg.type == "offer")
+                {
+                    DescData offer = new DescData();
+                    offer.connectionId = msg.connectionId;
+                    offer.sdp = msg.sdp;
+                    offer.polite = msg.polite;
+                    m_mainThreadContext.Post(d => OnOffer?.Invoke(this, offer), null);
+                }
+                else if (msg.type == "answer")
+                {
+                    DescData answer = new DescData
+                    {
+                        connectionId = msg.connectionId,
+                        sdp = msg.sdp
+                    };
+                    m_mainThreadContext.Post(d => OnAnswer?.Invoke(this, answer), null);
+                }
+                else if (msg.type == "candidate")
+                {
+                    CandidateData candidate = new CandidateData
+                    {
+                        connectionId = msg.connectionId,
+                        candidate = msg.candidate,
+                        sdpMLineIndex = msg.sdpMLineIndex,
+                        sdpMid = msg.sdpMid
+                    };
+                    m_mainThreadContext.Post(d => OnIceCandidate?.Invoke(this, candidate), null);
+                }
+            }
+            return true;
+        }
+
 
         private bool HTTPGetOffers()
         {

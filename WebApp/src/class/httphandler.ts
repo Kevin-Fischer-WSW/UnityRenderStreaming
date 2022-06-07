@@ -3,6 +3,15 @@ import Offer from './offer';
 import Answer from './answer';
 import Candidate from './candidate';
 
+class Disconnection {
+  id: string;
+  datetime: number;
+  constructor(id: string, datetime: number) {
+    this.id = id;
+    this.datetime = datetime;
+  }
+}
+
 let isPrivate: boolean;
 
 // [{sessonId:[connectionId,...]}]
@@ -19,6 +28,9 @@ const answers: Map<string, Map<string, Answer>> = new Map<string, Map<string, An
 
 // [{sessionId:[{connectionId:Candidate},...]}]
 const candidates: Map<string, Map<string, Candidate[]>> = new Map<string, Map<string, Candidate[]>>(); // key = sessionId
+
+// [{sessionId:[Disconnection,...]}]
+const disconnections: Map<string, Disconnection[]> = new Map<string, Disconnection[]>(); // key = sessionId
 
 function getOrCreateConnectionIds(sessionId: string): Set<string> {
   let connectionIds = null;
@@ -37,6 +49,7 @@ function reset(mode: string): void {
   offers.clear();
   answers.clear();
   candidates.clear();
+  disconnections.clear();
 }
 
 function checkSessionId(req: Request, res: Response, next): void {
@@ -54,6 +67,18 @@ function checkSessionId(req: Request, res: Response, next): void {
 
 function _getConnection(sessionId: string, fromTime: number): string[] {
   return Array.from(clients.get(sessionId));
+}
+
+function _getDisconnection(sessionId: string, fromTime: number): Disconnection[] {
+  let arrayDisconnections: Disconnection[] = [];
+  if (disconnections.size != 0 && disconnections.has(sessionId)) {
+    arrayDisconnections = disconnections.get(sessionId);
+  }
+
+  if (fromTime > 0) {
+    arrayDisconnections = arrayDisconnections.filter((v) => v[1].datetime > fromTime);
+  }
+  return arrayDisconnections;
 }
 
 function _getOffer(sessionId: string, fromTime: number): [string, Offer][] {
@@ -89,36 +114,9 @@ function _getAnswer(sessionId: string, fromTime: number): [string, Answer][] {
   return arrayAnswers;
 }
 
-function getAnswer(req: Request, res: Response): void {
-  // get `fromtime` parameter from request query
-  const fromTime: number = req.query.fromtime ? Number(req.query.fromtime) : 0;
-  const sessionId: string = req.header('session-id');
-  const answers: [string, Answer][] = _getAnswer(sessionId, fromTime);
-  res.json({ answers: answers.map((v) => ({ connectionId: v[0], sdp: v[1].sdp })) });
-}
-
-function getConnection(req: Request, res: Response): void {
-  // get `fromtime` parameter from request query
-  const fromTime: number = req.query.fromtime ? Number(req.query.fromtime) : 0;
-  const sessionId: string = req.header('session-id');
-  const connections = _getConnection(sessionId, fromTime);
-  res.json({ connections: connections.map((v) => ({ connectionId: v })) });
-}
-
-function getOffer(req: Request, res: Response): void {
-  // get `fromtime` parameter from request query
-  const fromTime: number = req.query.fromtime ? Number(req.query.fromtime) : 0;
-  const sessionId: string = req.header('session-id');
-  const offers = _getOffer(sessionId, fromTime);
-  res.json({ offers: offers.map((v) => ({ connectionId: v[0], sdp: v[1].sdp, polite: v[1].polite })) });
-}
-
-function getCandidate(req: Request, res: Response): void {
-  // get `fromtime` parameter from request query
-  const fromTime: number = req.query.fromtime ? Number(req.query.fromtime) : 0;
-  const sessionId: string = req.header('session-id');
+function _getCandidate(sessionId: string, fromTime: number): [string, Candidate][] {
   const connectionIds = Array.from(clients.get(sessionId));
-  const arr = [];
+  const arr: [string, Candidate][] = [];
   for (const connectionId of connectionIds) {
     const pair = connectionPair.get(connectionId);
     if (pair == null) {
@@ -129,26 +127,68 @@ function getCandidate(req: Request, res: Response): void {
       continue;
     }
     const arrayCandidates = candidates.get(otherSessionId).get(connectionId)
-      .filter((v) => v.datetime > fromTime)
-      .map((v) => ({ candidate: v.candidate, sdpMLineIndex: v.sdpMLineIndex, sdpMid: v.sdpMid }));
+      .filter((v) => v.datetime > fromTime);
     if (arrayCandidates.length === 0) {
       continue;
     }
-    arr.push({ connectionId, candidates: arrayCandidates });
+    for (const candidate of arrayCandidates) {
+      arr.push([connectionId, candidate]);
+    }
   }
-  res.json({ candidates: arr });
+  return arr;
+}
+
+function getAnswer(req: Request, res: Response): void {
+  // get `fromtime` parameter from request query
+  const fromTime: number = req.query.fromtime ? Number(req.query.fromtime) : 0;
+  const sessionId: string = req.header('session-id');
+  const answers: [string, Answer][] = _getAnswer(sessionId, fromTime);
+  res.json({ answers: answers.map((v) => ({ connectionId: v[0], sdp: v[1].sdp, type: "answer", datetime: v[1].datetime })) });
+}
+
+function getConnection(req: Request, res: Response): void {
+  // get `fromtime` parameter from request query
+  const fromTime: number = req.query.fromtime ? Number(req.query.fromtime) : 0;
+  const sessionId: string = req.header('session-id');
+  const connections = _getConnection(sessionId, fromTime);
+  res.json({ connections: connections.map((v) => ({ connectionId: v, type: "connect", datetime: Date.now() })) });
+}
+
+function getOffer(req: Request, res: Response): void {
+  // get `fromtime` parameter from request query
+  const fromTime: number = req.query.fromtime ? Number(req.query.fromtime) : 0;
+  const sessionId: string = req.header('session-id');
+  const offers = _getOffer(sessionId, fromTime);
+  res.json({ offers: offers.map((v) => ({ connectionId: v[0], sdp: v[1].sdp, polite: v[1].polite, type: "offer", datetime: v[1].datetime })) });
+}
+
+function getCandidate(req: Request, res: Response): void {
+  // get `fromtime` parameter from request query
+  const fromTime: number = req.query.fromtime ? Number(req.query.fromtime) : 0;
+  const sessionId: string = req.header('session-id');
+  const candidates = _getCandidate(sessionId, fromTime);
+  res.json({ candidates: candidates.map((v) => ({ connectionId: v[0], candidate: v[1].candidate, sdpMLineIndex: v[1].sdpMLineIndex, sdpMid: v[1].sdpMid, type: "candidate", datetime: v[1].datetime })) });
 }
 
 function getAll(req: Request, res: Response): void {
   const fromTime: number = req.query.fromtime ? Number(req.query.fromtime) : 0;
   const sessionId: string = req.header('session-id');
   const connections = _getConnection(sessionId, fromTime);
-  res.json({ 
-    connections: connections.map((v) => ({ connectionId: v })),
-    offers: [],
-    answers: [],
-    candidates: [],
- });
+  const offers = _getOffer(sessionId, fromTime);
+  const answers: [string, Answer][] = _getAnswer(sessionId, fromTime);
+  const candidates: [string, Candidate][] = _getCandidate(sessionId, fromTime);
+  const disconnections: Disconnection[] = _getDisconnection(sessionId, fromTime);
+
+  let array: any[] = [];
+
+  array = array.concat(connections.map((v) => ({ connectionId: v, type: "connect", datetime: Date.now() })));
+  array = array.concat(offers.map((v) => ({ connectionId: v[0], sdp: v[1].sdp, polite: v[1].polite, type: "offer", datetime: v[1].datetime })));
+  array = array.concat(answers.map((v) => ({ connectionId: v[0], sdp: v[1].sdp, type: "answer", datetime: v[1].datetime })));
+  array = array.concat(candidates.map((v) => ({ connectionId: v[0], candidate: v[1].candidate, sdpMLineIndex: v[1].sdpMLineIndex, sdpMid: v[1].sdpMid, type: "candidate", datetime: v[1].datetime })));
+  array = array.concat(disconnections.map((v) => ({ connectionId: v.id, type: "disconnect", datetime: v.datetime })));
+
+  array.sort((a, b) => a.datetime - b.datetime);
+  res.json({ messages: array });
 }
 
 function createSession(sessionId: string, res: Response): void {
@@ -156,6 +196,7 @@ function createSession(sessionId: string, res: Response): void {
   offers.set(sessionId, new Map<string, Offer>());
   answers.set(sessionId, new Map<string, Answer>());
   candidates.set(sessionId, new Map<string, Candidate[]>());
+  disconnections.set(sessionId, []);
   res.json({ sessionId: sessionId });
 }
 
@@ -165,6 +206,7 @@ function deleteSession(req: Request, res: Response): void {
   answers.delete(id);
   candidates.delete(id);
   clients.delete(id);
+  disconnections.delete(id);
   res.sendStatus(200);
 }
 
@@ -198,7 +240,7 @@ function createConnection(req: Request, res: Response): void {
 
   const connectionIds = getOrCreateConnectionIds(sessionId);
   connectionIds.add(connectionId);
-  res.json({ connectionId: connectionId, polite: polite });
+  res.json({ connectionId: connectionId, polite: polite, type: "connect", datetime: Date.now() });
 }
 
 function deleteConnection(req: Request, res: Response): void {
@@ -212,6 +254,8 @@ function deleteConnection(req: Request, res: Response): void {
     if (otherSessionId) {
       if (clients.has(otherSessionId)) {
         clients.get(otherSessionId).delete(connectionId);
+        const array1 = disconnections.get(otherSessionId);
+        array1.push(new Disconnection(connectionId, Date.now()));
       }
     }
   }
@@ -219,6 +263,10 @@ function deleteConnection(req: Request, res: Response): void {
   offers.get(sessionId).delete(connectionId);
   answers.get(sessionId).delete(connectionId);
   candidates.get(sessionId).delete(connectionId);
+
+  const array2 = disconnections.get(sessionId);
+  array2.push(new Disconnection(connectionId, Date.now()));
+
   res.json({ connectionId: connectionId });
 }
 
@@ -264,6 +312,11 @@ function postAnswer(req: Request, res: Response): void {
   // add connectionPair
   const pair = connectionPair.get(connectionId);
   const otherSessionId = pair[0] == sessionId ? pair[1] : pair[0];
+  if (!clients.has(otherSessionId)) {
+    // already deleted
+    res.sendStatus(200);
+    return;
+  }
 
   if (!isPrivate) {
     connectionPair.set(connectionId, [otherSessionId, sessionId]);

@@ -81,7 +81,7 @@ namespace Unity.RenderStreaming
     }
 
     [Serializable]
-    class CandidateContainerResData
+    public class CandidateContainerResData
     {
         public string connectionId;
         public CandidateData[] candidates;
@@ -94,6 +94,12 @@ namespace Unity.RenderStreaming
         public string candidate;
         public string sdpMid;
         public int sdpMLineIndex;
+    }
+
+    [Serializable]
+    public class AllResData
+    {
+        public SignalingMessage[] messages;
     }
 
 #pragma warning restore 0649
