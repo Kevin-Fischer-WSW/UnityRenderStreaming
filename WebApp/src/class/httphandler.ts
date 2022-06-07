@@ -148,7 +148,6 @@ function getAnswer(req: Request, res: Response): void {
 
 function getConnection(req: Request, res: Response): void {
   // get `fromtime` parameter from request query
-  const fromTime: number = req.query.fromtime ? Number(req.query.fromtime) : 0;
   const sessionId: string = req.header('session-id');
   const connections = _getConnection(sessionId);
   res.json({ connections: connections.map((v) => ({ connectionId: v, type: "connect", datetime: Date.now() })) });
