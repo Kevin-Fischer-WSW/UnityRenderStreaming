@@ -757,7 +757,7 @@
 							"    console.log(jsonData);",
 							"    pm.expect(jsonData.candidates.length).to.be.above(0);",
 							"    pm.expect(jsonData.candidates[0].connectionId).to.not.equal(null);",
-							"    pm.expect(jsonData.candidates[0].candidates.length).to.be.above(0);",
+							"    pm.expect(jsonData.candidates[0].candidates).to.not.equal(null);",
 							"});",
 							""
 						],
@@ -859,6 +859,7 @@
 							"pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
 							"pm.test(\"The response has a valid JSON body\", function () {",
 							"    pm.response.to.be.json;",
+							"    pm.response.to.have.jsonBody(\"messages\");",
 							"    var jsonData = pm.response.json();",
 							"    console.log(jsonData);",
 							"    pm.expect(jsonData.messages.length).to.be.above(0);",

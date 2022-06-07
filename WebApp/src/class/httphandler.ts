@@ -65,7 +65,7 @@ function checkSessionId(req: Request, res: Response, next): void {
   next();
 }
 
-function _getConnection(sessionId: string, fromTime: number): string[] {
+function _getConnection(sessionId: string): string[] {
   return Array.from(clients.get(sessionId));
 }
 
@@ -150,7 +150,7 @@ function getConnection(req: Request, res: Response): void {
   // get `fromtime` parameter from request query
   const fromTime: number = req.query.fromtime ? Number(req.query.fromtime) : 0;
   const sessionId: string = req.header('session-id');
-  const connections = _getConnection(sessionId, fromTime);
+  const connections = _getConnection(sessionId);
   res.json({ connections: connections.map((v) => ({ connectionId: v, type: "connect", datetime: Date.now() })) });
 }
 
@@ -173,7 +173,7 @@ function getCandidate(req: Request, res: Response): void {
 function getAll(req: Request, res: Response): void {
   const fromTime: number = req.query.fromtime ? Number(req.query.fromtime) : 0;
   const sessionId: string = req.header('session-id');
-  const connections = _getConnection(sessionId, fromTime);
+  const connections = _getConnection(sessionId);
   const offers = _getOffer(sessionId, fromTime);
   const answers: [string, Answer][] = _getAnswer(sessionId, fromTime);
   const candidates: [string, Candidate][] = _getCandidate(sessionId, fromTime);
