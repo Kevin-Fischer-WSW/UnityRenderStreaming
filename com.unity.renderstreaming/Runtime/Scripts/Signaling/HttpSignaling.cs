@@ -23,7 +23,6 @@ namespace Unity.RenderStreaming.Signaling
         private long m_lastTimeGetAnswerRequest;
         private long m_lastTimeGetCandidateRequest;
 
-        private HashSet<string> m_connection;
 	    public string Url { get { return m_url; } }
 	    public float Interval { get { return m_timeout; } }
 
@@ -38,13 +37,10 @@ namespace Unity.RenderStreaming.Signaling
                 ServicePointManager.ServerCertificateValidationCallback =
                     (sender, certificate, chain, errors) => true;
             }
-
-            m_connection = new HashSet<string>();
         }
 
         ~HttpSignaling()
         {
-            m_connection?.Clear();
             if(m_running)
                 Stop();
         }
@@ -344,34 +340,6 @@ namespace Unity.RenderStreaming.Signaling
             return true;
         }
 
-        private bool HTTPGetConnections()
-        {
-            HttpWebRequest request =
-                (HttpWebRequest)WebRequest.Create($"{m_url}/signaling/connection");
-            request.Method = "GET";
-            request.ContentType = "application/json";
-            request.Headers.Add("Session-Id", m_sessionId);
-            request.KeepAlive = false;
-
-            HttpWebResponse response = HTTPGetResponse(request);
-            ConnectionResDataList list = HTTPParseJsonResponse<ConnectionResDataList>(response);
-
-            if (list == null) return false;
-
-            foreach (var deleted in m_connection.Except(list.connections.Select(x => x.connectionId)).ToList())
-            {
-                m_mainThreadContext.Post(d => OnDestroyConnection?.Invoke(this, deleted), null);
-                m_connection.Remove(deleted);
-            }
-
-            foreach (var connection in list.connections)
-            {
-                m_connection.Add(connection.connectionId);
-            }
-
-            return true;
-        }
-
         enum DataType
         {
             Connection,
@@ -401,15 +369,9 @@ namespace Unity.RenderStreaming.Signaling
                 if (string.IsNullOrEmpty(msg.type))
                     continue;
 
-                if(msg.type == "connect")
-                {
-                    if(!m_connection.Contains(msg.connectionId))
-                        m_connection.Add(msg.connectionId);
-                }
-                else if(msg.type == "disconnect")
+                if(msg.type == "disconnect")
                 {
                     m_mainThreadContext.Post(d => OnDestroyConnection?.Invoke(this, msg.connectionId), null);
-                    m_connection.Remove(msg.connectionId);
                 }
                 else if (msg.type == "offer")
                 {
