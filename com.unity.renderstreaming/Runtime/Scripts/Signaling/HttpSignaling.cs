@@ -340,13 +340,6 @@ namespace Unity.RenderStreaming.Signaling
             return true;
         }
 
-        enum DataType
-        {
-            Connection,
-            Offers,
-            Answers
-        }
-
         private bool HTTPGetAll()
         {
             HttpWebRequest request =

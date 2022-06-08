@@ -81,7 +81,7 @@ namespace Unity.RenderStreaming
     }
 
     [Serializable]
-    public class CandidateContainerResData
+    class CandidateContainerResData
     {
         public string connectionId;
         public CandidateData[] candidates;
