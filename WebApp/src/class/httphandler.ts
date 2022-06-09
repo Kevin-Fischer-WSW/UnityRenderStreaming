@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import Offer from './offer';
 import Answer from './answer';
 import Candidate from './candidate';
+import { v4 as uuid } from 'uuid';
 
 class Disconnection {
   id: string;
@@ -12,10 +13,15 @@ class Disconnection {
   }
 }
 
+const TimeoutRequestedTime = 10000; // 10sec
+
 let isPrivate: boolean;
 
 // [{sessonId:[connectionId,...]}]
 const clients: Map<string, Set<string>> = new Map<string, Set<string>>();
+
+// [{sessonId:Date}]
+const lastRequestedTime: Map<string, Number> = new Map<string, Number>();
 
 // [{connectionId:[sessionId1, sessionId2]}]
 const connectionPair: Map<string, [string, string]> = new Map<string, [string, string]>(); // key = connectionId
@@ -62,14 +68,68 @@ function checkSessionId(req: Request, res: Response, next): void {
     res.sendStatus(404);
     return;
   }
+  lastRequestedTime[id] = Date.now();
   next();
 }
 
-function _getConnection(sessionId: string): string[] {
+function _deleteConnection(sessionId:string, connectionId:string) {
+  clients.get(sessionId).delete(connectionId);
+
+  if (connectionPair.has(connectionId)) {
+    const pair = connectionPair.get(connectionId);
+    const otherSessionId = pair[0] == sessionId ? pair[1] : pair[0];
+    if (otherSessionId) {
+      if (clients.has(otherSessionId)) {
+        clients.get(otherSessionId).delete(connectionId);
+        const array1 = disconnections.get(otherSessionId);
+        array1.push(new Disconnection(connectionId, Date.now()));
+      }
+    }
+  }
+  connectionPair.delete(connectionId);
+  offers.get(sessionId).delete(connectionId);
+  answers.get(sessionId).delete(connectionId);
+  candidates.get(sessionId).delete(connectionId);
+
+  const array2 = disconnections.get(sessionId);
+  array2.push(new Disconnection(connectionId, Date.now()));
+}
+
+function _deleteSession(sessionId: string) {
+  for(const connectionId of Array.from(clients.get(sessionId))) {
+    _deleteConnection(sessionId, connectionId);
+  }
+  offers.delete(sessionId);
+  answers.delete(sessionId);
+  candidates.delete(sessionId);
+  clients.delete(sessionId);
+  disconnections.delete(sessionId);
+}
+
+function _checkDeletedSession(sessionId: string): void {
+  const connectionIds = Array.from(clients.get(sessionId));
+  for (const connectionId of connectionIds) {
+    const pair = connectionPair.get(connectionId);
+    if (pair == null) {
+      continue;
+    }
+    const otherSessionId = sessionId === pair[0] ? pair[1] : pair[0];
+    if(!lastRequestedTime.has(otherSessionId))
+      continue;
+    if(lastRequestedTime[otherSessionId] > Date.now() - TimeoutRequestedTime)
+      continue;
+    _deleteSession(otherSessionId);
+    console.log("deleted");
+  }
+}
+
+function _getConnection(sessionId: string): string[] {  
+  _checkDeletedSession(sessionId);
   return Array.from(clients.get(sessionId));
 }
 
 function _getDisconnection(sessionId: string, fromTime: number): Disconnection[] {
+  _checkDeletedSession(sessionId);
   let arrayDisconnections: Disconnection[] = [];
   if (disconnections.size != 0 && disconnections.has(sessionId)) {
     arrayDisconnections = disconnections.get(sessionId);
@@ -190,7 +250,11 @@ function getAll(req: Request, res: Response): void {
   res.json({ messages: array });
 }
 
-function createSession(sessionId: string, res: Response): void {
+function createSession(sessionId: string, res: Response): void;
+function createSession(req: Request, res: Response): void;
+
+function createSession(req: string | Request, res: Response): void {
+  const sessionId: string = typeof req === "string" ? req : uuid();
   clients.set(sessionId, new Set<string>());
   offers.set(sessionId, new Map<string, Offer>());
   answers.set(sessionId, new Map<string, Answer>());
@@ -201,11 +265,7 @@ function createSession(sessionId: string, res: Response): void {
 
 function deleteSession(req: Request, res: Response): void {
   const id: string = req.header('session-id');
-  offers.delete(id);
-  answers.delete(id);
-  candidates.delete(id);
-  clients.delete(id);
-  disconnections.delete(id);
+  _deleteSession(id);
   res.sendStatus(200);
 }
 
@@ -245,26 +305,8 @@ function createConnection(req: Request, res: Response): void {
 function deleteConnection(req: Request, res: Response): void {
   const sessionId: string = req.header('session-id');
   const { connectionId } = req.body;
-  clients.get(sessionId).delete(connectionId);
 
-  if (connectionPair.has(connectionId)) {
-    const pair = connectionPair.get(connectionId);
-    const otherSessionId = pair[0] == sessionId ? pair[1] : pair[0];
-    if (otherSessionId) {
-      if (clients.has(otherSessionId)) {
-        clients.get(otherSessionId).delete(connectionId);
-        const array1 = disconnections.get(otherSessionId);
-        array1.push(new Disconnection(connectionId, Date.now()));
-      }
-    }
-  }
-  connectionPair.delete(connectionId);
-  offers.get(sessionId).delete(connectionId);
-  answers.get(sessionId).delete(connectionId);
-  candidates.get(sessionId).delete(connectionId);
-
-  const array2 = disconnections.get(sessionId);
-  array2.push(new Disconnection(connectionId, Date.now()));
+  _deleteConnection(sessionId, connectionId);
 
   res.json({ connectionId: connectionId });
 }
