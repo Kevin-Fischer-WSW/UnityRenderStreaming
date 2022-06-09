@@ -235,6 +235,7 @@ namespace Unity.RenderStreaming.Signaling
             request.ContentType = "application/json";
             request.KeepAlive = false;
             request.ContentLength = 0;
+            request.Timeout = (int)(m_timeout * 1000);
 
             Debug.Log($"Signaling: Connecting HTTP {m_url}");
 
