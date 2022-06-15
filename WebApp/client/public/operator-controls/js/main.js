@@ -30,9 +30,12 @@ window.addEventListener('beforeunload', async () => {
 
 function buildOperatorsControls() {
   let opControlsDiv = document.getElementById("controls");
+
   // Add a test button.
   const elementTestButton = document.createElement('button');
   elementTestButton.id = 'TestButton';
+  elementTestButton.innerText = "Test";
+  elementTestButton.title = "Rotate the cube slightly."
   elementTestButton.addEventListener("click", TestButton);
   opControlsDiv.appendChild(elementTestButton);
 }
