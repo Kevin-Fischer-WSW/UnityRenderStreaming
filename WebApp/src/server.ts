@@ -22,9 +22,10 @@ export const createServer = (config: Options): express.Application => {
   app.use('/samples', (req, res) => res.sendFile(path.join(__dirname, '../client/public/samples.html')));
   app.use(express.static(path.join(__dirname, '../client/public')));
   app.use('/module', express.static(path.join(__dirname, '../client/src')));
+  app.use('/node_modules', express.static(path.join(__dirname, '../node_modules')));
   app.get('/', (req, res) => {
     // todo Change to login page.
-    const indexPagePath: string = path.join(__dirname, '../client/public/index.html');
+    const indexPagePath: string = path.join(__dirname, '../client/public/operator-controls/login.html');
     fs.access(indexPagePath, (err) => {
       if (err) {
         log(LogLevel.warn, `Can't find file ' ${indexPagePath}`);
