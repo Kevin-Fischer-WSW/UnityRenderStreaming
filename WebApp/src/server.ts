@@ -19,9 +19,11 @@ export const createServer = (config: Options): express.Application => {
   app.use(express.json());
   app.get('/config', (req, res) => res.json({ useWebSocket: config.websocket, startupMode: config.mode, logging: config.logging }));
   app.use('/signaling', signaling);
+  app.use('/samples', (req, res) => res.sendFile(path.join(__dirname, '../client/public/samples.html')));
   app.use(express.static(path.join(__dirname, '../client/public')));
   app.use('/module', express.static(path.join(__dirname, '../client/src')));
   app.get('/', (req, res) => {
+    // todo Change to login page.
     const indexPagePath: string = path.join(__dirname, '../client/public/index.html');
     fs.access(indexPagePath, (err) => {
       if (err) {
