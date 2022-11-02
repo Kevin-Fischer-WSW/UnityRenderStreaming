@@ -6,4 +6,8 @@ export default interface Options {
   websocket?: boolean;
   mode?: string;
   logging?: string;
+  holdingSlideDir?: string;
+  holdingMusicDir?: string;
+  videoDir?: string;
+  recordingsDir?: string;
 }

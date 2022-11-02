@@ -8,6 +8,7 @@ import { createServer } from './server';
 import { AddressInfo } from 'net';
 import WSSignaling from './websocket';
 import Options from './class/options';
+import * as path from "path";
 
 export class RenderStreaming {
   public static run(argv: string[]): RenderStreaming {
@@ -23,6 +24,10 @@ export class RenderStreaming {
           .option('-w, --websocket', 'Enable Websocket Signaling', process.env.WEBSOCKET || false)
           .option('-m, --mode <type>', 'Choose Communication mode public or private (default public)', process.env.MODE || 'public')
           .option('-l, --logging <type>', 'Choose http logging type combined, dev, short, tiny or none.(default dev)', process.env.LOGGING || 'dev')
+          .option('-h, --holdingSlideDir <path>', 'Directory where holding slides shall be stored.', path.join(process.cwd(), 'Holding Slides'))
+          .option('-u, --holdingMusicDir <path>', 'Directory where holding music shall be stored.', path.join(process.cwd(), 'Holding Music'))
+          .option('-v, --videoDir <path>', 'Directory where videos shall be stored.', path.join(process.cwd(), 'Holding Slides/Custom Videos'))
+          .option('-r, --recordingsDir <path>', 'Directory where recorded videos shall be stored.', path.join(process.cwd(), 'Recordings'))
           .parse(argv);
         const option = program.opts();
         return {
@@ -33,6 +38,10 @@ export class RenderStreaming {
           websocket: option.websocket == undefined ? false : option.websocket,
           mode: option.mode,
           logging: option.logging,
+          holdingSlideDir: option.holdingSlideDir,
+          holdingMusicDir: option.holdingMusicDir,
+          videoDir: option.videoDir,
+          recordingsDir: option.recordingsDir
         };
       }
     };

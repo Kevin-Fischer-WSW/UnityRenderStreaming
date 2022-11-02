@@ -1,9 +1,9 @@
 ﻿/*
 This file sets up and updates elements related to Unity render streaming and disables context menu.
  */
-import {VideoPlayer} from "./ee-video-player.js";
-import {getServerConfig} from "../../js/config.js";
-import { createDisplayStringArray } from "../../js/stats.js";
+import {VideoPlayer} from "/operator-controls/js/ee-video-player.js";
+import {getServerConfig} from "/js/config.js";
+import { createDisplayStringArray } from "/js/stats.js";
 //import * as ControlImplementation from "./control-implementation.js";
 
 setup();
