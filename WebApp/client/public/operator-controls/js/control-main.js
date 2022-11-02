@@ -4,7 +4,7 @@ This file sets up and updates elements related to Unity render streaming and dis
 import {VideoPlayer} from "/operator-controls/js/ee-video-player.js";
 import {getServerConfig} from "/js/config.js";
 import { createDisplayStringArray } from "/js/stats.js";
-//import * as ControlImplementation from "./control-implementation.js";
+import * as ControlImplementation from "/operator-controls/js/control-implementation.js";
 
 setup();
 
@@ -54,6 +54,7 @@ function showWarningIfNeeded(startupMode) {
 function showPlayButton() {
   if (!document.getElementById('playButton')) {
     let elementPlayButton = document.createElement('div');
+    elementPlayButton.id = 'playButtonElement';
     //elementPlayButton.id = 'playButton';
     //elementPlayButton.src = 'images/Play.png';
     elementPlayButton.alt = 'Start Streaming';
@@ -84,7 +85,7 @@ function onClickPlayButton() {
 
   setupVideoPlayer([elementPreviewVideo, elementOutputVideo]).then(value => {
     myVideoPlayer = value;
-    //ControlImplementation.setupReceiverCallback();
+    ControlImplementation.setupReceiverCallback();
     myVideoPlayer.onErrorReceived = function (errMsg) {
       logDiv.innerHTML += `${errMsg}<br>`
     }
@@ -141,7 +142,7 @@ async function onDisconnect(message) {
   }
 
   // Clear generated elements.
-  playerDiv.removeChild(document.getElementById('playButton'))
+  playerDiv.removeChild(document.getElementById('playButtonElement'));
   outputDiv.removeChild(document.getElementById('output-video'));
   previewDiv.removeChild(document.getElementById('preview-video'));
   await myVideoPlayer.stop();
