@@ -9,7 +9,7 @@
     "start": "node ./build/index.js",
     "dev": "ts-node ./src/index.ts",
     "lint": "eslint src/**/*.ts test/**/*.ts",
-    "pack": "pkg --public-packages \"bootstrap\" .",
+    "pack": "pkg --public-packages \"bootstrap,clipboard\" .",
     "scss": "node-sass --watch client/public/scss -o client/public/css"
   },
   "dependencies": {
@@ -52,7 +52,8 @@
   "pkg": {
     "assets": [
       "client/public/**/*",
-      "client/src/**/*"
+      "client/src/**/*",
+      "node_modules/clipboard/**/*"
     ],
     "targets": [
       "node10"
