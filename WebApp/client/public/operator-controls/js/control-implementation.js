@@ -4,8 +4,17 @@ This file contains the implementations of our controls, including zoom controls,
  */
 import { OperatorControls } from "/operator-controls/js/control-map.gen.js";
 import { sendClickEvent, sendStringSubmitEvent } from "/videoplayer/js/register-events.js";
-import { myVideoPlayer } from "/operator-controls/js/control-main.js";
+import { myVideoPlayer, mainNotifications } from "/operator-controls/js/control-main.js";
 import { ValidateClonesWithJsonArray} from "/operator-controls/js/validation-helper.js";
+
+mainNotifications.addEventListener('setup', function () {
+  myVideoPlayer.onParticipantDataReceived = participantDataReceived;
+  myVideoPlayer.onAppStatusReceived = appStatusReceived;
+  setTimeout(() => {
+    sendClickEvent(myVideoPlayer, OperatorControls._GetParticipantData);
+    sendClickEvent(myVideoPlayer, OperatorControls._GetAppStatus);
+  }, 1000);
+});
 
 /* SIGN OUT MODAL ELEMENTS */
 let signOutModal = document.getElementById("signout-modal")
@@ -285,11 +294,6 @@ function setupDropdown(dropdown, func) {
       func(child.value)
     }
   }
-}
-
-export function setupReceiverCallback() {
-  myVideoPlayer.onParticipantDataReceived = participantDataReceived;
-  myVideoPlayer.onAppStatusReceived = appStatusReceived;
 }
 
 function participantDataReceived(json) {

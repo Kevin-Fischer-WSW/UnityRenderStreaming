@@ -1,8 +1,7 @@
 ﻿import { Signaling, WebSocketSignaling } from "../../module/signaling.js";
 import Peer from "../../module/peer.js";
 import * as Logger from "../../module/logger.js";
-import {sendClickEvent} from "/videoplayer/js/register-events.js";
-import {OperatorControls} from "./control-map.gen.js";
+import {getRTCConfiguration} from "../../js/config.js";
 
 function uuid4() {
   var temp_url = URL.createObjectURL(new Blob());
@@ -60,7 +59,8 @@ export class VideoPlayer {
     this.connectionId = uuid4();
 
     // Create peerConnection with proxy server and set up handlers
-    this.pc = new Peer(this.connectionId, true);
+    const config = getRTCConfiguration();
+    this.pc = new Peer(this.connectionId, true, config);
     this.pc.addEventListener('disconnect', () => {
       _this.ondisconnect();
     });
@@ -78,8 +78,6 @@ export class VideoPlayer {
         _this.localStream2.addTrack(this.videoTrackList[1]);
         _this.video.srcObject = _this.localStream;
         _this.videoThumb.srcObject = _this.localStream2;
-        sendClickEvent(_this, OperatorControls._GetParticipantData);
-        sendClickEvent(_this, OperatorControls._GetAppStatus);
       }
     });
     this.pc.addEventListener('sendoffer', (e) => {

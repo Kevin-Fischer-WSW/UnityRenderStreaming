@@ -4,7 +4,6 @@ This file sets up and updates elements related to Unity render streaming and dis
 import {VideoPlayer} from "/operator-controls/js/ee-video-player.js";
 import {getServerConfig} from "/js/config.js";
 import { createDisplayStringArray } from "/js/stats.js";
-import * as ControlImplementation from "/operator-controls/js/control-implementation.js";
 
 setup();
 
@@ -19,6 +18,13 @@ const playerDiv = document.getElementById("video-players");
 const outputDiv = document.getElementById("output-video-container");
 const previewDiv = document.getElementById("preview-video-container");
 const logDiv = document.getElementById("log-div");
+
+class MainNotifications extends EventTarget {
+  notifyVideoSetup() {
+    this.dispatchEvent(new Event('setup'));
+  }
+}
+export let mainNotifications = new MainNotifications();
 
 window.document.oncontextmenu = function () {
   return false;     // cancel default menu
@@ -85,7 +91,8 @@ function onClickPlayButton() {
 
   setupVideoPlayer([elementPreviewVideo, elementOutputVideo]).then(value => {
     myVideoPlayer = value;
-    ControlImplementation.setupReceiverCallback();
+    // Notify the control implementation that the video player is ready.
+    mainNotifications.notifyVideoSetup();
     myVideoPlayer.onErrorReceived = function (errMsg) {
       logDiv.innerHTML += `${errMsg}<br>`
     }
