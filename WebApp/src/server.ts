@@ -266,27 +266,32 @@ export const createServer = (config: Options): express.Application => {
       if (ValidatePathExists(res, uploadPath) === false) return;
       MoveFiles(res, files, uploadPath);
     });
+  });
 
-    function DeleteFile(res, _path) {
-      if (ValidatePathExists(res, _path) === false) return;
-      try {
-        fs.unlinkSync(_path);
-        res.status(200).json({message: ['File deleted successfully']});
-      } catch (err) {
-        console.log(err);
-        res.status(500).json({message: `File not deleted. Error: ${err}`});
-      }
+  function DeleteFile(res, _path) {
+    if (ValidatePathExists(res, _path) === false) return;
+    try {
+      fs.unlinkSync(_path);
+      res.status(200).json({message: ['File deleted successfully']});
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({message: `File not deleted. Error: ${err}`});
     }
+  }
 
-    app.delete('/slide_delete/:slide', (req, res) => {
-      let slidePath = path.join(customSlidePath, req.params.slide);
-      DeleteFile(res, slidePath);
-    });
+  app.delete('/slide_delete/:slide', (req, res) => {
+    let slidePath = path.join(customSlidePath, req.params.slide);
+    DeleteFile(res, slidePath);
+  });
 
-    app.delete('/music_delete/:music', (req, res) => {
-      let musicPath = path.join(holdingMusicDir, req.params.music);
-      DeleteFile(res, musicPath);
-    });
+  app.delete('/music_delete/:music', (req, res) => {
+    let musicPath = path.join(holdingMusicDir, req.params.music);
+    DeleteFile(res, musicPath);
+  });
+
+  app.delete('/video_delete/:video', (req, res) => {
+    let videoPath = path.join(videoDir, req.params.video);
+    DeleteFile(res, videoPath);
   });
 
   //list recordings

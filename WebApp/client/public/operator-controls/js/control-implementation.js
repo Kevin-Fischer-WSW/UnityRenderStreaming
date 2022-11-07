@@ -769,6 +769,7 @@ function UpdateBrowsePreviewElement(lmtRoute, element, select, srcRoute) {
       element.src = `${srcRoute}/${select.value}?${lastModifiedTime.toString()}`
     })
 }
+
 function UpdateSlideBrowsePreviewElement() {
   UpdateBrowsePreviewElement("/last_slide_update", slideImg, slideSelect, "/slides")
 }
@@ -816,6 +817,7 @@ function UpdateUploadBrowseOptionGroupElements() {
     .then(videos => {
       UpdateOptionGroupWithValues(videoOptionGroup, videos);
       UpdateVideoBrowsePreviewElement();
+      validateVideoSwitchBtns(videos);
     })
 }
 
@@ -1040,6 +1042,89 @@ async function HandleSlideUploadResponse(resp) {
   UpdateHoldMusicBrowsePreviewElement();
   UpdateVideoBrowsePreviewElement();
   UpdateUploadBrowseOptionGroupElements();
+}
+
+/* VIDEO CONTROLS */
+let videoFieldset  = document.getElementById("video-fieldset");
+let videoBtnContainer = document.getElementById("video-btn-container");
+let videoSwitchBtn = document.getElementById("video-btn-element");
+let videoSwitchBtns = [];
+let videoClearBtn = document.getElementById("video-clear-btn");
+videoClearBtn.addEventListener("click", onVideoClearClicked);
+
+function onVideoClearClicked() {
+  sendClickEvent(myVideoPlayer, OperatorControls._LiveButton);
+}
+
+videoSwitchBtn.style.display = "none";
+
+function getVideoImage(path, secs, callback, img) {
+  var me = this, video = document.createElement('video');
+  video.onloadedmetadata = function() {
+    if ('function' === typeof secs) {
+      secs = secs(this.duration);
+    }
+    this.currentTime = Math.min(Math.max(0, (secs < 0 ? this.duration : 0) + secs), this.duration);
+  };
+  video.onseeked = function(e) {
+    var canvas = document.createElement('canvas');
+    canvas.height = video.videoHeight;
+    canvas.width = video.videoWidth;
+    var ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    // var img = new Image();
+    img.src = canvas.toDataURL();
+    callback.call(me, img, this.currentTime, e);
+  };
+  video.onerror = function(e) {
+    callback.call(me, undefined, undefined, e);
+  };
+  video.src = path;
+}
+
+function showImageAt(secs, img, path) {
+  var duration;
+  getVideoImage(path, secs, function(img, secs, event) {}, img);
+}
+
+function validateVideoSwitchBtns(videos) {
+  // Be sure there are enough buttons for videos.
+  if (videoSwitchBtns.length < videos.length) {
+    while (videoSwitchBtns.length < videos.length) {
+      // Elements must be added.
+      let clone = videoSwitchBtn.cloneNode(true);
+      clone.id += "-" + videoSwitchBtns.length;
+      clone.style.display = "flex"
+      videoBtnContainer.appendChild(clone);
+      videoSwitchBtns.push(clone);
+      let span = document.querySelector(`#${clone.id} span`)
+      //let deleteBtn = document.querySelector(`#${clone.id} .media-delete-btn`); // todo: make a function to create delete buttons.
+      setupDeleteButton(clone, "/video_delete", span);
+      let button1 = document.querySelector(`#${clone.id} .media-left-btn`);
+      let button2 = document.querySelector(`#${clone.id} .media-right-btn`);
+      button1.addEventListener("click", function () {
+        let str = `${span.innerHTML},false`
+        sendStringSubmitEvent(myVideoPlayer, OperatorControls._CustomSlideButton, str);
+      })
+      button2.addEventListener("click", function () {
+        let str = `${span.innerHTML},true`
+        sendStringSubmitEvent(myVideoPlayer, OperatorControls._CustomSlideButton, str);
+      })
+    }
+  } else {
+    while (videoSwitchBtns.length > videos.length) {
+      // Elements must be destroyed.
+      videoSwitchBtns.pop().remove();
+    }
+  }
+  // Set data of each button.
+  for (let i = 0; i < videos.length; i += 1) {
+    let btn = videoSwitchBtns[i];
+    let img = document.querySelector(`#${btn.id} img`);
+    let label = document.querySelector(`#${btn.id} span`);
+    label.innerHTML = videos[i];
+    showImageAt(1, img, "/videos/" + label.innerHTML);
+  }
 }
 
 
