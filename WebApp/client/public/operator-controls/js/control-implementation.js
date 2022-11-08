@@ -303,10 +303,8 @@ function participantDataReceived(json) {
 }
 
 let currentlyPlayingTrackTime = document.getElementById("currently-playing-track-time")
-let holdingMusicTimer = 0;
-let musicTimerIntervalId = 0;
-let videoTimer = 0;
-let videoTimerIntervalId = 0;
+let timer = 0;
+let timerIntervalId = 0;
 
 function appStatusReceived(json) {
 
@@ -325,38 +323,20 @@ function appStatusReceived(json) {
     musicPlayStopBtn.innerHTML = jsonParsed.playingHoldingMusic ? "Stop" : "Play";
     currentlyPlayingSpan.innerHTML = jsonParsed.currentlyPlayingTrack;
     if (jsonParsed.playingHoldingMusic) {
-      holdingMusicTimer = Math.round(jsonParsed.currentTrackTimeLeft);
-      currentlyPlayingTrackTime.innerHTML = `-${holdingMusicTimer}`;
-      if (musicTimerIntervalId === 0) {
-        musicTimerIntervalId = setInterval(function () {
+      timer = Math.round(jsonParsed.currentTrackTimeLeft);
+      currentlyPlayingTrackTime.innerHTML = `-${timer}`;
+      if (timerIntervalId === 0) {
+        timerIntervalId = setInterval(function () {
           // Decrease the time left by 1 second
-          holdingMusicTimer--;
-          currentlyPlayingTrackTime.innerHTML = `-${holdingMusicTimer}`;
+          timer--;
+          currentlyPlayingTrackTime.innerHTML = `-${timer}`;
         }, 1000);
       }
     } else {
-      clearInterval(musicTimerIntervalId);
-      musicTimerIntervalId = 0;
+      clearInterval(timerIntervalId);
+      timerIntervalId = 0;
       currentlyPlayingTrackTime.innerHTML = "";
     }
-
-    if (jsonParsed.playingVideo) {
-      videoTimer = Math.round(jsonParsed.currentVideoPlaybackTime);
-      videoPlaybackTime.innerHTML = videoProgress.value = videoTimer;
-      if (videoTimerIntervalId === 0) {
-        videoTimerIntervalId = setInterval ( function() {
-          videoTimer++;
-          videoPlaybackTime.innerHTML = videoProgress.value = videoTimer;
-        }, 1000);
-      }
-    } else {
-      clearInterval(videoTimerIntervalId);
-      videoTimerIntervalId = 0;
-      videoPlaybackTime.innerHTML = "00:00";
-    }
-    videoProgress.max = jsonParsed.currentVideoDuration;
-    videoFieldset.disabled = false;
-    videoPlayPauseBtn.innerHTML = jsonParsed.playingVideo ? '<i class="bi bi-pause"></i>' : '<i class="bi bi-play"></i>';
 
     if (jsonParsed.streaming) {
       viewModal.disabled = true;
@@ -1070,37 +1050,11 @@ async function HandleSlideUploadResponse(resp) {
 
 /* VIDEO CONTROLS */
 let videoFieldset  = document.getElementById("video-fieldset");
-let videoPlayPauseBtn = document.getElementById("video-play-stop-btn");
 let videoBtnContainer = document.getElementById("video-btn-container");
 let videoSwitchBtn = document.getElementById("video-btn-element");
 let videoSwitchBtns = [];
 let videoClearBtn = document.getElementById("video-clear-btn");
-let videoProgress = document.getElementById("video-progress");
-let videoPlaybackTime = document.getElementById("video-playback-time");
-let videoVolume  = document.getElementById("volume-range-video");
-let videoVolumeLevel  = document.getElementById("video-volume-level");
-videoVolumeLevel.innerHTML = String(Number(Math.round(parseFloat(videoVolume.value) * 100))) + "%";
 videoClearBtn.addEventListener("click", onVideoClearClicked);
-
-videoVolume.addEventListener("mousemove", function() {
-  let str = videoVolume.value;
-  videoVolumeLevel.innerHTML = String(Number(Math.round(parseFloat(videoVolume.value) * 100))) + "%";
-  sendStringSubmitEvent(myVideoPlayer, OperatorControls._VolumeVideo, str);
-});
-
-videoProgress.addEventListener("change", function () {
-  let str = videoProgress.value;
-  videoPlaybackTime.innerHTML = videoProgress.value;
-  sendStringSubmitEvent(myVideoPlayer, OperatorControls._SeekVideoButton, str);
-});
-
-videoPlayPauseBtn.addEventListener("click", function() {
-  if (videoPlayPauseBtn.innerHTML === '<i class="bi bi-play"></i>') {
-    sendClickEvent(myVideoPlayer, OperatorControls._PlayVideo);
-  } else {
-    sendClickEvent(myVideoPlayer, OperatorControls._PauseVideo);
-  }
-});
 
 function onVideoClearClicked() {
   sendClickEvent(myVideoPlayer, OperatorControls._LiveButton);
@@ -1122,6 +1076,7 @@ function getVideoImage(path, secs, callback, img) {
     canvas.width = video.videoWidth;
     var ctx = canvas.getContext('2d');
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    // var img = new Image();
     img.src = canvas.toDataURL();
     callback.call(me, img, this.currentTime, e);
   };
@@ -1129,6 +1084,11 @@ function getVideoImage(path, secs, callback, img) {
     callback.call(me, undefined, undefined, e);
   };
   video.src = path;
+}
+
+function showImageAt(secs, img, path) {
+  var duration;
+  getVideoImage(path, secs, function(img, secs, event) {}, img);
 }
 
 function validateVideoSwitchBtns(videos) {
@@ -1148,13 +1108,12 @@ function validateVideoSwitchBtns(videos) {
       let button2 = document.querySelector(`#${clone.id} .media-right-btn`);
       button1.addEventListener("click", function () {
         let str = `${span.innerHTML},false`
-        sendStringSubmitEvent(myVideoPlayer, OperatorControls._ShowVideoButton, str);
+        sendStringSubmitEvent(myVideoPlayer, OperatorControls._CustomSlideButton, str);
       })
       button2.addEventListener("click", function () {
         let str = `${span.innerHTML},true`
-        sendStringSubmitEvent(myVideoPlayer, OperatorControls._ShowVideoButton, str);
+        sendStringSubmitEvent(myVideoPlayer, OperatorControls._CustomSlideButton, str);
       })
-
     }
   } else {
     while (videoSwitchBtns.length > videos.length) {
@@ -1168,7 +1127,7 @@ function validateVideoSwitchBtns(videos) {
     let img = document.querySelector(`#${btn.id} img`);
     let label = document.querySelector(`#${btn.id} span`);
     label.innerHTML = videos[i];
-    getVideoImage("/videos/" + label.innerHTML, 1, function(img, secs, event) {}, img);
+    showImageAt(1, img, "/videos/" + label.innerHTML);
   }
 }
 

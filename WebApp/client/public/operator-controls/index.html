@@ -365,13 +365,13 @@
       <fieldset id="music-fieldset">
         <legend class="title text-white mt-2">Hold Music</legend>
         <!-- Play/stop button and volume control -->
-        <div class="d-flex w-25 gap-5 mb-3">
+        <div class="d-flex w-25">
           <button id="music-play-stop-btn" type="button" class="btn btn-secondary m-1">Play</button>
           <div class="input-group">
             <div class="input-group-prepend">
               <label class="text-white" for="volume-range">Volume</label>
             </div>
-            <input type="range" class="form-range" min="0" max="100" id="volume-range-music">
+            <input type="range" class="form-range" min="0" max="100" id="volume-range">
           </div>
         </div>
         <!-- Library and Playlist -->
@@ -417,34 +417,12 @@
     <div class="tab-pane fade" id="nav-video" role="tabpanel" aria-labelledby="nav-video-tab">
       <fieldset id="video-fieldset">
         <legend class="title text-white mt-2">Video controls</legend>
-
-        <!-- Video controls bar -->
-        <div class="d-flex w-100 gap-5 mb-3">
-          <button id="video-play-stop-btn" type="button" class="btn btn-secondary m-1"><i class="bi bi-play"></i></button>
-          
-            <div class="input-group w-75">
-              <div class="input-group-prepend">
-                <label class="text-white" for="video-progress">Progress</label>
-              </div>
-              <input type="range" class="form-range w-80" min="0" id="video-progress">
-              <span id="video-playback-time" class="text-white">00:00</span>
-            </div>
-          
-            <div class="input-group w-25">
-            <div class="input-group-prepend">
-              <label class="text-white" for="volume-range">Volume</label>
-            </div>
-            <input type="range" class="form-range w-100" min="0" max="1" step="0.01" id="volume-range-video">
-            <span id="video-volume-level" class="text-white"></span>
-          </div>
-        </div>
-        
         <div id="video-btn-container" class="d-flex flex-wrap justify-content-center">
-
           <!-- Single video control element. Will be cloned for each video file -->
           <div id="video-btn-element" class="media-btn-element flex-column m-1">
             <span class="media-btn-label">Switch</span>
             <img src="..." alt="..." class="media-switch-thumb rounded">
+            <!-- <button class="media-switch-thumb btn btn-primary" type="button">Switch</button> -->
             <button class="media-delete-btn btn btn-danger rounded-pill" type="button"><i class="bi bi-trash"></i></button>
             <button class="media-left-btn btn btn-secondary"><i class="bi bi-volume-up"></i></button>
             <button class="media-right-btn btn btn-secondary"><i class="bi bi-volume-mute"></i></button>
