@@ -1,6 +1,6 @@
 $body-bg: #616161;
 
-#progress {
+#progress, #video-progress {
   height: 20px;
   display: flex;
   opacity: 1;
@@ -169,9 +169,9 @@ video {
 $primary : white;
 $secondary: #4c4c4c;
 
-@import "../operator-controls/node_modules/bootstrap/scss/_functions";
-@import "../operator-controls/node_modules/bootstrap/scss/_variables";
-@import "../operator-controls/node_modules/bootstrap/scss/mixins";
+@import "node_modules/bootstrap/scss/_functions";
+@import "node_modules/bootstrap/scss/_variables";
+@import "node_modules/bootstrap/scss/mixins";
 
 .video-container{
   aspect-ratio: 16 / 9;
@@ -191,7 +191,7 @@ $secondary: #4c4c4c;
 }
 
 // Import all of Bootstrap's css.
-@import '../operator-controls/node_modules/bootstrap/scss/bootstrap';
+@import 'node_modules/bootstrap/scss/bootstrap';
 
 .card-bordered {
   border: 1px solid #ebebeb;
