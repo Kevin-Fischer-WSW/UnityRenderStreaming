@@ -340,7 +340,10 @@ function appStatusReceived(json) {
       currentlyPlayingTrackTime.innerHTML = "";
     }
 
+    videoFieldsetBar.disabled = !jsonParsed.videoIsShowing;
+
     if (jsonParsed.playingVideo) {
+
       videoTimer = Math.round(jsonParsed.currentVideoPlaybackTime);
       videoPlaybackTime.innerHTML = videoProgress.value = videoTimer;
       if (videoTimerIntervalId === 0) {
@@ -355,7 +358,6 @@ function appStatusReceived(json) {
       videoPlaybackTime.innerHTML = "00:00";
     }
     videoProgress.max = jsonParsed.currentVideoDuration;
-    videoFieldset.disabled = false;
     videoPlayPauseBtn.innerHTML = jsonParsed.playingVideo ? '<i class="bi bi-pause"></i>' : '<i class="bi bi-play"></i>';
 
     if (jsonParsed.streaming) {
@@ -383,6 +385,7 @@ function appStatusReceived(json) {
   } else {
     meetingNoInputField.disabled = false;
     holdMusicFieldset.disabled = true;
+    videoFieldsetBar.disabled = true;
   }
 
   function ActivateButtonHelper(btn, active) {
@@ -1069,7 +1072,7 @@ async function HandleSlideUploadResponse(resp) {
 }
 
 /* VIDEO CONTROLS */
-let videoFieldset  = document.getElementById("video-fieldset");
+let videoFieldsetBar  = document.getElementById("video-fieldset-bar");
 let videoPlayPauseBtn = document.getElementById("video-play-stop-btn");
 let videoBtnContainer = document.getElementById("video-btn-container");
 let videoSwitchBtn = document.getElementById("video-btn-element");
@@ -1082,7 +1085,7 @@ let videoVolumeLevel  = document.getElementById("video-volume-level");
 videoVolumeLevel.innerHTML = String(Number(Math.round(parseFloat(videoVolume.value) * 100))) + "%";
 videoClearBtn.addEventListener("click", onVideoClearClicked);
 
-videoVolume.addEventListener("mousemove", function() {
+videoVolume.addEventListener("input", function() {
   let str = videoVolume.value;
   videoVolumeLevel.innerHTML = String(Number(Math.round(parseFloat(videoVolume.value) * 100))) + "%";
   sendStringSubmitEvent(myVideoPlayer, OperatorControls._VolumeVideo, str);
@@ -1091,6 +1094,8 @@ videoVolume.addEventListener("mousemove", function() {
 videoProgress.addEventListener("change", function () {
   let str = videoProgress.value;
   videoPlaybackTime.innerHTML = videoProgress.value;
+  clearInterval(videoTimerIntervalId);
+  videoTimerIntervalId = 0;
   sendStringSubmitEvent(myVideoPlayer, OperatorControls._SeekVideoButton, str);
 });
 
