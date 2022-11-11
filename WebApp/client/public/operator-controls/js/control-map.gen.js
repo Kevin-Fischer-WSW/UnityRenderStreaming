@@ -35,7 +35,8 @@ export const OperatorControls = {
 	_RemoveHoldingMusicFromPlaylist : 32,
 	_PlayHoldingMusic : 33,
 	_StopHoldingMusic : 34,
-	_PlayVideo : 35,
-	_PauseVideo : 36,
-	_VolumeVideo : 37,
+	_SetHoldingMusicVolume : 35,
+	_PlayVideo : 36,
+	_PauseVideo : 37,
+	_VolumeVideo : 38,
 };

@@ -327,6 +327,7 @@ function appStatusReceived(json) {
     if (jsonParsed.playingHoldingMusic) {
       holdingMusicTimer = Math.round(jsonParsed.currentTrackTimeLeft);
       currentlyPlayingTrackTime.innerHTML = `-${holdingMusicTimer}`;
+      volumeRangeMusic.value = jsonParsed.holdingMusicVolume;
       if (musicTimerIntervalId === 0) {
         musicTimerIntervalId = setInterval(function () {
           // Decrease the time left by 1 second
@@ -346,6 +347,7 @@ function appStatusReceived(json) {
 
       videoTimer = Math.round(jsonParsed.currentVideoPlaybackTime);
       videoPlaybackTime.innerHTML = videoProgress.value = videoTimer;
+      videoVolume.value = jsonParsed.currentVideoVolume;
       if (videoTimerIntervalId === 0) {
         videoTimerIntervalId = setInterval ( function() {
           videoTimer++;
@@ -668,6 +670,10 @@ function validateSlideSwitchBtns(slides) {
 /* HOLD MUSIC CONTROLS */
 let holdMusicFieldset = document.getElementById("music-fieldset");
 
+let volumeRangeMusic = document.getElementById("volume-range-music");
+volumeRangeMusic.addEventListener("change", function () {
+  sendStringSubmitEvent(myVideoPlayer, OperatorControls._SetHoldingMusicVolume, volumeRangeMusic.value);
+});
 //let holdMusicClearBtn = document.getElementById("music-clear-btn");
 
 let musicPlayStopBtn = document.getElementById("music-play-stop-btn");
