@@ -1192,11 +1192,17 @@ let chatMessages = [];
 
 let sendMessageInput = document.getElementById("send-message-input");
 let sendMessageBtn = document.getElementById("send-message-btn");
+sendMessageBtn.disabled = true;
+sendMessageInput.addEventListener("input", function() {
+  sendMessageBtn.disabled = (sendMessageInput.value === "") ? true : false;
+});
 sendMessageBtn.addEventListener("click", function() {
   let str = sendMessageInput.value;
   sendStringSubmitEvent(myVideoPlayer, OperatorControls._MessageReceived, str);
+
   // Take this opportunity to clear the input.
   sendMessageInput.value = "";
+  sendMessageBtn.disabled = true;
   // And set utc offset.
   let date = new Date();
   // NOTE: This is inverted because Unity app will use offset to go from UTC-0 to client's local time.
@@ -1211,7 +1217,7 @@ function validateChatHistory(history){
   let validateChatMessage = function (clone, message) {
     let messageText = document.querySelector(`#${clone.id} .message`);
     let messageDataTime = document.querySelector(`#${clone.id} div.message-data .message-data-time`);
-    messageDataTime.innerHTML = message.time;
+    messageDataTime.innerHTML = message.name + " " + message.time;
     messageText.innerHTML = message.message;
     if (myVideoPlayer.connectionId === message.sender){
       let messageData = document.querySelector(`#${clone.id} div.message-data`);

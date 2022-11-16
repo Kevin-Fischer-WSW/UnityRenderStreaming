@@ -8988,7 +8988,10 @@ button, input, optgroup, select, textarea {
 
 .chat .chat-history {
   padding: 20px;
-  border-bottom: 2px solid #fff; }
+  border-bottom: 2px solid #fff;
+  overflow-y: scroll;
+  max-height: 400px;
+  min-height: 250px; }
 
 .chat .chat-history ul {
   padding: 0; }
@@ -9034,7 +9037,8 @@ button, input, optgroup, select, textarea {
   margin-left: -10px; }
 
 .chat .chat-history .my-message {
-  background: #efefef; }
+  background: #efefef;
+  max-width: 50%; }
 
 .chat .chat-history .my-message:after {
   bottom: 100%;
@@ -9051,7 +9055,8 @@ button, input, optgroup, select, textarea {
 
 .chat .chat-history .other-message {
   background: #e8f1f3;
-  text-align: right; }
+  text-align: right;
+  max-width: 50%; }
 
 .chat .chat-history .other-message:after {
   border-bottom-color: #e8f1f3;
@@ -9070,3 +9075,7 @@ button, input, optgroup, select, textarea {
   content: " ";
   clear: both;
   height: 0; }
+
+#send-message-input {
+  min-width: 20%;
+  max-width: 100%; }
