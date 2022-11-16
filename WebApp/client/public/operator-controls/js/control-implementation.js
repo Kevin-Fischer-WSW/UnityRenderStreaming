@@ -1195,6 +1195,13 @@ let sendMessageBtn = document.getElementById("send-message-btn");
 sendMessageBtn.addEventListener("click", function() {
   let str = sendMessageInput.value;
   sendStringSubmitEvent(myVideoPlayer, OperatorControls._MessageReceived, str);
+  // Take this opportunity to clear the input.
+  sendMessageInput.value = "";
+  // And set utc offset.
+  let date = new Date();
+  // NOTE: This is inverted because Unity app will use offset to go from UTC-0 to client's local time.
+  let utcOffset = -date.getTimezoneOffset();
+  sendStringSubmitEvent(myVideoPlayer, OperatorControls._SetUtcOffset, String(utcOffset));
 });
 
 function validateChatHistory(history){

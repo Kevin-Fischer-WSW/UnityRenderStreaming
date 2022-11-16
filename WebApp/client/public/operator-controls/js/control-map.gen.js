@@ -42,4 +42,5 @@ export const OperatorControls = {
 	_VolumeVideo : 39,
 	_MessageReceived : 40,
 	_ChangeName : 41,
+	_SetUtcOffset : 42,
 };
