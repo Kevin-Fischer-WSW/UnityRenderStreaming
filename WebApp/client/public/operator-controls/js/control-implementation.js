@@ -10,10 +10,12 @@ import { ValidateClonesWithJsonArray} from "/operator-controls/js/validation-hel
 mainNotifications.addEventListener('setup', function () {
   myVideoPlayer.onParticipantDataReceived = participantDataReceived;
   myVideoPlayer.onAppStatusReceived = appStatusReceived;
+  myVideoPlayer.onChatHistoryReceived = validateChatHistory;
   setTimeout(() => {
     sendClickEvent(myVideoPlayer, OperatorControls._GetParticipantData);
     sendClickEvent(myVideoPlayer, OperatorControls._GetAppStatus);
   }, 1000);
+  sendClickEvent(myVideoPlayer, OperatorControls._GetChatHistory);
 });
 
 /* SIGN OUT MODAL ELEMENTS */
@@ -714,7 +716,7 @@ function validateTracksInLibrary(tracks) {
     let label = document.querySelector(`#${btn.id} span`);
     label.innerHTML = music;
   }
-  ValidateClonesWithJsonArray(trackInLibrary,library, tracksInLibrary, setupBtn, tracks, validateBtn)
+  ValidateClonesWithJsonArray(trackInLibrary, library, tracksInLibrary, setupBtn, tracks, validateBtn)
 }
 
 let playlist = document.getElementById("playlist");
@@ -1183,7 +1185,38 @@ function validateVideoSwitchBtns(videos) {
   }
 }
 
+/* CHAT CONTROLS */
+let chatHistory = document.querySelector("div.chat-history ul");
+let chatMessage = document.getElementById("chat-clone-source");
+let chatMessages = [];
 
+let sendMessageInput = document.getElementById("send-message-input");
+let sendMessageBtn = document.getElementById("send-message-btn");
+sendMessageBtn.addEventListener("click", function() {
+  let str = sendMessageInput.value;
+  sendStringSubmitEvent(myVideoPlayer, OperatorControls._MessageReceived, str);
+});
+
+function validateChatHistory(history){
+  let setupChatMessage = function (clone) {
+    clone.classList.remove("d-none");
+  }
+  let validateChatMessage = function (clone, message) {
+    let messageText = document.querySelector(`#${clone.id} .message`);
+    let messageDataTime = document.querySelector(`#${clone.id} div.message-data .message-data-time`);
+    messageDataTime.innerHTML = message.time;
+    messageText.innerHTML = message.message;
+    if (myVideoPlayer.connectionId === message.sender){
+      let messageData = document.querySelector(`#${clone.id} div.message-data`);
+      messageData.classList.remove("text-right");
+      messageText.classList.remove("float-right");
+      messageText.classList.remove("other-message");
+      messageText.classList.add("my-message");
+    }
+  }
+  let jsonHistory = JSON.parse(history);
+  ValidateClonesWithJsonArray(chatMessage, chatHistory, chatMessages, setupChatMessage, jsonHistory, validateChatMessage);
+}
 /* RECORDING CONTROLS */
 
 let listFileOptions = document.getElementById("list-all-files")

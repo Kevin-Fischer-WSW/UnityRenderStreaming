@@ -56,7 +56,13 @@ export class VideoPlayer {
       this.signaling = new Signaling();
     }
 
-    this.connectionId = uuid4();
+    // Check local stroage for connectionId
+    if (localStorage.getItem('connectionId') !== null) {
+      this.connectionId = localStorage.getItem('connectionId');
+    } else {
+      this.connectionId = uuid4();
+      localStorage.setItem('connectionId', this.connectionId);
+    }
 
     // Create peerConnection with proxy server and set up handlers
     const config = getRTCConfiguration();
@@ -153,6 +159,11 @@ export class VideoPlayer {
         let json = data.substring(1);
         if (_this.onAppStatusReceived) {
           _this.onAppStatusReceived.call(_this, json);
+        }
+      } else if (data[0] === 'c'){
+        let json = data.substring(1);
+        if (_this.onChatHistoryReceived) {
+          _this.onChatHistoryReceived.call(_this, json);
         }
       }
     };

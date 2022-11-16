@@ -8780,6 +8780,9 @@ button, input, optgroup, select, textarea {
 .text-info {
   color: #48b0f7 !important; }
 
+.text-right {
+  text-align: right !important; }
+
 .carousel-caption {
   top: 70%;
   font-size: calc(2vw + 1vh); }
