@@ -15,7 +15,9 @@ mainNotifications.addEventListener('setup', function () {
     sendClickEvent(myVideoPlayer, OperatorControls._GetParticipantData);
     sendClickEvent(myVideoPlayer, OperatorControls._GetAppStatus);
   }, 1000);
-  sendClickEvent(myVideoPlayer, OperatorControls._GetChatHistory);
+  setTimeout(() => {
+    sendClickEvent(myVideoPlayer, OperatorControls._GetChatHistory);
+  }, 1000);
 });
 
 /* SIGN OUT MODAL ELEMENTS */
@@ -1203,7 +1205,14 @@ sendMessageBtn.addEventListener("click", function() {
   // Take this opportunity to clear the input.
   sendMessageInput.value = "";
   sendMessageBtn.disabled = true;
-  // And set utc offset.
+
+});
+
+let navChatTab = document.getElementById("nav-chat-tab");
+navChatTab.addEventListener("click", function() {
+  // Get the chat history.
+  sendClickEvent(myVideoPlayer, OperatorControls._GetChatHistory);
+  // Set utc offset.
   let date = new Date();
   // NOTE: This is inverted because Unity app will use offset to go from UTC-0 to client's local time.
   let utcOffset = -date.getTimezoneOffset();
@@ -1217,7 +1226,7 @@ function validateChatHistory(history){
   let validateChatMessage = function (clone, message) {
     let messageText = document.querySelector(`#${clone.id} .message`);
     let messageDataTime = document.querySelector(`#${clone.id} div.message-data .message-data-time`);
-    messageDataTime.innerHTML = message.name + " " + message.time;
+    messageDataTime.innerHTML = `${message.name} - ${message.time}`;
     messageText.innerHTML = message.message;
     if (myVideoPlayer.connectionId === message.sender){
       let messageData = document.querySelector(`#${clone.id} div.message-data`);
