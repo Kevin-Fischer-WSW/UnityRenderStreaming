@@ -1189,6 +1189,7 @@ function validateVideoSwitchBtns(videos) {
 
 /* CHAT CONTROLS */
 let chatHistory = document.querySelector("div.chat-history ul");
+let cHistory = document.getElementById("cHistory")
 let chatMessage = document.getElementById("chat-clone-source");
 let chatMessages = [];
 
@@ -1198,9 +1199,17 @@ sendMessageBtn.disabled = true;
 sendMessageInput.addEventListener("input", function() {
   sendMessageBtn.disabled = (sendMessageInput.value === "") ? true : false;
 });
+
+sendMessageInput.addEventListener("keypress", function(e) {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    sendMessageBtn.click();
+  }
+});
 sendMessageBtn.addEventListener("click", function() {
   let str = sendMessageInput.value;
   sendStringSubmitEvent(myVideoPlayer, OperatorControls._MessageReceived, str);
+  scrollToBottom(cHistory);
 
   // Take this opportunity to clear the input.
   sendMessageInput.value = "";
@@ -1218,6 +1227,10 @@ navChatTab.addEventListener("click", function() {
   let utcOffset = -date.getTimezoneOffset();
   sendStringSubmitEvent(myVideoPlayer, OperatorControls._SetUtcOffset, String(utcOffset));
 });
+
+function scrollToBottom(obj) {
+  obj.scrollTop = obj.scrollHeight;
+};
 
 function validateChatHistory(history){
   let setupChatMessage = function (clone) {
@@ -1238,6 +1251,7 @@ function validateChatHistory(history){
   }
   let jsonHistory = JSON.parse(history);
   ValidateClonesWithJsonArray(chatMessage, chatHistory, chatMessages, setupChatMessage, jsonHistory, validateChatMessage);
+  scrollToBottom(cHistory);
 }
 /* RECORDING CONTROLS */
 
