@@ -1239,8 +1239,8 @@ function validateChatHistory(history){
   let validateChatMessage = function (clone, message) {
     let messageText = document.querySelector(`#${clone.id} .message`);
     let messageDataTime = document.querySelector(`#${clone.id} div.message-data .message-data-time`);
-    messageDataTime.innerHTML = `${message.name} - ${message.time}`;
-    messageText.innerHTML = message.message;
+    messageDataTime.innerText = `${message.name} - ${message.time}`;
+    messageText.innerText = message.message;
     if (myVideoPlayer.connectionId === message.sender){
       let messageData = document.querySelector(`#${clone.id} div.message-data`);
       messageData.classList.remove("text-right");
