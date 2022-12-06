@@ -98,6 +98,27 @@ function onClickPlayButton() {
     }
   });
 
+  // add mute button (mutes audio from the preview video)
+  const elementMuteButton = document.createElement('button');
+  elementMuteButton.id = 'mute-preview-btn';
+  elementMuteButton.classList.add('btn');
+  elementMuteButton.classList.add('btn-secondary');
+  elementMuteButton.classList.add('btn-sm');
+  // Make the button position relative to the bottom left of the playerDiv.
+  elementMuteButton.style.position = 'absolute';
+  elementMuteButton.style.bottom = '0.5em';
+  elementMuteButton.style.left = '1.5em';
+  elementMuteButton.innerHTML = 'Preview Audio <i class="bi bi-volume-up"></i>';
+  elementMuteButton.addEventListener('click', function () {
+    elementPreviewVideo.muted = !elementPreviewVideo.muted;
+    if (elementPreviewVideo.muted) {
+      elementMuteButton.innerHTML = 'Preview Audio <i class="bi bi-volume-mute"></i>';
+    } else {
+      elementMuteButton.innerHTML = 'Preview Audio <i class="bi bi-volume-up"></i>';
+    }
+  });
+  playerDiv.appendChild(elementMuteButton);
+
   /* NOTE: to reenable fullscreen. Uncomment this section.
   // add fullscreen button
   const elementFullscreenButton = document.createElement('img');
@@ -150,6 +171,7 @@ async function onDisconnect(message) {
 
   // Clear generated elements.
   playerDiv.removeChild(document.getElementById('playButtonElement'));
+  playerDiv.removeChild(document.getElementById('mute-preview-btn'));
   outputDiv.removeChild(document.getElementById('output-video'));
   previewDiv.removeChild(document.getElementById('preview-video'));
   await myVideoPlayer.stop();
