@@ -10,6 +10,7 @@ import { reset as resetHandler }from './class/httphandler';
 import { env } from "process";
 import * as session from 'express-session';
 import * as nocache from "nocache";
+import { rejects } from 'assert';
 
 declare module 'express-session' {
   export interface SessionData {
@@ -18,10 +19,7 @@ declare module 'express-session' {
   }
 }
 
-const credentials = {
-  username: "admin",
-  password: "admin"
-};
+const accessCode = "xcc662245mc1"
 
 const hours = 7200000
 
@@ -73,7 +71,12 @@ export const createServer = (config: Options): express.Application => {
       let uname = req.body.username;
       let pwd = req.body.password;
 
-      if (uname === credentials.username && pwd === credentials.password) {
+      const fs = require('fs');
+      const objPath: string = path.join(__dirname, '../src/data.json');
+      let rawdata = fs.readFileSync(objPath);
+      let obj = JSON.parse(rawdata);
+
+      if (uname === obj.uname && pwd === obj.pwd) {
         req.session.username = uname;
         req.session.authorized = true;
         req.session.cookie.maxAge = hours;
@@ -330,6 +333,42 @@ export const createServer = (config: Options): express.Application => {
           res.status(500).end();
         }
       });
+  });
+
+  app.get("/update_info", (req, res) => {
+    if (!req.session.authorized) {
+      return res.status(401).redirect('/');
+    }
+    const updatePagePath: string = path.join(__dirname, '../client/public/operator-controls/update.html');
+    return res.sendFile(path.join(updatePagePath));
+
+  });
+
+  app.post("/save_info", (req, res) => {
+    if (req.session.authorized) {
+      let uname = req.body.username;
+      let pwd = req.body.password;
+      let access_code = req.body.accesscode;
+
+      console.log(req.body.username, req.body.password, req.body.accesscode)
+
+      if (access_code === accessCode) {
+
+        const objPath: string = path.join(__dirname, '../src/data.json');
+        let obj = JSON.stringify({"uname":uname, "pwd":pwd});
+
+        var fs = require('fs');
+        fs.writeFile(objPath, obj, 'utf8', (err) => {
+          if (err) console.log(err);
+          console.log("Save Successfull");
+        });
+        res.status(200).redirect('/signout')
+      } else {
+        res.status(401).redirect('/update_info')
+      }
+    } else {
+      res.status(200).redirect('/')
+    }
   });
 
   return app;
