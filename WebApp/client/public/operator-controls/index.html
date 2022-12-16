@@ -376,6 +376,7 @@
                 <label class="text-white" for="volume-range-music">Volume</label>
               </div>
               <input type="range" class="form-range" min="0" max="1" step="0.01" id="volume-range-music">
+              <span id="music-volume-level" class="text-white"></span>
             </div>
           </div>
           <!-- Library and Playlist -->
@@ -458,8 +459,8 @@
             </div>
             <!-- Clear button -->
             <div class="media-btn-element flex-column m-1">
-              <span class="media-btn-label">Clear</span>
-              <button id="video-clear-btn" type="button" class="btn btn-primary media-switch-thumb">Clear</button>
+              <span class="media-btn-label">Transition to Live</span>
+              <button id="video-clear-btn" type="button" class="btn btn-primary media-switch-thumb" id="video-clear-btn">Live</button>
             </div>
           </div>
         </fieldset>

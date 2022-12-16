@@ -671,12 +671,22 @@ function validateSlideSwitchBtns(slides) {
   }
 }
 
+/* Music and Video volume Level Helper */
+function getVolumeLevel(value) {
+  return String(Number(Math.round(parseFloat(value) * 100))) + "%"
+}
+
 /* HOLD MUSIC CONTROLS */
 let holdMusicFieldset = document.getElementById("music-fieldset");
 
 let volumeRangeMusic = document.getElementById("volume-range-music");
-volumeRangeMusic.addEventListener("change", function () {
-  sendStringSubmitEvent(myVideoPlayer, OperatorControls._SetHoldingMusicVolume, volumeRangeMusic.value);
+let volumeLevelMusic  = document.getElementById("music-volume-level");
+volumeLevelMusic.innerHTML = getVolumeLevel(volumeRangeMusic.value);
+
+volumeRangeMusic.addEventListener("input", function () {
+  let str = volumeRangeMusic.value;
+  volumeLevelMusic.innerHTML = getVolumeLevel(volumeRangeMusic.value);
+  sendStringSubmitEvent(myVideoPlayer, OperatorControls._SetHoldingMusicVolume, str);
 });
 //let holdMusicClearBtn = document.getElementById("music-clear-btn");
 
@@ -1092,12 +1102,12 @@ let videoProgress = document.getElementById("video-progress");
 let videoPlaybackTime = document.getElementById("video-playback-time");
 let videoVolume  = document.getElementById("volume-range-video");
 let videoVolumeLevel  = document.getElementById("video-volume-level");
-videoVolumeLevel.innerHTML = String(Number(Math.round(parseFloat(videoVolume.value) * 100))) + "%";
+videoVolumeLevel.innerHTML = getVolumeLevel(videoVolume.value);
 videoClearBtn.addEventListener("click", onVideoClearClicked);
 
 videoVolume.addEventListener("input", function() {
   let str = videoVolume.value;
-  videoVolumeLevel.innerHTML = String(Number(Math.round(parseFloat(videoVolume.value) * 100))) + "%";
+  videoVolumeLevel.innerHTML = getVolumeLevel(videoVolume.value);
   sendStringSubmitEvent(myVideoPlayer, OperatorControls._VolumeVideo, str);
 });
 
