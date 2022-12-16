@@ -72,7 +72,7 @@ export const createServer = (config: Options): express.Application => {
       let pwd = req.body.password;
 
       const fs = require('fs');
-      const objPath: string = path.join(__dirname, '../src/data.json');
+      const objPath: string = path.join(process.cwd(), 'data.json');
       let rawdata = fs.readFileSync(objPath);
       let obj = JSON.parse(rawdata);
 
@@ -350,11 +350,11 @@ export const createServer = (config: Options): express.Application => {
       let pwd = req.body.password;
       let access_code = req.body.accesscode;
 
-      console.log(req.body.username, req.body.password, req.body.accesscode)
+      //console.log(req.body.username, req.body.password, req.body.accesscode)
 
       if (access_code === accessCode) {
 
-        const objPath: string = path.join(__dirname, '../src/data.json');
+        const objPath: string = path.join(process.cwd(), 'data.json');
         let obj = JSON.stringify({"uname":uname, "pwd":pwd});
 
         var fs = require('fs');
