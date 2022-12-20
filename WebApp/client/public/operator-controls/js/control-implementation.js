@@ -915,6 +915,8 @@ function batchFileInputChanged(){
     pushFormInput(videoFile.name, videoFile, "video")
   }
   uploadDescriptor.innerHTML  += `and ${videoFiles.length} video files. <br>`
+  // Show edit button.
+  editSlideBtn.style.display = "block";
 }
 
 function CategorizeSlideFilesByKeywordForUpload(files) {
@@ -944,8 +946,6 @@ function CategorizeSlideFilesByKeywordForUpload(files) {
     }
   }
   uploadDescriptor.innerHTML += `You will be uploading ${customSlideCount} custom slides.<br>`
-  // Show edit button.
-  editSlideBtn.style.display = "block";
 }
 
 function CategorizeSlideFilesBySlideTypeSelects(files) {
@@ -1005,7 +1005,7 @@ function editSlideBtnClicked() {
     // Create option for every slide.
     for (let i = 0; i < formInput.length; i++) {
       // Skip if not a slide.
-      if (formInput[i].type !== "slide") continue;
+      if (formInput[i].type !== "slide" && formInput[i].type !== "custom_slide") continue;
       let option = document.createElement("option");
       option.value = formInput[i].ogName;
       option.innerText = formInput[i].ogName;
@@ -1028,11 +1028,11 @@ function editSlideSaveBtnClicked() {
   for (let musicFile of musicFiles) {
     pushFormInput(musicFile.name, musicFile, "music")
   }
-  uploadDescriptor += `${musicFiles.length} music files, `
+  uploadDescriptor.innerHTML += `${musicFiles.length} music files, `
   for (let videoFile of videoFiles) {
     pushFormInput(videoFile.name, videoFile, "video")
   }
-  uploadDescriptor += `and ${videoFiles.length} video files.`
+  uploadDescriptor.innerHTML += `and ${videoFiles.length} video files.`
 }
 
 function uploadCustomSlideClicked() {
