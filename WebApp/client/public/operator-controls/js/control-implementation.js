@@ -47,29 +47,15 @@ let participantOnVidCtrlOg = document.getElementById("participant-on-vid-ctrl-og
 let participantOnVidCtrls = [];
 
 function validateParticipantOnVidCtrls() {
-  //Be sure there is enough participantOnVidCtrls for the number of participants
-  if (participantOnVidCtrls.length < participantJsonParsed.length) {
-    while (participantOnVidCtrls.length < participantJsonParsed.length) {
-      // Elements must be added.
-      let newCtrl = participantOnVidCtrlOg.cloneNode(true);
-      newCtrl.classList.remove("d-none");
-      newCtrl.id += "-" + participantOnVidCtrls.length;
-      participantOnVidCtrls.push(newCtrl)
-      previewVideoContainer.appendChild(newCtrl)
-      setupParticipantOnVidCtrl(newCtrl, participantOnVidCtrls.length-1)
-    }
-  } else {
-    while (participantOnVidCtrls.length > participantJsonParsed.length) {
-      // Elements must be removed.
-      previewVideoContainer.removeChild(participantOnVidCtrls.pop())
-    }
+  let setupCtrl = function (clone){
+    setupParticipantOnVidCtrl(clone, participantOnVidCtrls.length - 1)
   }
-  // Set sizes and positions of all the ctrls.
-  for (let i = 0; i < participantOnVidCtrls.length; i++) {
-    participantOnVidCtrls[i].style.top = (100 * participantJsonParsed[i].top) + "%"
-    participantOnVidCtrls[i].style.left = (100 * participantJsonParsed[i].left) + "%"
-    participantOnVidCtrls[i].style.width = (100 * participantJsonParsed[i].width) + "%"
+  let validateCtrl = function (ctrl, data) {
+    ctrl.style.top = (100 * data.top) + "%"
+    ctrl.style.left = (100 * data.left) + "%"
+    ctrl.style.width = (100 * data.width) + "%"
   }
+  ValidateClonesWithJsonArray(participantOnVidCtrlOg, previewVideoContainer, participantOnVidCtrls, setupCtrl, participantJsonParsed, validateCtrl)
 }
 
 /* RENAME MODAL ELEMENTS */
@@ -142,7 +128,6 @@ function setupParticipantOnVidCtrl(node, idx) {
     sendStringSubmitEvent(myVideoPlayer, OperatorControls._ShowLowerThird, str);
   })
 }
-
 
 /* CONTROL TAB ELEMENTS */
 let meetingNoInput = document.getElementById("meeting-number-input");
@@ -468,36 +453,22 @@ let participantInputGroups = [];
 participantInputGroupOg.style.display = "none";
 
 function validateParticipantInputGroups() {
-  // Be sure there is enough elements to hold participants.
-  if (participantInputGroups.length < participantJsonParsed.length) {
-    while (participantInputGroups.length < participantJsonParsed.length) {
-      // Elements must be added.
-      let clone = participantInputGroupOg.cloneNode(true);
-      clone.style.display = "flex"
-      participantFieldset.appendChild(clone);
-      clone.id += "-" + participantInputGroups.length;
-      setupParticipantInputGroup(clone, participantInputGroups.length)
-      participantInputGroups.push(clone)
-    }
-  } else {
-    while (participantInputGroups.length > participantJsonParsed.length) {
-      // Elements must be destroyed.
-      participantFieldset.removeChild(participantInputGroups.pop())
-    }
+  let setupGroup = function (clone){
+    clone.style.display = "flex";
+    setupParticipantInputGroup(clone, participantInputGroups.length - 1);
   }
-  // Set data of each input group.
-  for (let i = 0; i < participantJsonParsed.length; i += 1) {
-    let visibilityBtn = document.querySelector("div#participant-input-group-" + i + " .visibility-btn");
-    let muteBtn = document.querySelector("div#participant-input-group-" + i + " .mute-btn");
-    let nameInput = document.querySelector("div#participant-input-group-" + i + " .name-input");
-    let p = participantJsonParsed[i];
+  let validateGroup = function (clone, data){
+    let visibilityBtn = document.querySelector(`#${clone.id} .visibility-btn`);
+    let muteBtn = document.querySelector(`#${clone.id} .mute-btn`);
+    let nameInput = document.querySelector(`#${clone.id} .name-input`);
 
-    visibilityBtn.firstChild.className = p.visible ? "bi bi-eye" : "bi bi-eye-slash";
-    muteBtn.firstChild.className = p.muted ? "bi bi-mic-mute" : "bi bi-mic";
+    visibilityBtn.firstChild.className = data.visible ? "bi bi-eye" : "bi bi-eye-slash";
+    muteBtn.firstChild.className = data.muted ? "bi bi-mic-mute" : "bi bi-mic";
     if (nameInput !== document.activeElement) {
-      nameInput.value = p.username;
+      nameInput.value = data.username;
     }
   }
+  ValidateClonesWithJsonArray(participantInputGroupOg, participantFieldset, participantInputGroups, setupGroup, participantJsonParsed, validateGroup);
 }
 
 let currentlyDraggedP
