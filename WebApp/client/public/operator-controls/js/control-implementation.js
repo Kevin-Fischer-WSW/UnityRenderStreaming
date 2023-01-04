@@ -12,6 +12,7 @@ mainNotifications.addEventListener('setup', function () {
   myVideoPlayer.onParticipantDataReceived = participantDataReceived;
   myVideoPlayer.onAppStatusReceived = appStatusReceived;
   myVideoPlayer.onChatHistoryReceived = validateChatHistory;
+  myVideoPlayer.onStyleSchemaReceived = nil; // todo set this to function that generates json editor.
   setTimeout(() => {
     sendClickEvent(myVideoPlayer, OperatorControls._GetParticipantData);
     sendClickEvent(myVideoPlayer, OperatorControls._GetAppStatus);
