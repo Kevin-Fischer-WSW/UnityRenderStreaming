@@ -7,6 +7,7 @@ import { sendClickEvent, sendStringSubmitEvent } from "/videoplayer/js/register-
 import { myVideoPlayer, mainNotifications } from "/operator-controls/js/control-main.js";
 import { ValidateClonesWithJsonArray} from "/operator-controls/js/validation-helper.js";
 
+
 mainNotifications.addEventListener('setup', function () {
   myVideoPlayer.onParticipantDataReceived = participantDataReceived;
   myVideoPlayer.onAppStatusReceived = appStatusReceived;
@@ -1369,3 +1370,23 @@ function handleRecordingDownload() {
     downloadFile();
   }
 }
+
+/* LAYOUT SCHEMA EDITOR */
+
+let layout_element = document.getElementById('layout-schema-editor');
+
+JSONEditor.defaults.options.disable_edit_json = true;
+JSONEditor.defaults.options.disable_properties = true;
+
+let layout_editor = new JSONEditor(layout_element, {
+  schema: {},
+  theme: 'bootstrap4'
+
+});
+
+layout_editor.on('ready',() => {
+  // Now the api methods will be available
+  layout_editor.validate();
+});
+
+layout_editor.getValue('root.location').disable();

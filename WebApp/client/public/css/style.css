@@ -9079,3 +9079,6 @@ button, input, optgroup, select, textarea {
 #send-message-input {
   min-width: 20%;
   max-width: 100%; }
+
+#layout-schema-editor div h3 label, #layout-schema-editor div .h3 label {
+  color: white; }
