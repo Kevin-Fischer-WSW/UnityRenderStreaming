@@ -12,7 +12,7 @@ mainNotifications.addEventListener('setup', function () {
   myVideoPlayer.onParticipantDataReceived = participantDataReceived;
   myVideoPlayer.onAppStatusReceived = appStatusReceived;
   myVideoPlayer.onChatHistoryReceived = validateChatHistory;
-  myVideoPlayer.onStyleSchemaReceived = nil; // todo set this to function that generates json editor.
+  myVideoPlayer.onStyleSchemaReceived = onReceiveStyleSchema; // todo set this to function that generates json editor.
   setTimeout(() => {
     sendClickEvent(myVideoPlayer, OperatorControls._GetParticipantData);
     sendClickEvent(myVideoPlayer, OperatorControls._GetAppStatus);
@@ -593,6 +593,30 @@ function onLowerThirdStyleSelected(idx) {
       break;
   }
 }
+
+/* LAYOUT SCHEMA EDITOR */
+
+JSONEditor.defaults.options.disable_edit_json = true;
+JSONEditor.defaults.options.disable_properties = true;
+let layout_element = document.getElementById('layout-schema-editor');
+let layout_editor;
+
+function onReceiveStyleSchema(json) {
+  layout_editor = new JSONEditor(layout_element, {
+    schema: JSON.parse(json),
+    theme: 'bootstrap4'
+  
+  });
+}
+
+
+
+
+
+layout_editor.on('ready',() => {
+  // Now the api methods will be available
+  layout_editor.validate();
+});
 
 /* DELETE BUTTON */
 function setupDeleteButton(owner, route, spanWithFilename) {
@@ -1371,23 +1395,3 @@ function handleRecordingDownload() {
     downloadFile();
   }
 }
-
-/* LAYOUT SCHEMA EDITOR */
-
-let layout_element = document.getElementById('layout-schema-editor');
-
-JSONEditor.defaults.options.disable_edit_json = true;
-JSONEditor.defaults.options.disable_properties = true;
-
-let layout_editor = new JSONEditor(layout_element, {
-  schema: {},
-  theme: 'bootstrap4'
-
-});
-
-layout_editor.on('ready',() => {
-  // Now the api methods will be available
-  layout_editor.validate();
-});
-
-layout_editor.getValue('root.location').disable();
