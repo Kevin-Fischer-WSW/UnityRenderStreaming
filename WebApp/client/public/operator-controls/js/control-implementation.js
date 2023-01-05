@@ -602,21 +602,37 @@ let layout_element = document.getElementById('layout-schema-editor');
 let layout_editor;
 
 function onReceiveStyleSchema(json) {
+
+  if (layout_editor) {
+    layout_editor.destroy();
+  }
+
   layout_editor = new JSONEditor(layout_element, {
     schema: JSON.parse(json),
     theme: 'bootstrap4'
-  
+  });
+
+  layout_editor.on('ready',() => {
+    // Now the api methods will be available
+    validateSchema();
+  });
+
+  layout_editor.on('change',() => {
+    // TODO : create a new method to run operations upon change
+    validateSchema();
   });
 }
 
+function validateSchema() {
+
+  const err = layout_editor.validate();
+
+  if (err.length) {
+    console.log(err); //if the schema is invalid
+  }
+}
 
 
-
-
-layout_editor.on('ready',() => {
-  // Now the api methods will be available
-  layout_editor.validate();
-});
 
 /* DELETE BUTTON */
 function setupDeleteButton(owner, route, spanWithFilename) {
