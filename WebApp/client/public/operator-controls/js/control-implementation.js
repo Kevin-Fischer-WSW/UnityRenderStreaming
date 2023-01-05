@@ -620,9 +620,12 @@ function onReceiveStyleSchema(json) {
     layout_editor.destroy();
   }
 
+  let parsedJSON = JSON.parse(json);
+
   layout_editor = new JSONEditor(layout_element, {
-    schema: JSON.parse(json),
-    theme: 'bootstrap4'
+    schema: parsedJSON,
+    theme: 'bootstrap4',
+    startval: parsedJSON.startval,
   });
 
   layout_editor.on('ready',() => {
