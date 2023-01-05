@@ -632,7 +632,13 @@ function onReceiveStyleSchema(json) {
 
   layout_editor.on('change',() => {
     // TODO : create a new method to run operations upon change
-    validateSchema();
+    if (validateSchema()){
+      switch(layout_editor.options.schema.category){
+        case "Lower Third":
+          let str = layout_editor.options.schema.id + JSON.stringify(layout_editor.getValue());
+          sendStringSubmitEvent(myVideoPlayer, OperatorControls._ChangeLowerThirdStyle, str);
+      }
+    }
   });
 }
 
@@ -642,7 +648,9 @@ function validateSchema() {
 
   if (err.length) {
     console.log(err); //if the schema is invalid
+    return false;
   }
+  return true;
 }
 
 
