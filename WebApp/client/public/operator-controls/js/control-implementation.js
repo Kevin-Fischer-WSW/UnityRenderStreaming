@@ -568,10 +568,12 @@ let layoutFieldset = document.getElementById("layout-fieldset");
 let layoutDropdown = document.getElementById("layout-dropdown");
 let textSizeDropdown = document.getElementById("text-size-dropdown");
 let lowerThirdStyleDropdown = document.getElementById("lower-thirds-style-dropdown");
+let editStyleSelect = document.getElementById("edit-style-select");
 
 setupDropdown(layoutDropdown, onLayoutSelected)
 setupDropdown(textSizeDropdown, onTextSizeSelected)
 setupDropdown(lowerThirdStyleDropdown, onLowerThirdStyleSelected)
+editStyleSelect.addEventListener("change", editStyleSelectionChanged)
 
 /* LAYOUT CONTROLS IMPLEMENTATION */
 function onLayoutSelected(idx) {
@@ -590,6 +592,17 @@ function onLowerThirdStyleSelected(idx) {
       break;
     case 1:
       sendStringSubmitEvent(myVideoPlayer, OperatorControls._SetLowerThirdStyle2, "");
+      break;
+  }
+}
+
+function editStyleSelectionChanged() {
+  let style = editStyleSelect.options[editStyleSelect.selectedIndex];
+  let category = style.parentElement.label;
+  let id = style.value;
+  switch (category) {
+    case "Lower Thirds":
+      sendStringSubmitEvent(myVideoPlayer, OperatorControls._GetLowerThirdStyleSchema, id);
       break;
   }
 }
