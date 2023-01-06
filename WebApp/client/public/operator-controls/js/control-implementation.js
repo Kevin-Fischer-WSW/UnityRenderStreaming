@@ -7,10 +7,12 @@ import { sendClickEvent, sendStringSubmitEvent } from "/videoplayer/js/register-
 import { myVideoPlayer, mainNotifications } from "/operator-controls/js/control-main.js";
 import { ValidateClonesWithJsonArray} from "/operator-controls/js/validation-helper.js";
 
+
 mainNotifications.addEventListener('setup', function () {
   myVideoPlayer.onParticipantDataReceived = participantDataReceived;
   myVideoPlayer.onAppStatusReceived = appStatusReceived;
   myVideoPlayer.onChatHistoryReceived = validateChatHistory;
+  myVideoPlayer.onStyleSchemaReceived = onReceiveStyleSchema; // todo set this to function that generates json editor.
   setTimeout(() => {
     sendClickEvent(myVideoPlayer, OperatorControls._GetParticipantData);
     sendClickEvent(myVideoPlayer, OperatorControls._GetAppStatus);
@@ -537,10 +539,12 @@ let layoutFieldset = document.getElementById("layout-fieldset");
 let layoutDropdown = document.getElementById("layout-dropdown");
 let textSizeDropdown = document.getElementById("text-size-dropdown");
 let lowerThirdStyleDropdown = document.getElementById("lower-thirds-style-dropdown");
+let editStyleSelect = document.getElementById("edit-style-select");
 
 setupDropdown(layoutDropdown, onLayoutSelected)
 setupDropdown(textSizeDropdown, onTextSizeSelected)
 setupDropdown(lowerThirdStyleDropdown, onLowerThirdStyleSelected)
+editStyleSelect.addEventListener("change", editStyleSelectionChanged)
 
 /* LAYOUT CONTROLS IMPLEMENTATION */
 function onLayoutSelected(idx) {
@@ -562,6 +566,68 @@ function onLowerThirdStyleSelected(idx) {
       break;
   }
 }
+
+function editStyleSelectionChanged() {
+  let style = editStyleSelect.options[editStyleSelect.selectedIndex];
+  let category = style.parentElement.label;
+  let id = style.value;
+  switch (category) {
+    case "Lower Thirds":
+      sendStringSubmitEvent(myVideoPlayer, OperatorControls._GetLowerThirdStyleSchema, id);
+      break;
+  }
+}
+
+/* LAYOUT SCHEMA EDITOR */
+
+JSONEditor.defaults.options.disable_edit_json = true;
+JSONEditor.defaults.options.disable_properties = true;
+let layout_element = document.getElementById('layout-schema-editor');
+let layout_editor;
+
+function onReceiveStyleSchema(json) {
+
+  if (layout_editor) {
+    layout_editor.destroy();
+  }
+
+  let parsedJSON = JSON.parse(json);
+
+  layout_editor = new JSONEditor(layout_element, {
+    schema: parsedJSON,
+    theme: 'bootstrap4',
+    startval: parsedJSON.startval,
+  });
+
+  layout_editor.on('ready',() => {
+    // Now the api methods will be available
+    validateSchema();
+  });
+
+  layout_editor.on('change',() => {
+    // TODO : create a new method to run operations upon change
+    if (validateSchema()){
+      switch(layout_editor.options.schema.category){
+        case "Lower Third":
+          let str = layout_editor.options.schema.id + JSON.stringify(layout_editor.getValue());
+          sendStringSubmitEvent(myVideoPlayer, OperatorControls._ChangeLowerThirdStyle, str);
+      }
+    }
+  });
+}
+
+function validateSchema() {
+
+  const err = layout_editor.validate();
+
+  if (err.length) {
+    console.log(err); //if the schema is invalid
+    return false;
+  }
+  return true;
+}
+
+
 
 /* DELETE BUTTON */
 function setupDeleteButton(owner, route, spanWithFilename) {

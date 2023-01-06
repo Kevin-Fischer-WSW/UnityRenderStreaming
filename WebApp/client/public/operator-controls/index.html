@@ -340,7 +340,18 @@
             <li value="0"><a class="dropdown-item">Staggered</a></li>
             <li value="1"><a class="dropdown-item">Classic Zoom</a></li>
           </ul>
+          <legend class="title text-white mt-2">Style Editing</legend>
+          <select id="edit-style-select" class="form-select" aria-label="Slide select">
+            <optgroup label="Lower Thirds">
+              <option selected value="1">Plain Zoom</option>
+              <option value="2">Staggered</option>
+            </optgroup>
+          </select>
+          <div id="layout-schema-editor">
+
+          </div>
         </fieldset>
+        </div>
       </div>
       <!-- Slide controls -->
       <div class="tab-pane fade" id="nav-slide" role="tabpanel" aria-labelledby="nav-slide-tab">
@@ -668,6 +679,8 @@
   <!-- Bootstrap JS Bundle -->
   <script src="/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
   <script type="application/javascript" src="/node_modules/clipboard/dist/clipboard.min.js"></script>
+  <!-- JSon Editor -->
+  <script type="application/javascript" src="/node_modules/@json-editor/json-editor/dist/jsoneditor.js"></script>
   <!-- Unity Render Streaming -->
   <script type="text/javascript" src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
   <script src="https://unpkg.com/event-target@latest/min.js"></script>

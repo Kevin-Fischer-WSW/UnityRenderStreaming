@@ -166,6 +166,12 @@ export class VideoPlayer {
           _this.onChatHistoryReceived.call(_this, json);
         }
       }
+      else if (data[0] === 'j'){
+        let json = data.substring(1);
+        if (_this.onStyleSchemaReceived){
+          _this.onStyleSchemaReceived.call(_this, json);
+        }
+      }
     };
   }
 
