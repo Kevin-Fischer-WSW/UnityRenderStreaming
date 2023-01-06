@@ -85,6 +85,8 @@ function setupParticipantOnVidCtrl(node, idx) {
   let showLtEl = document.querySelector(`div#${node.id} a[target="action-show-lt"]`);
   // let camEl = document.querySelector(`div#${node.id} .participant-on-vid-cam`);
 
+  node.classList.remove("d-none");
+
   dragEl.ondragstart = (ev) => {
     currentlyDraggedPov = node
   }
