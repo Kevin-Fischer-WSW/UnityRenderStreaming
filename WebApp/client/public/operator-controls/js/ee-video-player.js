@@ -2,6 +2,7 @@
 import Peer from "../../module/peer.js";
 import * as Logger from "../../module/logger.js";
 import {getRTCConfiguration} from "../../js/config.js";
+import {MessageTypes} from "./message-type-map.gen.js";
 
 function uuid4() {
   var temp_url = URL.createObjectURL(new Blob());
@@ -144,33 +145,35 @@ export class VideoPlayer {
     this.channel.onmessage = async (msg) => {
       // receive message from unity and operate message
       let data = msg.data;
-      if (data[0] === 'e') {
-        let errMsg = data.substring(1);
-        Logger.error(errMsg);
-        if (_this.onErrorReceived) {
-          _this.onErrorReceived.call(_this, errMsg)
-        }
-      } else if (data[0] === 'p') {
-        let json = data.substring(1);
-        if (_this.onParticipantDataReceived) {
-          _this.onParticipantDataReceived.call(_this, json);
-        }
-      } else if (data[0] === 's') {
-        let json = data.substring(1);
-        if (_this.onAppStatusReceived) {
-          _this.onAppStatusReceived.call(_this, json);
-        }
-      } else if (data[0] === 'c'){
-        let json = data.substring(1);
-        if (_this.onChatHistoryReceived) {
-          _this.onChatHistoryReceived.call(_this, json);
-        }
-      }
-      else if (data[0] === 'j'){
-        let json = data.substring(1);
-        if (_this.onStyleSchemaReceived){
-          _this.onStyleSchemaReceived.call(_this, json);
-        }
+      let msgType = data[0];
+      let msgContents = data.substring(1)
+      switch(msgType){
+        case MessageTypes._Error:
+          Logger.error(msgContents);
+          if (_this.onErrorReceived) {
+            _this.onErrorReceived.call(_this, msgContents)
+          }
+          break;
+        case MessageTypes._ParticipantData:
+          if (_this.onParticipantDataReceived) {
+            _this.onParticipantDataReceived.call(_this, msgContents);
+          }
+          break;
+        case MessageTypes._AppStatus:
+          if (_this.onAppStatusReceived) {
+            _this.onAppStatusReceived.call(_this, msgContents);
+          }
+          break;
+        case MessageTypes._ChatHistory:
+          if (_this.onChatHistoryReceived) {
+            _this.onChatHistoryReceived.call(_this, msgContents);
+          }
+          break;
+        case MessageTypes._StyleSchema:
+          if (_this.onStyleSchemaReceived){
+            _this.onStyleSchemaReceived.call(_this, msgContents);
+          }
+          break;
       }
     };
   }
