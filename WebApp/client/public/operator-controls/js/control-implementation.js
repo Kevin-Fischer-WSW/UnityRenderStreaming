@@ -1824,6 +1824,7 @@ function downloadFile() {
 }
 
 async function listAvailableRecordings() {
+  // todo move this function to a seperate file so it can be used by the video editor page as well.
   await updateStreamPref();
   let resp = await fetch("/listRecordings/" + streamKey.value);
   let files = await resp.json();

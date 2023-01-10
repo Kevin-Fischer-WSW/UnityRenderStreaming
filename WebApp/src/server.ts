@@ -129,6 +129,15 @@ export const createServer = (config: Options): express.Application => {
     }
   });
 
+  app.get("/videoeditor", (req, res) => {
+    if (req.session.authorized) {
+      const indexPagePath: string = path.join(__dirname, '../client/public/video-editor/index.html');
+      return res.sendFile(path.join(indexPagePath));
+    } else {
+      return res.status(401).redirect("/");
+    }
+  });
+
   app.get("/signout", (req, res) => {
     req.session.destroy((err) => {
       if (err) {
