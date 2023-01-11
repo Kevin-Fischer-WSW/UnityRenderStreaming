@@ -9146,3 +9146,15 @@ button, input, optgroup, select, textarea {
 
 #layout-schema-editor div h3 label, #layout-schema-editor div .h3 label {
   color: white; }
+
+#timeline-controls {
+  height: 100px;
+  width: 100%;
+  overflow: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  align-items: center;
+  justify-content: center; }
+
+#add {
+  height: 100%; }

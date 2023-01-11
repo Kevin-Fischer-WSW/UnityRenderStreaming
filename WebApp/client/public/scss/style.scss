@@ -972,3 +972,18 @@ input[type="range"]:focus::-moz-range-thumb {
   box-shadow: 0 0 0 13px rgba(0, 0, 0, 0.2) 
 }
 
+#timeline-controls{
+  height: 100px;
+  width: 100%;
+  overflow: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  align-items: center;
+  justify-content: center;
+}
+
+#add{
+  //position: initial;
+  //transform: translateY(50%);
+  height: 100%;
+}
