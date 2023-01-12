@@ -677,6 +677,7 @@ button, input, optgroup, select, textarea {
 
 ::-webkit-scrollbar {
   width: 0.5em;
+  height: 0.5em;
 }
 
 /* Track */
@@ -973,17 +974,19 @@ input[type="range"]:focus::-moz-range-thumb {
 }
 
 #timeline-controls{
-  height: 100px;
-  width: 100%;
-  overflow: auto;
-  overflow-y: hidden;
-  white-space: nowrap;
-  align-items: center;
-  justify-content: center;
+  overflow-x: scroll;
 }
 
 #add{
   //position: initial;
   //transform: translateY(50%);
   height: 100%;
+}
+
+#timeline-box {
+ flex: 0 0 500px;
+}
+
+#clip-divider {
+  flex: 0 0 1px;
 }
