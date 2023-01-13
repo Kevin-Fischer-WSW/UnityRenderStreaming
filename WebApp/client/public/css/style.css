@@ -8930,7 +8930,8 @@ button, input, optgroup, select, textarea {
   color: #fff; }
 
 ::-webkit-scrollbar {
-  width: 0.5em; }
+  width: 0.5em;
+  height: 0.5em; }
 
 /* Track */
 ::-webkit-scrollbar-track {
@@ -9148,13 +9149,10 @@ button, input, optgroup, select, textarea {
   color: white; }
 
 #timeline-controls {
-  height: 100px;
-  width: 100%;
-  overflow: auto;
-  overflow-y: hidden;
-  white-space: nowrap;
-  align-items: center;
-  justify-content: center; }
+  overflow-x: scroll; }
 
-#add {
-  height: 100%; }
+#timeline-box {
+  flex: 0 0 500px; }
+
+#clip-divider {
+  flex: 0 0 1px; }
