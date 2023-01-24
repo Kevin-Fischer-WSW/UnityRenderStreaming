@@ -278,7 +278,6 @@ async function updateStreamPref() {
     streamUrl.innerHTML = data.streamServiceSettings.server;
     boardData.innerHTML = url[3] === "none" ? "" : data.streamServiceSettings.server + data.streamServiceSettings.key;
   }
-
 }
 
 async function saveStreamPref() {
