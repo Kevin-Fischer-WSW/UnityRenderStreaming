@@ -1841,8 +1841,8 @@ async function listAvailableRecordings() {
 
   for (let i = files.length - 1; i >= 0; i--) {
     let option = listFileOptions.children[i + 1];
-    option.value = files[i];
-    option.innerText = files[i];
+    option.value = files[i].file;
+    option.innerText = files[i].file;
   }
 }
 

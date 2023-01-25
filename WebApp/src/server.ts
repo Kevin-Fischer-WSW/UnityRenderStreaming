@@ -12,6 +12,7 @@ import * as session from 'express-session';
 import * as nocache from "nocache";
 import { rejects } from 'assert';
 import * as Ffmpeg  from 'fluent-ffmpeg';
+import {FfprobeData} from "fluent-ffmpeg";
 
 declare module 'express-session' {
   export interface SessionData {
@@ -285,21 +286,34 @@ export const createServer = (config: Options): express.Application => {
   });
 
   //list recordings
-  app.get("/listRecordings/:skey", (req, res) => {
+  app.get("/listRecordings/:skey", async (req, res) => {
 
     let data = [];
 
     /* In this case only checking to see if the dir exists.*/
     if (ValidatePathExists(res, config.recordingsDir) === false) return;
     const files = fs.readdirSync(config.recordingsDir)
-    files.forEach(file => {
+    for (let i = 0; i < files.length; i++){
+      const file = files[i];
       if (file.split("__")[0] === req.params.skey) {
-        data.push(file);
+        // Get duration of recording using fluent-ffmpeg.
+        let filePath = path.join(config.recordingsDir, file);
+        let duration = 0;
+        await probe(filePath)
       }
-    })
+    }
+    console.log(data)
     res.status(200).json(data);
-
   });
+
+  async function probe(file){
+    return new Promise((resolve, reject) => {
+      Ffmpeg.ffprobe(file, (err, metadata) => {
+        if (err) reject(err);
+        resolve(metadata);
+      });
+    });
+  }
 
   // download recordings
   app.get("/download/:skey", (req, res) => {
