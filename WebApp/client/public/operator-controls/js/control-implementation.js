@@ -432,6 +432,7 @@ function onArchiveClick() {
 
 /* ZOOM CONTROLS */
 let meetingNumberInput = document.getElementById("meeting-number-input")
+let meetingPasswordInput = document.getElementById("meeting-password-input")
 let joinMeetingBtn = document.getElementById("join-meeting-btn")
 joinMeetingBtn.addEventListener('click', onJoinClick)
 let leaveMeetingBtn = document.getElementById("leave-meeting-btn")
@@ -439,7 +440,8 @@ leaveMeetingBtn.addEventListener("click", onLeaveClicked)
 
 /* ZOOM CONTROL IMPLEMENTATION */
 function onJoinClick() {
-  sendStringSubmitEvent(myVideoPlayer, OperatorControls._JoinMeetingButton, meetingNumberInput.value);
+  let str = meetingNumberInput.value + "," + meetingPasswordInput.value;
+  sendStringSubmitEvent(myVideoPlayer, OperatorControls._JoinMeetingButton, str);
 }
 
 function onLeaveClicked() {
