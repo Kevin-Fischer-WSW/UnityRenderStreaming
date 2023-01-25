@@ -16,15 +16,16 @@ async function GetClips(){
     if (resp2.ok) {
       clips = data2;
       for (let i = 0; i < clips.length; i++) {
-        clipDropdown.innerHTML += `<li value="${i}"><a class="dropdown-item">${clips[i].file}</a></li>`;
-        clipDropdown.firstChild.addEventListener('click', () => {
-          if (addAndNotInsertButtonPressedLast){
-            timeline.createClip(clips[i].file, clips[i].duration);
-          }else{
-            timeline.insertClip(timeline.selectedClipIndex, clips[i].file, clips[i].duration);
-          }
-        });
+        clipDropdown.innerHTML += `<li value="${i}"><button class="dropdown-item">${clips[i].file}</button></li>`;
       }
+      clipDropdown.addEventListener('click', (event) => {
+        let clipIndex = event.target.parentElement.value;
+        if (addAndNotInsertButtonPressedLast) {
+          timeline.createClip(clips[clipIndex].file, clips[clipIndex].duration);
+        } else {
+          timeline.insertClip(clips[clipIndex], timeline.selectedClipIndex);
+        }
+      });
     }
   }
 }
