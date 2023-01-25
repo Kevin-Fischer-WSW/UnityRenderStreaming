@@ -22,10 +22,13 @@
     <video id="video" class="bg-black w-100" controls src=""></video>
     <!-- Button group to add clip, insert clip, and delete clip -->
     <div class="btn-group" role="group" aria-label="Basic example">
-      <button id="add-clip" type="button" class="btn btn-secondary">Add Clip</button>
-      <button id="insert-clip" type="button" class="btn btn-secondary">Insert Clip</button>
+      <button id="add-clip" type="button" class="btn btn-secondary" data-bs-toggle="dropdown">Add Clip</button>
+      <button id="insert-clip" type="button" class="btn btn-secondary" data-bs-toggle="dropdown">Insert Clip</button>
+      <ul id="clip-dropdown" class="dropdown-menu" aria-labelledby="layout-btn">
+      </ul>
       <button id="delete-clip" type="button" class="btn btn-secondary">Delete Clip</button>
     </div>
+
     <!-- Button to create a cut -->
     <button id="create-cut" type="button" class="btn btn-secondary">Create Cut</button>
     <!-- Slider to change zoom level -->
