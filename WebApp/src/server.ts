@@ -11,6 +11,7 @@ import { env } from "process";
 import * as session from 'express-session';
 import * as nocache from "nocache";
 import { rejects } from 'assert';
+import * as Ffmpeg  from 'fluent-ffmpeg';
 
 declare module 'express-session' {
   export interface SessionData {
@@ -379,8 +380,8 @@ export const createServer = (config: Options): express.Application => {
       return res.status(401).redirect('/');
     }
     let logPath = path.join(config.eagleEyeLogDir, req.params.log);
-    if (ValidatePathExists(res, logPath) === false){
-      res.status(500).json({ message: `File ${logPath} does not exist on server` })
+    if (ValidatePathExists(res, logPath) === false) {
+      res.status(500).json({message: `File ${logPath} does not exist on server`})
       return;
     }
     res.attachment(req.params.log);
@@ -393,6 +394,31 @@ export const createServer = (config: Options): express.Application => {
           res.status(500).end();
         }
       });
+  });
+
+  app.get("/timeframes/:intervals", (req, res) => {
+
+    if (req.session.authorized) {
+
+      //todo write timeframe to output txt file for ffmpeg.
+      //SWill run into issues if two people try to request at the same time.
+
+      const filePath: string = path.join(config.recordingsDir, 'intervals.txt');
+
+      fs.writeFile(filePath, req.params.intervals, (err) => {
+        if (err) {
+          console.log(err);
+        }
+        else {
+          console.log("File written successfully\n");
+        }
+      });
+
+      res.status(200).redirect("");
+
+    } else {
+      res.status(401).redirect("/");
+    }
   });
 
   return app;
