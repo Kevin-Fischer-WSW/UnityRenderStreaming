@@ -299,7 +299,12 @@ export const createServer = (config: Options): express.Application => {
         // Get duration of recording using fluent-ffmpeg.
         let filePath = path.join(config.recordingsDir, file);
         let duration = 0;
-        await probe(filePath)
+        await probe(filePath).then((metadata:FfprobeData) => {
+          duration = metadata.format.duration;
+          data.push({file: file, duration: duration});
+        }).catch((err) => {
+          console.log(err);
+        });
       }
     }
     console.log(data)
