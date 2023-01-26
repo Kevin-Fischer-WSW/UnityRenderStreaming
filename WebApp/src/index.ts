@@ -29,6 +29,7 @@ export class RenderStreaming {
           .option('-v, --videoDir <path>', 'Directory where videos shall be stored.', path.join(process.cwd(), 'Holding Slides/Custom Videos'))
           .option('-r, --recordingsDir <path>', 'Directory where recorded videos shall be stored.', path.join(process.cwd(), 'Recordings'))
           .option('-g, --eagleEyeLogDir <path>', 'Directory where eagle eye log shall be stored.', path.join(process.env.APPDATA, "../LocalLow/DefaultCompany/EE Unity Project"))
+          .option('-e, --videoEditingDir <path>', 'Directory where edited videos shall be stored.', path.join(process.cwd(), 'Video Edits'))
           .parse(argv);
         const option = program.opts();
         return {
@@ -43,7 +44,8 @@ export class RenderStreaming {
           holdingMusicDir: option.holdingMusicDir,
           videoDir: option.videoDir,
           recordingsDir: option.recordingsDir,
-          eagleEyeLogDir: option.eagleEyeLogDir
+          eagleEyeLogDir: option.eagleEyeLogDir,
+          videoEditingDir: option.videoEditingDir
         };
       }
     };

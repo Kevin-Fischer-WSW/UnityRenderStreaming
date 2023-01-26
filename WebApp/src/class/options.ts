@@ -11,4 +11,5 @@ export default interface Options {
   videoDir?: string;
   recordingsDir?: string;
   eagleEyeLogDir?: string;
+  videoEditingDir?: string;
 }
