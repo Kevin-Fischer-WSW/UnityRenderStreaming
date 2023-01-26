@@ -3,11 +3,13 @@
 let timeline = new Timeline(30, 0.1, 2);
 document.getElementById('timeline-container').appendChild(timeline.element);
 
+
 let clipDropdown = document.getElementById('clip-dropdown');
 
 // Get a list of the recorded video files
 let clips = [];
-async function GetClips(){
+
+async function GetClips() {
   let resp1 = await fetch('/getStreamPref')
   let data1 = await resp1.json()
   if (resp1.ok) {
@@ -55,8 +57,24 @@ createCutButton.addEventListener('click', () => {
 let zoomSlider = document.getElementById('zoom-slider');
 zoomSlider.addEventListener('input', () => {
   timeline.setZoom(zoomSlider.value);
+  updateTimeSlider()
 });
+
 let timeSlider = document.getElementById('time-slider');
 timeSlider.addEventListener('input', () => {
-  timeline.setTime(timeSlider.value);
+  timeline.setTime(timeSlider.value / timeSlider.max);
 });
+
+timeline.addEventListener('duration-changed', () => {
+  updateTimeSlider()
+});
+
+function updateTimeSlider(){
+  let c = timeline.getDurationOfClipsMinusCuts() - timeline.getZoomedTimeSpan();
+  if (c > 0){
+    timeSlider.value = timeline.timeSpanStart;
+    timeSlider.max = c;
+  }else{
+    timeSlider.max = 0;
+  }
+}

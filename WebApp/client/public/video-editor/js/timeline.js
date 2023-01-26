@@ -6,8 +6,9 @@
     selectionMade: "selectionMade"
 }
 
-export class Timeline {
+export class Timeline extends EventTarget{
     constructor(timeSpanAtNormalZoom, zoomMin, zoomMax) {
+        super();
         this.timelineElement = document.createElement('div');
         this.timelineElement.id = 'timeline';
         this.timelineElement.classList.add('timeline');
@@ -108,12 +109,13 @@ export class Timeline {
     }
 
     createClip(name, duration) {
-        let clip = {
+      let clip = {
             name: name,
             duration: duration
         };
         this.clips.push(clip);
         this.updateWholeTimeline();
+        this.invokeWholeDurationChanged();
     }
 
     createCut() {
@@ -148,8 +150,9 @@ export class Timeline {
         this.cutSpans.splice(spliceAt, 0, cutSpan);
         this.updateApparentStartsOfCutsAfterInsertingCut(cutSpan);
         // Update the timeline
-        this.updateWholeTimeline();
         this.clearSelection();
+        this.updateWholeTimeline();
+        this.invokeWholeDurationChanged();
     }
 
     deleteClip(clipIndex) {
@@ -161,6 +164,7 @@ export class Timeline {
         // Update the timeline
         this.clearSelection();
         this.updateWholeTimeline();
+        this.invokeWholeDurationChanged();
     }
 
     deleteCut(clipIndex) {
@@ -168,6 +172,7 @@ export class Timeline {
         let cutSpan = this.cutSpans[clipIndex];
         this.updateApparentStartsOfCutsAfterDeletingCut(cutSpan);
         this.updateWholeTimeline();
+        this.invokeWholeDurationChanged();
     }
 
     getClipIndexAtNorm(norm) {
@@ -193,7 +198,7 @@ export class Timeline {
         return [clipStart, clipEnd];
     }
 
-    getDurationOfClips() {
+    getDurationOfClipsMinusCuts() {
         // Get the duration of all the clips
         let duration = 0;
         for (let i = 0; i < this.clips.length; i++) {
@@ -268,8 +273,9 @@ export class Timeline {
         };
         this.clips.splice(index, 0, clip);
         // Update the timeline
-        this.updateClipIndexAndApparentStartAfterInsertingClip(index);
         this.clearSelection();
+        this.updateClipIndexAndApparentStartAfterInsertingClip(index);
+        this.updateWholeTimeline();
     }
 
     isCloseToSelectionStart(norm){
@@ -280,6 +286,10 @@ export class Timeline {
     isCloseToSelectionEnd(norm){
         let end = this.timeToNorm(this.selectionEnd);
         return Math.abs(norm - end) < 0.01;
+    }
+
+    invokeWholeDurationChanged() {
+        this.dispatchEvent(new Event('duration-changed'));
     }
 
     normToTime(norm){
@@ -539,14 +549,6 @@ export class Timeline {
         this.updateSelectionStyle(start, end);
         this.updateClips();
         this.updateTimelineTicks();
-        // For debug, add the cut span to div#cuts
-        let cutSpanElement = document.getElementById('cuts');
-        if (cutSpanElement) {
-          cutSpanElement.innerHTML = '';
-          for (let i = 0; i < this.cutSpans.length; i++) {
-            cutSpanElement.innerHTML += this.cutSpans[i].inpoint.toFixed(2) + ' - ' + this.cutSpans[i].outpoint.toFixed(2) + '<br>';
-          }
-        }
     }
 
     setZoom(value){
@@ -561,7 +563,11 @@ export class Timeline {
         // Clamp value between 0 and 1
         value = Math.max(0, Math.min(1, value));
         this.timeSpanStartNorm = value;
-        this.timeSpanStart = value * (this.getDurationOfClips() - this.getZoomedTimeSpan());
+        if (this.getDurationOfClipsMinusCuts() < this.getZoomedTimeSpan()) {
+            this.timeSpanStart = 0;
+        } else {
+            this.timeSpanStart = value * (this.getDurationOfClipsMinusCuts() - this.getZoomedTimeSpan());
+        }
         this.timeSpanEnd = this.timeSpanStart + this.getZoomedTimeSpan();
         this.updateWholeTimeline();
     }
