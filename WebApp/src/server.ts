@@ -415,12 +415,22 @@ export const createServer = (config: Options): express.Application => {
       });
   });
 
-  app.get("/timeframes/:intervals", (req, res) => {
+  app.get("/listVideoEditingProjects", (req, res)=>{
+    // todo
+  });
+
+  app.get("/videoEditingProjectData", (req, res)=>{
+    // todo
+  });
+
+  app.post("/submitVideoEdits", (req, res) => {
 
     if (req.session.authorized) {
-
-      //todo write timeframe to output txt file for ffmpeg.
-      //SWill run into issues if two people try to request at the same time.
+      // todo Use req.body to get name and see if that directory exists.
+      // Update the data.json
+      //todo parse cuts and clips to output txt file for ffmpeg.
+      // Note: We will run into issues if two people try to request at the same time.
+      // send a json back containing the src for the rendered preview.
 
       const filePath: string = path.join(config.recordingsDir, 'intervals.txt');
 
