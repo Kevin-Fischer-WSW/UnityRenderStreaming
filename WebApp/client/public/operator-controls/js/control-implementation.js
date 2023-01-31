@@ -129,8 +129,8 @@ function setupParticipantOnVidCtrl(node, idx) {
   showLtEl.addEventListener("click", function(ev) {
     ev.preventDefault();
     let p = participantJsonParsed[idx];
-    let str = `${p.id},${!p.lowerThirdShowing}`;
-    sendStringSubmitEvent(myVideoPlayer, OperatorControls._ShowLowerThird, str);
+    let str = p.id.toString();
+    sendStringSubmitEvent(myVideoPlayer, OperatorControls._ToggleParticipantLowerThird, str);
   })
 
   showLtExclusiveEl.addEventListener("click", function(ev) {
@@ -535,9 +535,9 @@ function setupParticipantInputGroup(node, idx) {
   })
 
   lowerThirdBtn.addEventListener("click", function () {
-    let p = participantJsonParsed[idx]
-    let str = p.id + "," + !p.lowerThirdShowing
-    sendStringSubmitEvent(myVideoPlayer, OperatorControls._ShowLowerThird, str)
+    let p = participantJsonParsed[idx];
+    let str = p.id.toString();
+    sendStringSubmitEvent(myVideoPlayer, OperatorControls._ToggleParticipantLowerThird, str);
   })
 
   exclusiveLowerThirdBtn.addEventListener("click", function () {

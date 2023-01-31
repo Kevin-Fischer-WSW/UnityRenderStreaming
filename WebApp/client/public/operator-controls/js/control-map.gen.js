@@ -28,7 +28,7 @@ export const OperatorControls = {
 	_ChangeLowerThirdStyle : 25,
 	_GetLowerThirdStyleSchema : 26,
 	_SetSizeOfLowerThird : 27,
-	_ShowLowerThird : 28,
+	_ToggleParticipantLowerThird : 28,
 	_JustShowSpecificParticipantLowerThird : 29,
 	_ShowAllLowerThirds : 30,
 	_HideAllLowerThirds : 31,
