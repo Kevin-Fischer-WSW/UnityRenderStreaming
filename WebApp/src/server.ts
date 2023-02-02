@@ -275,6 +275,23 @@ export const createServer = (config: Options): express.Application => {
     }
   }
 
+  function DeleteDirectory(res, _path) {
+    // For extra safety, only allow deletion inside video editor directory.
+    if (_path.includes(videoEditingDir) === false) {
+      res.status(400).json({message: 'Invalid directory path'});
+      return;
+    }
+    if (ValidatePathExists(res, _path) === false)
+      return;
+    try {
+      fs.rmdirSync(_path, {recursive: true});
+      res.status(200).json({message: 'Directory deleted successfully'});
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({message: "Directory not deleted. Error: ".concat(err)});
+    }
+  }
+
   app.delete('/slide_delete/:slide', (req, res) => {
     let slidePath = path.join(holdingSlidePath, req.params.slide);
     DeleteFile(res, slidePath);
@@ -414,7 +431,7 @@ export const createServer = (config: Options): express.Application => {
       });
   });
 
-  let videoEditingDir = config.videoEditingDir;
+  let videoEditingDir = path.normalize(config.videoEditingDir);
   app.get("/listVideoEditingProjects", (req, res)=>{
     // Get a list of all the directories in the video editing directory.
     getFiles(res, videoEditingDir);
@@ -439,6 +456,12 @@ export const createServer = (config: Options): express.Application => {
         fs.mkdirSync(projectPath);
       }
 
+      // Validate the project data.
+      if (validateVideoEditingProjectData(req.body.projectData) === false){
+        res.status(400).json({message: "Invalid project data"});
+        return;
+      }
+
       // Save the data.json to the directory.
       let dataPath = path.join(projectPath, "data.json");
       let data = JSON.stringify(req.body.projectData);
@@ -452,10 +475,33 @@ export const createServer = (config: Options): express.Application => {
 
   });
 
+  function validateVideoEditingProjectData(data){
+    // Not undefined.
+    if (data === undefined) return false;
+    if (data.clips === undefined) return false;
+    if (data.cutSpans === undefined) return false;
+    // Clips and cut spans are arrays.
+    if (Array.isArray(data.clips) === false) return false;
+    if (Array.isArray(data.cutSpans) === false) return false;
+    // Cut spans are in order, don't overlap, and are within the bounds of the clips.
+    for (let i = 0; i < data.cutSpans.length; i++){
+      let span = data.cutSpans[i];
+      if (span.inpoint > span.outpoint) return false;
+      if (span.inpoint < 0) return false;
+      if (span.clipIndex < 0) return false;
+      if (span.clipIndex >= data.clips.length) return false;
+      if (span.outpoint > data.clips[span.clipIndex].duration) return false;
+      if (i > 0){
+        if (span.inpoint < data.cutSpans[i-1].outpoint) return false;
+      }
+    }
+    return true;
+  }
+
   app.delete("/deleteVideoEditingProject/:project", (req, res) => {
     if (req.session.authorized) {
       let projectPath = path.join(videoEditingDir, req.params.project);
-      DeleteFile(res, projectPath);
+      DeleteDirectory(res, projectPath);
     }
   });
 
