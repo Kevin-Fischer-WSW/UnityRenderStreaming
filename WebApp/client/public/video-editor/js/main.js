@@ -25,14 +25,84 @@ async function GetClips() {
         if (addAndNotInsertButtonPressedLast) {
           timeline.createClip(clips[clipIndex].file, clips[clipIndex].duration);
         } else {
-          timeline.insertClip(clips[clipIndex], timeline.selectedClipIndex);
+          timeline.insertClip(clips[clipIndex].file, clips[clipIndex].duration, timeline.selectedClipIndex);
         }
       });
     }
   }
 }
 
+let projectDropdownBtn = document.getElementById('project-dropdown-btn');
+let projectDropdown = document.getElementById('project-dropdown');
+projectDropdownBtn.addEventListener('click', () => {
+  projectDropdown.innerHTML = '';
+  GetProjects();
+});
+
+async function GetProjects() {
+  let resp = await fetch('/listVideoEditingProjects')
+  let data = await resp.json()
+  if (resp.ok) {
+    for (let i = 0; i < data.length; i++) {
+      projectDropdown.innerHTML += `<li value="${i}"><button class="dropdown-item">${data[i]}</button></li>`;
+    }
+    projectDropdown.addEventListener('click', (event) => {
+      let projectIndex = event.target.parentElement.value;
+      loadProject(data[projectIndex]);
+    });
+  }
+}
+
+let projectNameInput = document.getElementById('project-name');
+async function loadProject(projectName) {
+  let resp = await fetch(`/videoEditingProjectData/${projectName}`)
+  let data = await resp.json()
+  if (resp.ok) {
+    timeline.setJson(data)
+    projectNameInput.value = projectName;
+  }
+}
+
 GetClips();
+
+
+let saveProjectButton = document.getElementById('save-project');
+saveProjectButton.addEventListener('click', () => {
+  let projectName = projectNameInput.value;
+  let projectData = timeline.getJson();
+  let data = {
+    projectName: projectName,
+    projectData: projectData
+  };
+  fetch('/submitVideoEdits', {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  }).then((response) => {
+    if (response.ok) {
+      alert('Project saved');
+    } else {
+      alert('Error saving project');
+    }
+  });
+});
+
+let deleteProjectButton = document.getElementById('delete-project');
+deleteProjectButton.addEventListener('click', () => {
+  let projectName = projectNameInput.value;
+  fetch(`/deleteVideoEditingProject/${projectName}`, {
+    method: 'DELETE'
+  }).then((response) => {
+    if (response.ok) {
+      alert('Project deleted');
+      projectNameInput.value = '';
+    } else {
+      alert('Error deleting project');
+    }
+  });
+});
 
 let addAndNotInsertButtonPressedLast = false;
 

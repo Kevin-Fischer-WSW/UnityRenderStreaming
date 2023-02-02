@@ -18,6 +18,28 @@
 <div class="container">
 
   <h1 class="display-5 border-bottom text-white p-2">Video Editor</h1>
+  <div class="d-flex justify-content-evenly">
+    <!-- Dropdown to select the video project -->
+    <div class="dropdown">
+      <button class="btn btn-secondary dropdown-toggle" type="button" id="project-dropdown-btn" data-bs-toggle="dropdown"
+              aria-expanded="false">
+        Select Project
+      </button>
+      <ul id="project-dropdown" class="dropdown-menu" aria-labelledby="project-dropdown-btn">
+        <!-- Items will be added here programatically -->
+      </ul>
+    </div>
+    <!-- Input group to name the video project -->
+    <div class="input-group mb-3">
+      <span class="input-group-text" id="basic-addon1">Project Name</span>
+      <input id="project-name" type="text" class="form-control" placeholder="Project Name" aria-label="Project Name"
+             aria-describedby="basic-addon1">
+    </div>
+    <!-- Button to save video project -->
+    <button id="save-project" type="button" class="btn btn-secondary">Save Project</button>
+    <!-- Button to delete video project -->
+    <button id="delete-project" type="button" class="btn btn-secondary">Delete Project</button>
+  </div>
   <div id="video-container" class="container-fluid mt-4">
     <video id="video" class="bg-black w-100" controls src=""></video>
     <!-- Button group to add clip, insert clip, and delete clip -->
@@ -25,6 +47,7 @@
       <button id="add-clip" type="button" class="btn btn-secondary" data-bs-toggle="dropdown">Add Clip</button>
       <button id="insert-clip" type="button" class="btn btn-secondary" data-bs-toggle="dropdown">Insert Clip</button>
       <ul id="clip-dropdown" class="dropdown-menu" aria-labelledby="layout-btn">
+        <!-- Items will be added here programatically -->
       </ul>
       <button id="delete-clip" type="button" class="btn btn-secondary">Delete Clip</button>
     </div>
