@@ -254,6 +254,13 @@ export class Timeline extends EventTarget {
     return [inpoint, outpoint];
   }
 
+  getJson() {
+    return {
+      clips: this.clips,
+      cutSpans: this.cutSpans,
+    };
+  }
+
   getNormAtMouse(ev) {
     return (ev.clientX - this.timelineElement.offsetLeft) / this.timelineElement.offsetWidth;
   }
@@ -358,6 +365,12 @@ export class Timeline extends EventTarget {
     if (this.selectionStart === this.selectionEnd) {
       this.clearSelection();
     }
+  }
+
+  setJson(json) {
+    this.clips = json.clips;
+    this.cutSpans = json.cutSpans;
+    this.updateWholeTimeline();
   }
 
   showSelection(show) {
