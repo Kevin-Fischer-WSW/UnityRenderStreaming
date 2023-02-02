@@ -307,7 +307,6 @@ export const createServer = (config: Options): express.Application => {
         });
       }
     }
-    console.log(data)
     res.status(200).json(data);
   });
 
@@ -415,38 +414,48 @@ export const createServer = (config: Options): express.Application => {
       });
   });
 
+  let videoEditingDir = config.videoEditingDir;
   app.get("/listVideoEditingProjects", (req, res)=>{
-    // todo
-  });
+    // Get a list of all the directories in the video editing directory.
+    getFiles(res, videoEditingDir);
+  })
 
-  app.get("/videoEditingProjectData", (req, res)=>{
-    // todo
-  });
+  app.get("/videoEditingProjectData/:project", (req, res)=>{
+    // Get the data.json file for the project.
+    let projectPath = path.join(videoEditingDir, req.params.project);
+    if (ValidatePathExists(res, projectPath) === false) return;
+    let dataPath = path.join(projectPath, "data.json");
+    if (ValidatePathExists(res, dataPath) === false) return;
+    let data = JSON.parse(fs.readFileSync(dataPath).toString());
+    res.status(200).json(data);
+  })
 
-  app.post("/submitVideoEdits", (req, res) => {
+  app.put("/submitVideoEdits", (req, res) => {
 
     if (req.session.authorized) {
-      // todo Use req.body to get name and see if that directory exists.
-      // Update the data.json
+      // Create directory for the project.
+      let projectPath = path.join(videoEditingDir, req.body.projectName);
+      if (fs.existsSync(projectPath) === false){
+        fs.mkdirSync(projectPath);
+      }
+
+      // Save the data.json to the directory.
+      let dataPath = path.join(projectPath, "data.json");
+      let data = JSON.stringify(req.body.projectData);
+      fs.writeFileSync(dataPath, data);
+
       //todo parse cuts and clips to output txt file for ffmpeg.
       // Note: We will run into issues if two people try to request at the same time.
       // send a json back containing the src for the rendered preview.
+      res.status(200).json({message: "success"});
+    }
 
-      const filePath: string = path.join(config.recordingsDir, 'intervals.txt');
+  });
 
-      fs.writeFile(filePath, req.params.intervals, (err) => {
-        if (err) {
-          console.log(err);
-        }
-        else {
-          console.log("File written successfully\n");
-        }
-      });
-
-      res.status(200).redirect("");
-
-    } else {
-      res.status(401).redirect("/");
+  app.delete("/deleteVideoEditingProject/:project", (req, res) => {
+    if (req.session.authorized) {
+      let projectPath = path.join(videoEditingDir, req.params.project);
+      DeleteFile(res, projectPath);
     }
   });
 
