@@ -73,6 +73,10 @@ export const createServer = (config: Options): express.Application => {
 
       const fs = require('fs');
       const objPath: string = path.join(process.cwd(), 'data.json');
+      if (fs.existsSync(objPath) === false) {
+        // Create the file.
+        fs.writeFileSync(objPath, JSON.stringify({uname: "admin", pwd: "EagleEye2023"}), 'utf8');
+      }
       let rawdata = fs.readFileSync(objPath);
       let obj = JSON.parse(rawdata);
 
