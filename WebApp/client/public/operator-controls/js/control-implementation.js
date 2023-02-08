@@ -12,7 +12,8 @@ mainNotifications.addEventListener('setup', function () {
   myVideoPlayer.onParticipantDataReceived = participantDataReceived;
   myVideoPlayer.onAppStatusReceived = appStatusReceived;
   myVideoPlayer.onChatHistoryReceived = validateChatHistory;
-  myVideoPlayer.onStyleSchemaReceived = onReceiveStyleSchema; // todo set this to function that generates json editor.
+  myVideoPlayer.onStyleSchemaReceived = onReceiveStyleSchema;
+  myVideoPlayer.onStyleValuesReceived = onReceiveStyleValues;
   setTimeout(() => {
     sendClickEvent(myVideoPlayer, OperatorControls._GetParticipantData);
     sendClickEvent(myVideoPlayer, OperatorControls._GetAppStatus);
@@ -576,7 +577,6 @@ function onTextSizeSelected(idx) {
 
 function onLowerThirdStyleSelected(idx) {
   switch (idx) {
-    // Note: empty str values will eventually be replaced with arguments for style.
     case 0:
       sendStringSubmitEvent(myVideoPlayer, OperatorControls._SetLowerThirdStyle1, "");
       break;
@@ -593,6 +593,9 @@ function editStyleSelectionChanged() {
   switch (category) {
     case "Lower Thirds":
       sendStringSubmitEvent(myVideoPlayer, OperatorControls._GetLowerThirdStyleSchema, id);
+      break;
+    case "Layouts":
+      sendStringSubmitEvent(myVideoPlayer, OperatorControls._GetLayoutStyleSchema, id);
       break;
   }
 }
@@ -623,16 +626,36 @@ function onReceiveStyleSchema(json) {
     validateSchema();
   });
 
-  layout_editor.on('change',() => {
-    // TODO : create a new method to run operations upon change
-    if (validateSchema()){
-      switch(layout_editor.options.schema.category){
-        case "Lower Third":
-          let str = layout_editor.options.schema.id + JSON.stringify(layout_editor.getValue());
-          sendStringSubmitEvent(myVideoPlayer, OperatorControls._ChangeLowerThirdStyle, str);
-      }
+  layout_editor.on('change', onLayoutEditorChanged);
+}
+
+function onLayoutEditorChanged(){
+  if (layoutEditorValuesSetInCB) {
+    layoutEditorValuesSetInCB = false;
+    return;
+  }
+  if (validateSchema()) {
+    switch(layout_editor.options.schema.category){
+      case "Lower Third":
+        let str = layout_editor.options.schema.id + JSON.stringify(layout_editor.getValue());
+        sendStringSubmitEvent(myVideoPlayer, OperatorControls._ChangeLowerThirdStyle, str);
+        break;
+      case "Layout":
+        let str2 = layout_editor.options.schema.id + JSON.stringify(layout_editor.getValue());
+        sendStringSubmitEvent(myVideoPlayer, OperatorControls._ChangeLayoutStyle, str2);
+        break;
     }
-  });
+  }
+}
+
+let layoutEditorValuesSetInCB = false;
+function onReceiveStyleValues(json) {
+  let data = JSON.parse(json);
+  // If the schema's title matches the received data's title, then set the value.
+  if (layout_editor.options.schema.title === data.title) {
+    layoutEditorValuesSetInCB = true;
+    layout_editor.setValue(data);
+  }
 }
 
 function validateSchema() {
