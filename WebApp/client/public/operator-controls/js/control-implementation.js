@@ -6,6 +6,7 @@ import { OperatorControls } from "/operator-controls/js/control-map.gen.js";
 import { sendClickEvent, sendStringSubmitEvent } from "/videoplayer/js/register-events.js";
 import { myVideoPlayer, mainNotifications } from "/operator-controls/js/control-main.js";
 import { ValidateClonesWithJsonArray} from "/operator-controls/js/validation-helper.js";
+import { unityFetch } from "../../js/unity-fetch.js";
 
 
 mainNotifications.addEventListener('setup', function () {
@@ -208,7 +209,7 @@ function flagStreamPrefChange() {
 }
 
 async function updateStreamPref() {
-  let resp = await fetch("/getStreamPref");
+  let resp = await unityFetch("/getStreamServiceSettings")
   let data = await resp.json();
   if (!resp.ok) {
     console.error("Error " + resp.status + ": " + data.message)
@@ -216,30 +217,28 @@ async function updateStreamPref() {
     alertDisplay(errorAlert);
   } else {
     let reg = new RegExp("[:/.]");
-    let url = data.settings.server.split(reg);
+    let url = data.streamServiceSettings.server.split(reg);
     streamingServerAdd.value = url[3];
     streamingApp.value = url[6];
-    streamKey.value = data.settings.key;
-    uname.value = data.settings.username;
-    pwd.value = data.settings.password;
-    streamUrl.innerHTML = data.settings.server;
-    boardData.innerHTML = data.settings.server + data.settings.key;
+    streamKey.value = data.streamServiceSettings.key;
+    uname.value = data.streamServiceSettings.username;
+    pwd.value = data.streamServiceSettings.password;
+    streamUrl.innerHTML = data.streamServiceSettings.server;
+    boardData.innerHTML = data.streamServiceSettings.server + data.streamServiceSettings.key;
   }
 
 }
 
 async function saveStreamPref() {
   saveBtn.disabled = true;
-  let resp = await fetch("/stream_pref?" +
-    "streamingServerAdd=" + streamingServerAdd.value +
-    "&streamingApp=" + streamingApp.value +
+  let resp = await unityFetch("/setStreamServiceSettings?" +
+    "serverUrl=" + `rtmp://${streamingServerAdd.value}.wsw.com/${streamingApp.value}/` +
     "&streamKey=" + streamKey.value +
-    "&uname=" + uname.value +
-    "&pwd=" + pwd.value)
-  let data = await resp.json()
+    "&username=" + uname.value +
+    "&password=" + pwd.value,
+    { method: "PUT" })
   if (!resp.ok) {
-    console.error("Error " + resp.status + ": " + data.message)
-    errorMsg.innerHTML = data.message;
+    errorMsg.innerHTML = resp.statusText;
     alertDisplay(errorAlert, 1000);
   } else {
     await updateStreamPref();
