@@ -49,6 +49,29 @@ export const createServer = (config: Options): express.Application => {
     next();
   });
 
+  app.all('/uapp/:endpoint', function(req, res, next) {
+    // Make a http request to the endpoint at http://localhost:4444/endpoint
+    // and return the response to the client.
+    const http = require('http');
+    const endpoint = req.params.endpoint;
+    let path = `/${endpoint}`;
+    if (req.url.includes('?')) {
+      path += `?${req.url.split('?')[1]}`;
+    }
+    const options = {
+      hostname: 'localhost',
+      port: 4444,
+      path: path,
+      method: req.method,
+      headers: req.headers,
+    };
+    const request = http.request(options, (response) => {
+      res.writeHead(response.statusCode, response.headers);
+      response.pipe(res);
+    });
+    req.pipe(request);
+  });
+
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
   app.get('/config', (req, res) => res.json({ useWebSocket: config.websocket, startupMode: config.mode, logging: config.logging }));
@@ -131,35 +154,6 @@ export const createServer = (config: Options): express.Application => {
     }
     return true;
   }
-
-  let serviceJsonPath = path.join(env.APPDATA, "obs-studio/basic/profiles/Eagle_Eye/service.json");
-  app.get('/getStreamPref', (req, res) => {
-    if (ValidatePathExists(res, serviceJsonPath) === false) return;
-    let data = JSON.parse(fs.readFileSync(serviceJsonPath).toString());
-    res.status(200).json(data)
-  });
-
-  app.get('/stream_pref', (req, res) => {
-    let updateAddress = "rtmp://" + req.query.streamingServerAdd + ".wsw.com/" + req.query.streamingApp + "/";
-    if (ValidatePathExists(res, serviceJsonPath) === false) return;
-    // Write new json object and then save on the server.
-    let data = JSON.parse(fs.readFileSync(serviceJsonPath).toString());
-    data.settings.server = updateAddress;
-    data.settings.key = req.query.streamKey;
-    data.settings.username = req.query.uname;
-    data.settings.password = req.query.pwd;
-
-    fs.writeFile(serviceJsonPath, JSON.stringify(data), (err) => {
-      if (err) {
-        console.log(err);
-      }
-      else {
-        console.log("File written successfully\n");
-      }
-    });
-    // NOTE: Frontend is expecting json.
-    res.status(200).json({})
-  });
 
   function GetLastModifiedTime(path) {
     if (fs.existsSync(path)) {
