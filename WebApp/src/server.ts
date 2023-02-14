@@ -59,7 +59,7 @@ export const createServer = (config: Options): express.Application => {
       path += `?${req.url.split('?')[1]}`;
     }
     const options = {
-      hostname: 'localhost',
+      hostname: '127.0.0.1',
       port: 4444,
       path: path,
       method: req.method,
