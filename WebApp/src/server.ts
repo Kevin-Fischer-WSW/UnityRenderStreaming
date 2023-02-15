@@ -59,8 +59,8 @@ export const createServer = (config: Options): express.Application => {
       path += `?${req.url.split('?')[1]}`;
     }
     const options = {
-      hostname: '127.0.0.1',
-      port: 4444,
+      hostname: 'localhost',
+      port: 46000,
       path: path,
       method: req.method,
       headers: req.headers,
@@ -68,6 +68,10 @@ export const createServer = (config: Options): express.Application => {
     const request = http.request(options, (response) => {
       res.writeHead(response.statusCode, response.headers);
       response.pipe(res);
+    });
+    request.on('error', (error) => {
+      log(LogLevel.error, error);
+      res.status(500).send(error);
     });
     req.pipe(request);
   });
