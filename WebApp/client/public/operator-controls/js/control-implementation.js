@@ -1149,24 +1149,31 @@ function uploadCustomSlideClicked() {
     let formData = new FormData()
     formData.append("type", input.type)
     formData.append(input.name, input.file)
-    fetch("/slide_upload", {
-      method: "POST",
-      body: formData
-    }).then(HandleSlideUploadResponse)
+    let progressSpan = document.createElement("span")
+    progressSpan.id = input.name
+    uploadDescriptor.appendChild(progressSpan)
+    let request = new XMLHttpRequest();
+    request.open("POST", "/slide_upload");
+    request.send(formData);
+    request.upload.addEventListener("progress", function (e) {
+      progressSpan.innerHTML = `${input.name}: ${Math.round(e.loaded / e.total * 100)}%`
+      if (e.loaded === e.total) {
+        progressSpan.innerHTML += " (Done)"
+        switch(input.type){
+          case "slide":
+            UpdateSlideBrowsePreviewElement();
+            break;
+          case "music":
+            UpdateHoldMusicBrowsePreviewElement();
+            break;
+          case "video":
+            UpdateVideoBrowsePreviewElement();
+            break;
+        }
+        UpdateUploadBrowseOptionGroupElements();
+      }
+    })
   }
-  uploadDescriptor.innerHTML = "Uploading..."
-}
-
-async function HandleSlideUploadResponse(resp) {
-  let data = await resp.json();
-  // Update slide preview.
-  for (let message of data.messages) {
-    uploadDescriptor.innerHTML += `<br>${message}`
-  }
-  UpdateSlideBrowsePreviewElement();
-  UpdateHoldMusicBrowsePreviewElement();
-  UpdateVideoBrowsePreviewElement();
-  UpdateUploadBrowseOptionGroupElements();
 }
 
 /* VIDEO CONTROLS */
