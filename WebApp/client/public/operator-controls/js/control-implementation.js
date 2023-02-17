@@ -1153,13 +1153,13 @@ function uploadCustomSlideClicked() {
     progressSpan.id = input.name
     uploadDescriptor.appendChild(progressSpan)
     let request = new XMLHttpRequest();
-    request.open("POST", "/slide_upload");
-    request.send(formData);
+
     request.upload.addEventListener("progress", function (e) {
       progressSpan.innerHTML = `${input.name}: ${Math.round(e.loaded / e.total * 100)}%`
       if (e.loaded === e.total) {
         progressSpan.innerHTML += " (Done)"
         switch(input.type){
+          case "custom_slide":
           case "slide":
             UpdateSlideBrowsePreviewElement();
             break;
@@ -1173,6 +1173,9 @@ function uploadCustomSlideClicked() {
         UpdateUploadBrowseOptionGroupElements();
       }
     })
+
+    request.open("POST", "/slide_upload");
+    request.send(formData);
   }
 }
 
