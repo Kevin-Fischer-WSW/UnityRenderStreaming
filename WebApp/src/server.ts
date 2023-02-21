@@ -250,10 +250,17 @@ export const createServer = (config: Options): express.Application => {
   }
 
   app.post('/slide_upload', (req, res, next) => {
-    let form = new formidable.IncomingForm()
+    const options = {
+      multiples: true,
+      maxFileSize: 2 * 1024 * 1024 * 1024, // 2 GB
+    }
+    let form = new formidable.IncomingForm(options)
     // Parse submitted form data.
     form.parse(req, function (err, fields, files) {
-      if (err) next(err);
+      if (err){
+        next(err);
+        return;
+      }
       // Determine upload path via type.
       let uploadPath;
       if (fields.type === 'custom_slide') {
