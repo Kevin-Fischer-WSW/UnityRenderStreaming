@@ -76,7 +76,7 @@ export const createServer = (config: Options): express.Application => {
     req.pipe(request);
   });
 
-  app.use(express.urlencoded({ extended: true }));
+  app.use(express.urlencoded({ extended: true, limit: '2gb' }));
   app.use(express.json());
   app.get('/config', (req, res) => res.json({ useWebSocket: config.websocket, startupMode: config.mode, logging: config.logging }));
   app.use('/signaling', signaling);
