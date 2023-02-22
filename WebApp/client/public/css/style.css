@@ -1,4 +1,4 @@
-#progress {
+#progress, .progressupload {
   height: 20px;
   display: flex;
   opacity: 1;

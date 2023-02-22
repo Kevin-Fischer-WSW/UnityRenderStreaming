@@ -8,6 +8,7 @@ import { myVideoPlayer, mainNotifications } from "/operator-controls/js/control-
 import { ValidateClonesWithJsonArray} from "/operator-controls/js/validation-helper.js";
 import { unityFetch } from "../../js/unity-fetch.js";
 import {getVideoThumb} from "../../js/video-thumbnail.js";
+import { createUploadProgressTracker } from "../../js/progresstracker.js";
 
 
 mainNotifications.addEventListener('setup', function () {
@@ -1152,27 +1153,15 @@ function editSlideSaveBtnClicked() {
 function uploadCustomSlideClicked() {
   // Hide edit button.
   editSlideBtn.style.display = "none";
+  let parentTracker = document.getElementById("uploadTrackerContainer");
   for (let input of formInput) {
+
     let formData = new FormData()
     formData.append("type", input.type)
     formData.append(input.name, input.file)
-    let progressSpan = document.createElement("span")
-    progressSpan.id = input.name
-    uploadDescriptor.appendChild(progressSpan)
+
     let request = new XMLHttpRequest();
-
-    request.upload.addEventListener("progress", function (e) {
-      progressSpan.innerHTML = `${input.name}: ${Math.round(e.loaded / e.total * 100)}%`
-    })
-    request.upload.addEventListener("error", function (e) {
-      progressSpan.innerHTML += " (Error)"
-      request.abort();
-    })
-    request.upload.addEventListener("load", function (e) {
-      progressSpan.innerHTML += " (Done)"
-      FetchAllUploadedMediaAndUpdateDash();
-    })
-
+    createUploadProgressTracker(parentTracker, request, input.name, FetchAllUploadedMediaAndUpdateDash);
     request.open("POST", "/slide_upload");
     request.send(formData);
   }
