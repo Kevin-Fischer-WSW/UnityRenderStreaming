@@ -7,6 +7,7 @@ import { sendClickEvent, sendStringSubmitEvent } from "/videoplayer/js/register-
 import { myVideoPlayer, mainNotifications } from "/operator-controls/js/control-main.js";
 import { ValidateClonesWithJsonArray} from "/operator-controls/js/validation-helper.js";
 import { unityFetch } from "../../js/unity-fetch.js";
+import {getVideoThumb} from "../../js/video-thumbnail.js";
 
 
 mainNotifications.addEventListener('setup', function () {
@@ -691,6 +692,11 @@ function setupDeleteButton(owner, route, spanWithFilename) {
         if (response.ok) {
           FetchAllUploadedMediaAndUpdateDash();
         }
+      }).finally(function () {
+        // Reset owner opacity.
+        owner.style.opacity = 1;
+        //Reset delete button.
+        deleteBtn.innerHTML = ogDeleteContents;
       });
     }
   });
@@ -1214,29 +1220,6 @@ function onVideoClearClicked() {
 
 videoSwitchBtn.style.display = "none";
 
-function getVideoImage(path, secs, callback, img) {
-  var me = this, video = document.createElement('video');
-  video.onloadedmetadata = function() {
-    if ('function' === typeof secs) {
-      secs = secs(this.duration);
-    }
-    this.currentTime = Math.min(Math.max(0, (secs < 0 ? this.duration : 0) + secs), this.duration);
-  };
-  video.onseeked = function(e) {
-    var canvas = document.createElement('canvas');
-    canvas.height = video.videoHeight;
-    canvas.width = video.videoWidth;
-    var ctx = canvas.getContext('2d');
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    img.src = canvas.toDataURL();
-    callback.call(me, img, this.currentTime, e);
-  };
-  video.onerror = function(e) {
-    callback.call(me, undefined, undefined, e);
-  };
-  video.src = path;
-}
-
 function validateVideoSwitchBtns(videos) {
   // Be sure there are enough buttons for videos.
   if (videoSwitchBtns.length < videos.length) {
@@ -1273,7 +1256,11 @@ function validateVideoSwitchBtns(videos) {
     let img = document.querySelector(`#${btn.id} img`);
     let label = document.querySelector(`#${btn.id} span`);
     label.innerHTML = videos[i];
-    getVideoImage("/videos/" + label.innerHTML, 1, function(img, secs, event) {}, img);
+    getVideoThumb("/videos/" + label.innerHTML, 1).then(function (blob) {
+      img.src = URL.createObjectURL(blob);
+    }).catch(function (err) {
+      console.error(err);
+    });
   }
 }
 
