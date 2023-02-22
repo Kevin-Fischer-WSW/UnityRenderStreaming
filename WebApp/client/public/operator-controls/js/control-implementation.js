@@ -683,12 +683,13 @@ function setupDeleteButton(owner, route, spanWithFilename) {
         deleteBtn.innerHTML = ogDeleteContents;
       }, 2000);
     } else {
-      // Reset button.
-      deleteBtn.innerHTML = ogDeleteContents;
+      // Make owner semi-transparent.
+      owner.style.opacity = 0.5;
+      deleteBtn.innerHTML = "Deleting...";
       // Delete media.
       fetch(`${route}/${spanWithFilename.innerHTML}`, {method: "DELETE"}).then(function (response) {
         if (response.ok) {
-          UpdateUploadBrowseOptionGroupElements();
+          FetchAllUploadedMediaAndUpdateDash();
         }
       });
     }
@@ -919,7 +920,7 @@ function UpdateOptionGroupWithValues(optionGroup, options) {
   }
 }
 
-function UpdateUploadBrowseOptionGroupElements() {
+function FetchAllUploadedMediaAndUpdateDash() {
   // Fetch custom slides.
   fetch("/all_custom_slides")
     .then(value => value.json())
@@ -947,7 +948,7 @@ function UpdateUploadBrowseOptionGroupElements() {
 }
 
 // Update initially.
-UpdateUploadBrowseOptionGroupElements();
+FetchAllUploadedMediaAndUpdateDash();
 
 let typeToKeyWords = {
   "intro": ["intro"],
@@ -1156,22 +1157,14 @@ function uploadCustomSlideClicked() {
 
     request.upload.addEventListener("progress", function (e) {
       progressSpan.innerHTML = `${input.name}: ${Math.round(e.loaded / e.total * 100)}%`
-      if (e.loaded === e.total) {
-        progressSpan.innerHTML += " (Done)"
-        switch(input.type){
-          case "custom_slide":
-          case "slide":
-            UpdateSlideBrowsePreviewElement();
-            break;
-          case "music":
-            UpdateHoldMusicBrowsePreviewElement();
-            break;
-          case "video":
-            UpdateVideoBrowsePreviewElement();
-            break;
-        }
-        UpdateUploadBrowseOptionGroupElements();
-      }
+    })
+    request.upload.addEventListener("error", function (e) {
+      progressSpan.innerHTML += " (Error)"
+      request.abort();
+    })
+    request.upload.addEventListener("load", function (e) {
+      progressSpan.innerHTML += " (Done)"
+      FetchAllUploadedMediaAndUpdateDash();
     })
 
     request.open("POST", "/slide_upload");
@@ -1255,7 +1248,6 @@ function validateVideoSwitchBtns(videos) {
       videoBtnContainer.appendChild(clone);
       videoSwitchBtns.push(clone);
       let span = document.querySelector(`#${clone.id} span`)
-      //let deleteBtn = document.querySelector(`#${clone.id} .media-delete-btn`); // todo: make a function to create delete buttons.
       setupDeleteButton(clone, "/video_delete", span);
       let button1 = document.querySelector(`#${clone.id} .media-left-btn`);
       let button2 = document.querySelector(`#${clone.id} .media-right-btn`);
