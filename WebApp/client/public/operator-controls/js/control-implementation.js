@@ -457,11 +457,25 @@ let showAllLowerThirdsBtn = document.getElementById("show-all-lower-thirds-btn")
 showAllLowerThirdsBtn.addEventListener("click", onShowAllLowerThirdsClick);
 let hideAllLowerThirdsBtn = document.getElementById("hide-all-lower-thirds-btn");
 hideAllLowerThirdsBtn.addEventListener("click", onHideAllLowerThirdsClick);
+
+let enableAutoShowOnJoin = document.getElementById("enable-autoshow-btn");
+let disableAutoShowOnJoin = document.getElementById("disable-autoshow-btn");
+enableAutoShowOnJoin.addEventListener("click", onEnableAutoShowOnJoin);
+disableAutoShowOnJoin.addEventListener("click", onDisableAutoShowOnJoin);
+
+function onEnableAutoShowOnJoin() {
+  unityFetch("/enableOutputVideoByDefault?enable=true", {method: "PUT"});
+}
+
+function onDisableAutoShowOnJoin() {
+  unityFetch("/enableOutputVideoByDefault?enable=false", {method: "PUT"});
+}
+
 function onShowAllLowerThirdsClick() {
-  sendClickEvent(myVideoPlayer, OperatorControls._ShowAllLowerThirds)
+  sendClickEvent(myVideoPlayer, OperatorControls._ShowAllLowerThirds);
 }
 function onHideAllLowerThirdsClick() {
-  sendClickEvent(myVideoPlayer, OperatorControls._HideAllLowerThirds)
+  sendClickEvent(myVideoPlayer, OperatorControls._HideAllLowerThirds);
 }
 let participantInputGroupOg = document.getElementById("participant-input-group");
 let participantInputGroups = [];
