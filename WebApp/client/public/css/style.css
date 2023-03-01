@@ -61,7 +61,7 @@
 #pending-btn {
   background-color: #EEDC31;
   border: 2px solid #3D3D3D;
-  height: 100px;
+  height: 70px;
   width: 150px;
   font-size: 20px;
   cursor: pointer;
@@ -73,7 +73,7 @@
 #live-btn {
   background-color: #7FDB6A;
   border: 2px solid #3D3D3D;
-  height: 100px;
+  height: 70px;
   width: 250px;
   font-size: 20px;
   cursor: pointer;
@@ -86,7 +86,7 @@
 #technical-diff-btn {
   background-color: #F57A37;
   border: 2px solid #3D3D3D;
-  height: 100px;
+  height: 70px;
   width: 150px;
   font-size: 20px;
   cursor: pointer;
@@ -99,7 +99,7 @@
 #archive-btn {
   background-color: #F44747;
   border: 2px solid #3D3D3D;
-  height: 100px;
+  height: 70px;
   width: 150px;
   font-size: 20px;
   cursor: pointer;
@@ -155,6 +155,13 @@ video {
   color: #fff;
   width: 100%;
   height: 100%; }
+
+#general-status-bar {
+  background-color: #4c4c4c;
+  height: 8%;
+  border: none;
+  color: white;
+  padding: 0.2rem; }
 
 /*!
    * Bootstrap  v5.2.2 (https://getbootstrap.com/)
@@ -8558,6 +8565,9 @@ textarea.form-control-lg {
 
 .padding {
   padding: 3rem !important; }
+
+body {
+  padding-bottom: 3%; }
 
 .card-header:first-child {
   border-radius: calc(.25rem - 1px) calc(.25rem - 1px) 0 0; }

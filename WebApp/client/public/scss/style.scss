@@ -75,7 +75,7 @@ $body-bg: #616161;
 #pending-btn {
   background-color: #EEDC31;
   border: 2px solid #3D3D3D;
-  height: 100px;
+  height: 70px;
   width: 150px;
   font-size: 20px;
   cursor: pointer;
@@ -89,7 +89,7 @@ $body-bg: #616161;
 #live-btn {
   background-color: #7FDB6A;
   border: 2px solid #3D3D3D;
-  height: 100px;
+  height: 70px;
   width: 250px;
   font-size: 20px;
   cursor: pointer;
@@ -104,7 +104,7 @@ $body-bg: #616161;
 #technical-diff-btn {
   background-color: #F57A37;
   border: 2px solid #3D3D3D;
-  height: 100px;
+  height: 70px;
   width: 150px;
   font-size: 20px;
   cursor: pointer;
@@ -119,7 +119,7 @@ $body-bg: #616161;
 #archive-btn {
   background-color: #F44747;
   border: 2px solid #3D3D3D;
-  height: 100px;
+  height: 70px;
   width: 150px;
   font-size: 20px;
   cursor: pointer;
@@ -197,6 +197,14 @@ $secondary: #4c4c4c;
   height: 100%;
 }
 
+#general-status-bar{
+  background-color: $secondary;
+  height: 8%;
+  border: none;
+  color: $primary;
+  padding: 0.2rem;
+}
+
 // Import all of Bootstrap's css.
 @import 'node_modules/bootstrap/scss/bootstrap';
 
@@ -218,9 +226,10 @@ $secondary: #4c4c4c;
   padding: 3rem !important
 }
 
-// body {
-//   background-color: #f9f9fa
-// }
+body {
+  //background-color: #f9f9fa
+  padding-bottom: 3%;
+}
 
 .card-header:first-child {
   border-radius: calc(.25rem - 1px) calc(.25rem - 1px) 0 0;

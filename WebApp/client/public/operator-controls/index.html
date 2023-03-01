@@ -37,6 +37,9 @@
         <path
           d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
       </symbol>
+      <symbol id="info-fill" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+      </symbol>
     </svg>
 
     <!-- Logout Modal -->
@@ -185,19 +188,16 @@
         </div>
       </div>
     </div>
-    <!-- Stream control buttons -->
-    <div class="btn-group w-100 mt-4">
-      <button id="pending-btn" class="btn btn-lg btn-outline-primary text-black">Start Stream - Intro Slide</button>
-      <button id="live-btn" class="btn btn-lg btn-outline-primary text-black">Live</button>
-      <button id="technical-diff-btn" class="btn btn-lg btn-outline-primary text-black">Technical Difficulty</button>
-      <button id="archive-btn" class="btn btn-lg btn-outline-primary text-black">Conclusion Slide</button>
+
+    <div id="general-status-bar">
+      Status Unknown.
     </div>
+
+
   </div>
 
-
-
   <!-- Video Players for Unity Render Streaming -->
-  <div id="video-players" class="container-fluid text-center mt-4">
+  <div id="video-players" class="container-fluid text-center">
     <!-- Play button element and full screen button element will be added here -->
     <div class="row gx-0">
       <div class="col">
@@ -231,6 +231,14 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- Stream control buttons -->
+  <div class="container d-flex btn-group w-100 mt-2">
+    <button id="pending-btn" class="btn btn-lg btn-outline-primary text-black">Start Stream - Intro Slide</button>
+    <button id="live-btn" class="btn btn-lg btn-outline-primary text-black">Live</button>
+    <button id="technical-diff-btn" class="btn btn-lg btn-outline-primary text-black">Technical Difficulty</button>
+    <button id="archive-btn" class="btn btn-lg btn-outline-primary text-black">Conclusion Slide</button>
   </div>
 
   <!-- Operator Control Tabs -->
@@ -279,8 +287,8 @@
             <input id="meeting-number-input" type="text" class="form-control m-2" placeholder="Meeting ID" aria-label="Meeting number">
             <input id="meeting-password-input" type="text" class="form-control m-2" placeholder="Password" aria-label="Meeting password">
             <button id="join-meeting-btn" class="btn btn-primary m-2" type="button">Join</button>
+            <button id="leave-meeting-btn" class="btn btn-primary" type="button">Leave</button>
           </fieldset>
-          <button id="leave-meeting-btn" class="btn btn-primary" type="button">Leave</button>
         </fieldset>
       </div>
       <!-- Participant controls -->

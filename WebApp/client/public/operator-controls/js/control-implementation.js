@@ -194,6 +194,9 @@ let errorAlert = document.getElementById("error-alert");
 let errorAlertFile = document.getElementById("error-alert-file");
 let boardData = document.getElementById('kt_clipboard_4');
 
+/* GENERAL STATUS BAR */
+let generalStatBar = document.getElementById("general-status-bar");
+
 /* -> clipboard */
 const copyData = document.getElementById('kt_clipboard_4');
 const copyBtn = document.getElementById('clip');
@@ -320,6 +323,11 @@ function appStatusReceived(json) {
   ActivateButtonHelper(liveBtn, false)
   ActivateButtonHelper(archiveBtn, false)
 
+  generalStatBar.innerHTML = 
+  `Stream: ${jsonParsed.streaming ? "Yes": "No"} | 
+  Recording: ${jsonParsed.recording ? "Yes": "No"} | 
+  Holding Slide: ${jsonParsed.holdingSlide} | 
+  Holding Music: ${jsonParsed.playingHoldingMusic ? "Playing": "Not Playing"}.`
 
   if (jsonParsed.inMeeting || jsonParsed.meetingSimulated) {
     validateTracksInPlaylist(jsonParsed.playlist, jsonParsed.currentlyPlayingIndex)
@@ -778,7 +786,6 @@ function getVolumeLevel(value) {
 
 /* HOLD MUSIC CONTROLS */
 let holdMusicFieldset = document.getElementById("music-fieldset");
-
 let volumeRangeMusic = document.getElementById("volume-range-music");
 let volumeLevelMusic  = document.getElementById("music-volume-level");
 volumeLevelMusic.innerHTML = getVolumeLevel(volumeRangeMusic.value);
@@ -1334,7 +1341,6 @@ function validateChatHistory(history){
   scrollToBottom(cHistory);
 }
 /* RECORDING CONTROLS */
-
 let listFileOptions = document.getElementById("list-all-files")
 listFileOptions.addEventListener("click", listAvailableRecordings);
 
@@ -1449,3 +1455,34 @@ function handleRecordingDownload() {
     downloadFile();
   }
 }
+
+/* BRING NAV-TABS INTO VIEW*/
+let navZoomTabBtn = document.getElementById("nav-zoom-tab");
+navZoomTabBtn.addEventListener("click", ()=>{navZoomTabBtn.scrollIntoView();});
+
+let navPartTabBtn = document.getElementById("nav-participants-tab");
+navPartTabBtn.addEventListener("click", ()=>{navPartTabBtn.scrollIntoView();});
+
+let navLayoutTabBtn = document.getElementById("nav-layout-tab");
+navLayoutTabBtn.addEventListener("click", ()=>{navLayoutTabBtn.scrollIntoView();});
+
+let navSlideTabBtn = document.getElementById("nav-slide-tab");
+navSlideTabBtn.addEventListener("click", ()=>{navSlideTabBtn.scrollIntoView();});
+
+let navMusicTabBtn = document.getElementById("nav-music-tab");
+navMusicTabBtn.addEventListener("click", ()=>{navSlideTabBtn.scrollIntoView();});
+
+let navVideoTabBtn = document.getElementById("nav-video-tab");
+navVideoTabBtn.addEventListener("click", ()=>{navVideoTabBtn.scrollIntoView();});
+
+let navChatTabBtn = document.getElementById("nav-chat-tab");
+navChatTabBtn.addEventListener("click", ()=>{navChatTabBtn.scrollIntoView();});
+
+let navLogTabBtn = document.getElementById("nav-log-tab");
+navLogTabBtn.addEventListener("click", ()=>{navLogTabBtn.scrollIntoView();});
+
+let navUploadTabBtn = document.getElementById("nav-upload-tab");
+navUploadTabBtn.addEventListener("click", ()=>{navUploadTabBtn.scrollIntoView();});
+
+let navRecordingTabBtn = document.getElementById("nav-recording-tab");
+navRecordingTabBtn.addEventListener("click", ()=>{navRecordingTabBtn.scrollIntoView();});
