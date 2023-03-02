@@ -332,6 +332,8 @@ function appStatusReceived(json) {
   if (jsonParsed.inMeeting || jsonParsed.meetingSimulated) {
     validateTracksInPlaylist(jsonParsed.playlist, jsonParsed.currentlyPlayingIndex)
     meetingNoInputField.disabled = true;
+    joinMeetingBtn.disabled = true;
+    leaveMeetingBtn.disabled = false;
     holdMusicFieldset.disabled = false;
     musicPlayStopBtn.innerHTML = jsonParsed.playingHoldingMusic ? "Stop" : "Play";
     currentlyPlayingSpan.innerHTML = jsonParsed.currentlyPlayingTrack;
@@ -388,6 +390,9 @@ function appStatusReceived(json) {
     } else {
       pendingBtn.innerHTML = "Start stream"
       viewModal.disabled = false;
+      if (jsonParsed.holdingSlide === "endOfStream" || jsonParsed.holdingSlide === "conclusion") {
+        sendClickEvent(myVideoPlayer, OperatorControls._LiveButton);
+      }
     }
 
     if (jsonParsed.secondClickEndsStream) {
@@ -395,8 +400,11 @@ function appStatusReceived(json) {
     } else {
       archiveBtn.innerHTML = "Archive"
     }
+
   } else {
     meetingNoInputField.disabled = false;
+    joinMeetingBtn.disabled = false;
+    leaveMeetingBtn.disabled = true;
     holdMusicFieldset.disabled = true;
     videoFieldsetBar.disabled = true;
   }
