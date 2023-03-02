@@ -687,7 +687,7 @@ function validateSchema() {
 
 
 /* DELETE BUTTON */
-function setupDeleteButton(owner, route, spanWithFilename) {
+function setupDeleteButton(owner, route, elementWithFilename, onDeleteConfirmed) {
   let deleteBtn = document.querySelector(`#${owner.id} .media-delete-btn`);
   let ogDeleteContents = deleteBtn.innerHTML;
   let confirmDeleteContents = `Confirm delete?`;
@@ -703,9 +703,10 @@ function setupDeleteButton(owner, route, spanWithFilename) {
       owner.style.opacity = 0.5;
       deleteBtn.innerHTML = "Deleting...";
       // Delete media.
-      fetch(`${route}/${spanWithFilename.innerHTML}`, {method: "DELETE"}).then(function (response) {
+      // todo Add callback to handle response. Also make route a parameter.
+      fetch(route.replace("{0}", elementWithFilename.thingToDelete), {method: "DELETE"}).then(function (response) {
         if (response.ok) {
-          FetchAllUploadedMediaAndUpdateDash();
+          onDeleteConfirmed();
         }
       }).finally(function () {
         // Reset owner opacity.
@@ -718,12 +719,26 @@ function setupDeleteButton(owner, route, spanWithFilename) {
 }
 
 /* SLIDE CONTROLS */
+/* It seems that now, we should request a list of slides from Unity. Unity could have a list of strings or urls. This
+* list could be sent as a part of app status, so if this list changes, all operators get this updated info. Might also
+* be helpful since Unity could also report on whether the slide is cached or not, if there were any problems loading it
+* etc. */
+let slideTab = document.getElementById("nav-slide-tab");
 let slideFieldset = document.getElementById("slide-fieldset");
 let slideBtnContainer = document.getElementById("slide-btn-container");
 let slideSwitchBtn = document.getElementById("slide-btn-element");
 let slideSwitchBtns = [];
 let slideClearBtn = document.getElementById("slide-clear-btn");
+slideTab.addEventListener("click", onSlideTabClicked);
 slideClearBtn.addEventListener("click", onSlideClearClicked);
+
+function onSlideTabClicked() {
+  unityFetch("/getHoldingSlides")
+    .then(resp => resp.json())
+    .then(json => {
+      validateSlideSwitchBtns(json);
+    })
+}
 
 function onSlideClearClicked() {
   sendClickEvent(myVideoPlayer, OperatorControls._LiveButton);
@@ -732,43 +747,36 @@ function onSlideClearClicked() {
 slideSwitchBtn.style.display = "none";
 
 function validateSlideSwitchBtns(slides) {
-  // Be sure there are enough buttons for slides.
-  if (slideSwitchBtns.length < slides.length) {
-    while (slideSwitchBtns.length < slides.length) {
-      // Elements must be added.
-      let clone = slideSwitchBtn.cloneNode(true);
-      clone.id += "-" + slideSwitchBtns.length;
-      clone.style.display = "flex"
-      slideBtnContainer.appendChild(clone);
-      slideSwitchBtns.push(clone);
-      let span = document.querySelector(`#${clone.id} span`)
-      //let deleteBtn = document.querySelector(`#${clone.id} .media-delete-btn`); // todo: make a function to create delete buttons.
-      setupDeleteButton(clone, "/slide_delete", span);
-      let button1 = document.querySelector(`#${clone.id} .media-left-btn`);
-      let button2 = document.querySelector(`#${clone.id} .media-right-btn`);
-      button1.addEventListener("click", function () {
-        let str = `${span.innerHTML},false`
-        sendStringSubmitEvent(myVideoPlayer, OperatorControls._CustomSlideButton, str);
-      })
-      button2.addEventListener("click", function () {
-        let str = `${span.innerHTML},true`
-        sendStringSubmitEvent(myVideoPlayer, OperatorControls._CustomSlideButton, str);
-      })
-    }
-  } else {
-    while (slideSwitchBtns.length > slides.length) {
-      // Elements must be destroyed.
-      slideSwitchBtns.pop().remove();
+  let setupSlide = function (slide) {
+    slide.style.display = "flex";
+    let span = document.querySelector(`#${slide.id} span`)
+    let img = document.querySelector(`#${slide.id} img`);
+    setupDeleteButton(slide, "/uapp/deleteHoldingSlide?url={0}", span, onSlideTabClicked);
+    slide.addEventListener("click", function () {
+      unityFetch("/setHoldingSlide?url=" + img.src, {method: "PUT"})
+        .then(response => {
+          if (response.ok) {
+            console.log("Slide set.");
+          }
+        })
+    });
+  }
+  let validateSlide = function (slide, slideInfo) {
+    let img = document.querySelector(`#${slide.id} img`);
+    let label = document.querySelector(`#${slide.id} span`);
+    label.thingToDelete = slideInfo.url;
+    label.innerHTML = slideInfo.name;
+    if (slideInfo.extension === "mp4" || slideInfo.extension === "mov" || slideInfo.extension === "webm") {
+      getVideoThumb(slideInfo.url, 1).then(function (blob) {
+        img.src = URL.createObjectURL(blob);
+      }).catch(function (err) {
+        img.src = slideInfo.url;
+      });
+    } else {
+      img.alt = img.src = slideInfo.url;
     }
   }
-  // Set data of each button.
-  for (let i = 0; i < slides.length; i += 1) {
-    let btn = slideSwitchBtns[i];
-    let img = document.querySelector(`#${btn.id} img`);
-    let label = document.querySelector(`#${btn.id} span`);
-    label.innerHTML = slides[i];
-    img.alt = img.src = `/slides/${slides[i]}`;
-  }
+  ValidateClonesWithJsonArray(slideSwitchBtn, slideBtnContainer, slideSwitchBtns, setupSlide, slides, validateSlide);
 }
 
 /* Music and Video volume Level Helper */
@@ -817,7 +825,7 @@ function validateTracksInLibrary(tracks) {
   let setupBtn = function (clone) {
     clone.classList.remove("d-none");
     let span = document.querySelector(`#${clone.id} span`)
-    setupDeleteButton(clone, "/music_delete", span);
+    setupDeleteButton(clone, "/music_delete/{0}", span, FetchAllUploadedMediaAndUpdateDash);
     let addTrackBtn = document.querySelector(`#${clone.id} .add-track-btn`);
     addTrackBtn.addEventListener("click", function () {
       // Add to playlist
@@ -826,7 +834,7 @@ function validateTracksInLibrary(tracks) {
   }
   let validateBtn = function (btn, music) {
     let label = document.querySelector(`#${btn.id} span`);
-    label.innerHTML = music;
+    label.thingToDelete = label.innerHTML = music;
   }
   ValidateClonesWithJsonArray(trackInLibrary, library, tracksInLibrary, setupBtn, tracks, validateBtn)
 }
@@ -943,11 +951,11 @@ function UpdateOptionGroupWithValues(optionGroup, options) {
 
 function FetchAllUploadedMediaAndUpdateDash() {
   // Fetch custom slides.
-  fetch("/all_custom_slides")
+  unityFetch("/getHoldingSlides")
     .then(value => value.json())
     .then(slides => {
-      UpdateOptionGroupWithValues(customSlideOptionGroup, slides);
-      UpdateSlideBrowsePreviewElement();
+      //UpdateOptionGroupWithValues(customSlideOptionGroup, slides);
+      //UpdateSlideBrowsePreviewElement();
       validateSlideSwitchBtns(slides);
     })
   // Fetch holding music.
@@ -1234,7 +1242,7 @@ function validateVideoSwitchBtns(videos) {
       videoBtnContainer.appendChild(clone);
       videoSwitchBtns.push(clone);
       let span = document.querySelector(`#${clone.id} span`)
-      setupDeleteButton(clone, "/video_delete", span);
+      setupDeleteButton(clone, "/video_delete/{0}", span, FetchAllUploadedMediaAndUpdateDash);
       let button1 = document.querySelector(`#${clone.id} .media-left-btn`);
       let button2 = document.querySelector(`#${clone.id} .media-right-btn`);
       button1.addEventListener("click", function () {
@@ -1258,7 +1266,7 @@ function validateVideoSwitchBtns(videos) {
     let btn = videoSwitchBtns[i];
     let img = document.querySelector(`#${btn.id} img`);
     let label = document.querySelector(`#${btn.id} span`);
-    label.innerHTML = videos[i];
+    label.thingToDelete = label.innerHTML = videos[i];
     getVideoThumb("/videos/" + label.innerHTML, 1).then(function (blob) {
       img.src = URL.createObjectURL(blob);
     }).catch(function (err) {
