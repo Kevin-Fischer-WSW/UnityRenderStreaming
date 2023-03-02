@@ -382,7 +382,7 @@ function appStatusReceived(json) {
         ActivateButtonHelper(pendingBtn, true)
       } else if (jsonParsed.holdingSlide === "technicalDifficulties") {
         ActivateButtonHelper(technicalDiffBtn, true)
-      } else if (jsonParsed.holdingSlide === "none") {
+      } else if (jsonParsed.holdingSlide === "none" || jsonParsed.isCustomSlide) {
         ActivateButtonHelper(liveBtn, true)
       } else if (jsonParsed.holdingSlide === "endOfStream") {
         ActivateButtonHelper(archiveBtn, true)

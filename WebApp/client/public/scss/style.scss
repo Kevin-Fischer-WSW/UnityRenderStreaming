@@ -80,6 +80,9 @@ $body-bg: #616161;
   font-size: 20px;
   cursor: pointer;
   border-right: 2px solid #3D3D3D;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 #pending-btn:hover {
@@ -124,6 +127,13 @@ $body-bg: #616161;
   font-size: 20px;
   cursor: pointer;
   border-left: 1px solid #3D3D3D;
+}
+
+// avoid button text from overflowing.
+#pending-btn, #live-btn, #technical-diff-btn, #archive-btn {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 #archive-btn:hover {
