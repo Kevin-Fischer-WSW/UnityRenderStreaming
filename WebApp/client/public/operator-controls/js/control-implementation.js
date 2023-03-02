@@ -323,10 +323,10 @@ function appStatusReceived(json) {
   ActivateButtonHelper(liveBtn, false)
   ActivateButtonHelper(archiveBtn, false)
 
-  generalStatBar.innerHTML = 
-  `Stream: ${jsonParsed.streaming ? "Yes": "No"} | 
-  Recording: ${jsonParsed.recording ? "Yes": "No"} | 
-  Holding Slide: ${jsonParsed.holdingSlide} | 
+  generalStatBar.innerHTML =
+  `Stream: ${jsonParsed.streaming ? "Yes": "No"} |
+  Recording: ${jsonParsed.recording ? "Yes": "No"} |
+  Holding Slide: ${jsonParsed.holdingSlide} |
   Holding Music: ${jsonParsed.playingHoldingMusic ? "Playing": "Not Playing"}.`
 
   if (jsonParsed.inMeeting || jsonParsed.meetingSimulated) {
@@ -1006,7 +1006,7 @@ function SortFilesByExtension(files){
   let videoFiles = []
   for (let i = 0; i < files.length; i++) {
     let file = files[i]
-    let extension = file.name.split(".").pop()
+    let extension = file.name.split(".").pop().toLowerCase()
     if (extensionToMethod["slide"].includes(extension)) {
       slideFiles.push(file)
     } else if (extensionToMethod["music"].includes(extension)) {
