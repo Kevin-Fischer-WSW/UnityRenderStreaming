@@ -45,7 +45,8 @@ async function setup() {
   const res = await getServerConfig();
   useWebSocket = res.useWebSocket;
   showWarningIfNeeded(res.startupMode);
-  showPlayButton();
+  //showPlayButton();
+  Play();
   showStatsMessage();
 }
 
@@ -57,29 +58,31 @@ function showWarningIfNeeded(startupMode) {
   }
 }
 
-function showPlayButton() {
-  if (!document.getElementById('playButton')) {
-    let elementPlayButton = document.createElement('div');
-    elementPlayButton.id = 'playButtonElement';
-    //elementPlayButton.id = 'playButton';
-    //elementPlayButton.src = 'images/Play.png';
-    elementPlayButton.alt = 'Start Streaming';
-    elementPlayButton.title = "Click to Connect"
-    elementPlayButton.innerHTML = "<img id = playButton src = \"images/Play.png\"><span class=\"carousel-caption\">Click play to connect!</span>";
-    playButton = document.getElementById("video-players").appendChild(elementPlayButton);
-    playButton.addEventListener('click', onClickPlayButton);
-  }
-}
+// function showPlayButton() {
+//   if (!document.getElementById('playButton')) {
+//     let elementPlayButton = document.createElement('div');
+//     elementPlayButton.id = 'playButtonElement';
+//     //elementPlayButton.id = 'playButton';
+//     //elementPlayButton.src = 'images/Play.png';
+//     elementPlayButton.alt = 'Start Streaming';
+//     elementPlayButton.title = "Click to Connect"
+//     elementPlayButton.innerHTML = "<img id = playButton src = \"images/Play.png\"><span class=\"carousel-caption\">Click play to connect!</span>";
+//     playButton = document.getElementById("video-players").appendChild(elementPlayButton);
+//     playButton.addEventListener('click', onClickPlayButton);
+//   }
+// }
 
-function onClickPlayButton() {
-
-  playButton.style.display = 'none';
+//function onClickPlayButton() {
+function Play() {
+  //playButton.style.display = 'none';
 
   // add video player (preview)
   const elementPreviewVideo = document.createElement('video');
   elementPreviewVideo.style.touchAction = 'none';
   elementPreviewVideo.style.display = "flex";
   elementPreviewVideo.id = 'preview-video';
+  elementPreviewVideo.autoplay = true;
+  elementPreviewVideo.muted = true;
   previewDiv.appendChild(elementPreviewVideo);
 
   // add video player (output)
@@ -87,7 +90,12 @@ function onClickPlayButton() {
   elementOutputVideo.style.touchAction = 'none';
   elementOutputVideo.style.display = 'flex';
   elementOutputVideo.id = 'output-video';
+  elementOutputVideo.autoplay = true;
+  elementOutputVideo.muted = true;
   outputDiv.appendChild(elementOutputVideo);
+
+  elementPreviewVideo.load();
+  elementOutputVideo.load();
 
   setupVideoPlayer([elementPreviewVideo, elementOutputVideo]).then(value => {
     myVideoPlayer = value;
@@ -108,7 +116,7 @@ function onClickPlayButton() {
   elementMuteButton.style.position = 'absolute';
   elementMuteButton.style.bottom = '0.5em';
   elementMuteButton.style.left = '1.5em';
-  elementMuteButton.innerHTML = 'Preview Audio <i class="bi bi-volume-up"></i>';
+  elementMuteButton.innerHTML = 'Preview Audio <i class="bi bi-volume-mute"></i>';
   elementMuteButton.addEventListener('click', function () {
     elementPreviewVideo.muted = !elementPreviewVideo.muted;
     if (elementPreviewVideo.muted) {
@@ -159,25 +167,35 @@ async function setupVideoPlayer(previewElement, outputElement) {
   let selectedCodecs = null;
 
   await videoPlayer.setupConnection(useWebSocket, selectedCodecs);
+  videoPlayer.onconnect = onConnect;
   videoPlayer.ondisconnect = onDisconnect;
 
   return videoPlayer;
 }
 
+async function onConnect() {
+  document.getElementById("general-status-bar").innerHTML = "Connection State: Connected"
+}
+
 async function onDisconnect(message) {
+
   if (message) {
     logDiv.innerHTML += `${message}<br>`;
   }
 
   // Clear generated elements.
-  playerDiv.removeChild(document.getElementById('playButtonElement'));
+  //playerDiv.removeChild(document.getElementById('playButtonElement'));
   playerDiv.removeChild(document.getElementById('mute-preview-btn'));
   outputDiv.removeChild(document.getElementById('output-video'));
   previewDiv.removeChild(document.getElementById('preview-video'));
   await myVideoPlayer.stop();
   myVideoPlayer = null;
 
-  showPlayButton();
+  //showPlayButton();
+  document.getElementById("meeting-number-input-field").disabled = false;
+  document.getElementById("join-meeting-btn").disabled = false;
+  document.getElementById("general-status-bar").innerHTML = "Connection State: Disconnected"
+  Play();
 }
 
 /** @type {RTCStatsReport} */

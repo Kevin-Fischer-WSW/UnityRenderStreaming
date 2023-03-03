@@ -40,6 +40,7 @@ export class VideoPlayer {
     this.videosAdded = false;
 
     this.ondisconnect = function () { };
+    this.onconnect = function () { };
   }
 
   async setupConnection(useWebSocket) {
@@ -106,6 +107,7 @@ export class VideoPlayer {
         _this.ondisconnect();
       }
     });
+
     this.signaling.addEventListener('offer', async (e) => {
       const offer = e.detail;
       const desc = new RTCSessionDescription({ sdp: offer.sdp, type: "offer" });
@@ -134,6 +136,7 @@ export class VideoPlayer {
     // Create data channel with proxy server and set up handlers
     this.channel = this.pc.createDataChannel(this.connectionId, 'data');
     this.channel.onopen = function () {
+      _this.onconnect();
       Logger.log('Datachannel connected.');
     };
     this.channel.onerror = function (e) {
