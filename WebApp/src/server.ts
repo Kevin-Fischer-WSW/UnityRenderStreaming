@@ -66,7 +66,7 @@ export const createServer = (config: Options): express.Application => {
       headers: req.headers,
     };
     const request = http.request(options, (response) => {
-      res.writeHead(response.statusCode, response.headers);
+      res.writeHead(response.statusCode, response.statusMessage, response.headers);
       response.pipe(res);
     });
     request.on('error', (error) => {
