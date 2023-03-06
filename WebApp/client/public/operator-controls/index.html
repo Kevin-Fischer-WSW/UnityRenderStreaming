@@ -354,6 +354,27 @@
             <li value="0"><a class="dropdown-item">Staggered</a></li>
             <li value="1"><a class="dropdown-item">Classic Zoom</a></li>
           </ul>
+          <!-- Screen share crop button -->
+          <button id="crop-screen-share-btn" class="btn btn-secondary" type="button" data-bs-toggle="modal" data-bs-target="#screen-share-crop-modal">Crop Screen Share</button>
+          <!-- Screen share crop modal -->
+          <div class="modal fade" id="screen-share-crop-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h1 class="modal-title fs-5" id="exampleModalLabel">Crop screen share</h1>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <img src="uapp/getScreenShareImage?t=0" alt="This is supposed to be a preview of the screen share texture" style="width: 100%">
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                  <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Apply</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <legend class="title text-white mt-2">Style Editing</legend>
           <select id="edit-style-select" class="form-select" aria-label="Slide select">
             <optgroup label="Lower Thirds">
