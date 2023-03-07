@@ -85,6 +85,7 @@ let currentlyDraggedPov
 function setupParticipantOnVidCtrl(node, idx) {
   let dragEl = document.querySelector(`div#${node.id} .participant-on-vid-drag`);
   let eyeEl = document.querySelector(`div#${node.id} .participant-on-vid-eye`);
+  let earEl = document.querySelector(`div#${node.id} .participant-on-vid-ear`);
   let muteEl = document.querySelector(`div#${node.id} .participant-on-vid-mute`);
   let renameEl = document.querySelector(`div#${node.id} a[target="action-rename"]`);
   let showLtEl = document.querySelector(`div#${node.id} a[target="action-show-lt"]`);
@@ -113,6 +114,16 @@ function setupParticipantOnVidCtrl(node, idx) {
     }
   }
 
+  earEl.addEventListener("click", function () {
+    let p = participantJsonParsed[idx];
+    unityFetch(`/toggleParticipantAudibility?participantId=${p.id}&enable=${!p.audible}`, {method: "PUT"})
+      .then(resp => {
+        if (resp.ok) {
+          console.log("audibility toggled")
+        }
+      })
+  })
+
   eyeEl.addEventListener("click", function () {
     let p = participantJsonParsed[idx];
     let str = p.id + "," + !p.visible;
@@ -121,8 +132,12 @@ function setupParticipantOnVidCtrl(node, idx) {
 
   muteEl.addEventListener("click", function () {
     let p = participantJsonParsed[idx];
-    let str = p.id + "," + !p.muted;
-    sendStringSubmitEvent(myVideoPlayer, OperatorControls._MuteParticipantButton, str);
+    if (p.muted){
+      let str = p.id + ",false";
+      sendStringSubmitEvent(myVideoPlayer, OperatorControls._MuteParticipantButton, str);
+    } else {
+      console.log("Only can mute from zoom");
+    }
   })
 
   renameEl.addEventListener("click", function() {

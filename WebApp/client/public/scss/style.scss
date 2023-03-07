@@ -698,7 +698,8 @@ button, input, optgroup, select, textarea {
   position: absolute;
   opacity: 1%;
   background-color: $blue;
-  height: 100%;
+  top: 25%;
+  height: 50%;
   width: 85%;
 }
 
@@ -723,8 +724,8 @@ button, input, optgroup, select, textarea {
 
 .participant-on-vid-mute {
   position: absolute;
-  right: 0;
-  top: 25%;
+  left: 15%;
+  top: 0;
   width: 15%;
   height: 25%;
   opacity: 1%;
@@ -735,17 +736,17 @@ button, input, optgroup, select, textarea {
   opacity: 50%;
 }
 
-.participant-on-vid-cam {
+.participant-on-vid-ear {
   position: absolute;
-  right: 0;
-  top: 50%;
+  right: 15%;
+  top: 75%;
   width: 15%;
   height: 25%;
   opacity: 1%;
   background-color: $blue;
 }
 
-.participant-on-vid-cam:hover {
+.participant-on-vid-ear:hover {
   opacity: 50%;
 }
 
