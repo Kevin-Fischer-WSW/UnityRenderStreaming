@@ -34,6 +34,7 @@ signOutModal.addEventListener('shown.bs.modal', function () {
 
 /* EXTEND */
 document.body.addEventListener("click", function() {
+
   setTimeout(function(){
     extend();
   }, 700)});
@@ -323,6 +324,8 @@ function appStatusReceived(json) {
   ActivateButtonHelper(liveBtn, false)
   ActivateButtonHelper(archiveBtn, false)
 
+  addParticipantSelectCheckEventListener(); // adds event listeners to each select checkbox
+
   generalStatBar.innerHTML =
   `Stream: ${jsonParsed.streaming ? "Yes": "No"} |
   Recording: ${jsonParsed.recording ? "Yes": "No"} |
@@ -479,6 +482,83 @@ let disableAutoShowOnJoin = document.getElementById("disable-autoshow-btn");
 enableAutoShowOnJoin.addEventListener("click", onEnableAutoShowOnJoin);
 disableAutoShowOnJoin.addEventListener("click", onDisableAutoShowOnJoin);
 
+let selectAllParticipantBtn = document.getElementById("check-uncheck-all-ppt-btn");
+let showSelectParticipantBtn = document.getElementById("show-select-ppt-btn");
+let hideSelectParticipantBtn = document.getElementById("hide-select-ppt-btn"); 
+
+function addParticipantSelectCheckEventListener() {
+  let cbs = document.getElementsByName('checked-participant');
+  for (let i = 0; i < cbs.length; i++) {
+    cbs[i].addEventListener('change', updateSelectParticipantBtnText);
+  }
+}
+
+function mapSelectParticiapntsToInputGroups() {
+  let arr = participantInputGroups.map(group => {
+    return group.querySelector(".check");
+  });
+  return arr;
+}
+
+function updateSelectParticipantBtnText() {
+  let counter = 0;
+  let selectedParticipants = mapSelectParticiapntsToInputGroups();
+
+  for (let i = 0; i <  selectedParticipants.length; i++) {
+    if (selectedParticipants[i].checked) {
+      counter++;
+    }
+  }
+
+  if (counter === selectedParticipants.length) {
+    selectAllParticipantBtn.innerHTML = "Unselect All";
+  } else {
+    selectAllParticipantBtn.innerHTML = "Select All";
+  }
+}
+
+selectAllParticipantBtn.addEventListener("click", () => {
+  
+  if (selectAllParticipantBtn.innerHTML === "Select All") {
+    selectAllParticipantBtn.innerHTML = "Unselect All";
+    let selectedParticipants = mapSelectParticiapntsToInputGroups();
+    
+    for (let i = 0; i <  selectedParticipants.length; i++) {
+      selectedParticipants[i].checked = true;
+    }
+  } else if (selectAllParticipantBtn.innerHTML === "Unselect All") {
+    selectAllParticipantBtn.innerHTML = "Select All";
+    let selectedParticipants = mapSelectParticiapntsToInputGroups();
+    for (let i = 0; i <  selectedParticipants.length; i++) {
+      selectedParticipants[i].checked = false;
+    }
+  }
+});
+
+showSelectParticipantBtn.addEventListener("click", () => {
+  let selectedParticipants = participantInputGroups.map(group => {
+    return group.querySelector(".check");
+  });
+  for (let i = 0; i <  selectedParticipants.length; i++) {
+    if (selectedParticipants[i].checked) {
+      let p = participantJsonParsed[i]
+      let str = p.id + ",true" 
+      sendStringSubmitEvent(myVideoPlayer, OperatorControls._ToggleParticipantVisibilityButton, str)
+    }
+  }
+})
+
+hideSelectParticipantBtn.addEventListener("click", () => {
+  let selectedParticipants = mapSelectParticiapntsToInputGroups();
+  for (let i = 0; i <  selectedParticipants.length; i++) {
+    if (selectedParticipants[i].checked) {
+      let p = participantJsonParsed[i]
+      let str = p.id + ",false"
+      sendStringSubmitEvent(myVideoPlayer, OperatorControls._ToggleParticipantVisibilityButton, str)
+    }
+  }
+})
+
 function onEnableAutoShowOnJoin() {
   unityFetch("/enableOutputVideoByDefault?enable=true", {method: "PUT"});
 }
@@ -519,6 +599,16 @@ function validateParticipantInputGroups() {
 
 let currentlyDraggedP
 
+function ClearSelectParticipantsOnDrag() {
+  selectAllParticipantBtn.innerHTML = selectAllParticipantBtn.innerHTML == "Select All" ? "Unselect All" : "Select All";
+  let selectedParticipants = participantInputGroups.map(group => {
+    return group.querySelector(".check");
+  });
+  for (let i = 0; i <  selectedParticipants.length; i++) {
+    selectedParticipants[i].checked = false;
+  }
+}
+
 function setupParticipantInputGroup(node, idx) {
   let nameInput = document.querySelector("div#" + node.id + " .name-input")
   let visibilityBtn = document.querySelector("div#" + node.id + " .visibility-btn")
@@ -528,6 +618,7 @@ function setupParticipantInputGroup(node, idx) {
 
   node.ondragstart = (ev) => {
     currentlyDraggedP = node;
+    ClearSelectParticipantsOnDrag();
   }
 
   node.ondragover = (ev) => {
@@ -536,7 +627,7 @@ function setupParticipantInputGroup(node, idx) {
 
   node.ondrop = (ev) => {
     ev.preventDefault();
-    if (node !== currentlyDraggedP) {
+    if (node !== currentlyDraggedP) { 
       let droppedIdx = 0, currentIdx = 0;
       for (let i = 0; i < participantInputGroups.length; i++) {
         if (currentlyDraggedP === participantInputGroups[i]) {

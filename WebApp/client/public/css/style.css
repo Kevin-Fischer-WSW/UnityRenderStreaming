@@ -65,7 +65,10 @@
   width: 150px;
   font-size: 20px;
   cursor: pointer;
-  border-right: 2px solid #3D3D3D; }
+  border-right: 2px solid #3D3D3D;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap; }
 
 #pending-btn:hover {
   background-color: #c5b559; }
@@ -105,6 +108,11 @@
   cursor: pointer;
   border-left: 1px solid #3D3D3D; }
 
+#pending-btn, #live-btn, #technical-diff-btn, #archive-btn {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap; }
+
 #archive-btn:hover {
   background-color: #db3333; }
 
@@ -141,6 +149,18 @@
 
 video {
   width: 100%; }
+
+.check-box-centered {
+  padding-left: 6px;
+  padding-right: 6px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  min-height: 42px;
+  min-width: 42px;
+  display: inline-grid;
+  background-color: #4c4c4c;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px; }
 
 .video-container {
   aspect-ratio: 16 / 9;

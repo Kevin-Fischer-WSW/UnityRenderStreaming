@@ -301,12 +301,22 @@
             <button id="hide-all-lower-thirds-btn" type="button" class="btn btn-secondary">Hide all lower
               thirds</button>
           </div>
-          <div class="btn-group w-50 mt-2 mb-2" role="group" aria-label="Show/Hide all participants.">
+          <div class="btn-group w-50 mt-2" role="group" aria-label="Enable/Disable Autoshow all participants.">
             <button id="enable-autoshow-btn" type="button" class="btn btn-secondary">Enable Auto Show</button>
             <button id="disable-autoshow-btn" type="button" class="btn btn-secondary">Disable Auto Show</button>
           </div>
+          <div class="btn-group w-50 mt-2 mb-2" role="group" aria-label="Show/Hide select participants.">
+            <button id="check-uncheck-all-ppt-btn" type="button" class="btn btn-secondary">Select All</button>
+            <button id="show-select-ppt-btn" type="button" class="btn btn-secondary">Show Participants</button>
+            <button id="hide-select-ppt-btn" type="button" class="btn btn-secondary">Hide Participants</button>
+          </div>
           <!-- Single participant control element. Will be cloned for each participant -->
           <div id="participant-input-group" class="input-group">
+
+            <div class="check-box-centered">
+              <input id="checked-participant" class="check" type="checkbox" name="checked-participant"> </input>
+            </div>
+
             <span class="input-group-text" draggable="true"><i class="bi bi-grip-vertical"></i></span>
             <input type="text" class="form-control name-input" placeholder="Participant's name"
               aria-label="Participant's name">
