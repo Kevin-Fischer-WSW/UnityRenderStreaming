@@ -89,7 +89,6 @@ function setupParticipantOnVidCtrl(node, idx) {
   let muteEl = document.querySelector(`div#${node.id} .participant-on-vid-mute`);
   let renameEl = document.querySelector(`div#${node.id} a[target="action-rename"]`);
   let showLtEl = document.querySelector(`div#${node.id} a[target="action-show-lt"]`);
-  let showLtExclusiveEl = document.querySelector(`div#${node.id} a[target="action-show-lt-exclusive"]`);
   // let camEl = document.querySelector(`div#${node.id} .participant-on-vid-cam`);
 
   node.classList.remove("d-none");
@@ -151,13 +150,6 @@ function setupParticipantOnVidCtrl(node, idx) {
     let p = participantJsonParsed[idx];
     let str = p.id.toString();
     sendStringSubmitEvent(myVideoPlayer, OperatorControls._ToggleParticipantLowerThird, str);
-  })
-
-  showLtExclusiveEl.addEventListener("click", function(ev) {
-    ev.preventDefault();
-    let p = participantJsonParsed[idx];
-    let str = `${p.id}`;
-    sendStringSubmitEvent(myVideoPlayer, OperatorControls._JustShowSpecificParticipantLowerThird, str);
   })
 }
 
@@ -629,7 +621,6 @@ function setupParticipantInputGroup(node, idx) {
   let visibilityBtn = document.querySelector("div#" + node.id + " .visibility-btn")
   let muteBtn = document.querySelector("div#" + node.id + " .mute-btn")
   let lowerThirdBtn = document.querySelector("div#" + node.id + " .show-lower-third-btn")
-  let exclusiveLowerThirdBtn = document.querySelector("div#" + node.id + " .show-lower-third-exclusive-btn")
 
   node.ondragstart = (ev) => {
     currentlyDraggedP = node;
@@ -676,12 +667,6 @@ function setupParticipantInputGroup(node, idx) {
     let p = participantJsonParsed[idx];
     let str = p.id.toString();
     sendStringSubmitEvent(myVideoPlayer, OperatorControls._ToggleParticipantLowerThird, str);
-  })
-
-  exclusiveLowerThirdBtn.addEventListener("click", function () {
-    let p = participantJsonParsed[idx]
-    let str = p.id.toString();
-    sendStringSubmitEvent(myVideoPlayer, OperatorControls._JustShowSpecificParticipantLowerThird, str)
   })
 
   nameInput.addEventListener("change", function () {
