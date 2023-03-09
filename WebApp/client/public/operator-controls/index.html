@@ -261,10 +261,6 @@
         <button class="nav-link" id="nav-video-tab" data-bs-toggle="tab" data-bs-target="#nav-video" type="button"
           role="tab" aria-controls="nav-video" aria-selected="false">Video
         </button>
-        <button class="nav-link" id="nav-chat-tab" data-bs-toggle="tab" data-bs-target="#nav-chat" type="button"
-          role="tab" aria-controls="nav-chat" aria-selected="false">Chat
-        </button>
-
         <button class="nav-link" id="nav-log-tab" data-bs-toggle="tab" data-bs-target="#nav-log" type="button"
           role="tab" aria-controls="nav-log" aria-selected="false">Log
         </button>
@@ -503,53 +499,6 @@
             </div>
           </div>
         </fieldset>
-      </div>
-
-      <!-- Chat box -->
-      <div class="tab-pane fade" id="nav-chat" role="tabpanel" aria-labelledby="nav-chat-tab">
-
-        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" />
-
-        <div class="container-fluid p-3">
-          <div class="row clearfix">
-            <div class="col-lg-12">
-              <div class="card chat-app">
-                <div class="chat">
-                  <div class="chat-history" id="cHistory">
-                    <ul class="m-b-0">
-                      <li id="chat-clone-source" class="clearfix d-none">
-                        <div class="message-data text-right">
-                          <span class="message-data-time"> <!--Time goes here --> </span>
-                        </div>
-                        <div class="message other-message float-right"> <!-- The message contents go here --> </div>
-                      </li>
-                    </ul>
-                  </div>
-                  <div class="chat-message clearfix">
-                    <div class="input-group mb-0 w-100 flex-nowrap">
-                      <button id="send-message-btn" class="btn btn-secondary"><i class="fa fa-send"></i></button>
-                      <input id="send-message-input" type="text" class="form-control flex-grow-1" placeholder="Enter text here...">
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- Help Section -->
-        <p>
-          <button class="btn btn-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseWidthExample" aria-expanded="false" aria-controls="collapseWidthExample">
-            Help
-          </button>
-        </p>
-        <div style="min-height: 120px;">
-          <div class="collapse collapse-horizontal" id="collapseWidthExample">
-            <!-- Note: Width has to be set as px on child element -->
-            <div class="card card-body bg-secondary text-white shadow-none" style="width: 500px;">
-              /rename [new name] - Set how your name appears in chat.<br>
-            </div>
-          </div>
-        </div>
       </div>
 
       <!-- Log controls -->
