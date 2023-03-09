@@ -380,5 +380,43 @@ export const createServer = (config: Options): express.Application => {
     }
   });
 
+  app.get("/logs", (req, res) => {
+    if (!req.session.authorized) {
+      return res.status(401).redirect('/');
+    }
+    // Return files ending in .log residing in the logs directory.
+    const logDir: string = config.eagleEyeLogDir;
+    if (ValidatePathExists(res, logDir) === false) return;
+    const files = fs.readdirSync(logDir)
+    let data = [];
+    files.forEach(file => {
+      if (file.endsWith('.log')) {
+        data.push(file);
+      }
+    })
+    res.status(200).json(data);
+  });
+
+  app.get("/download_log/:log", (req, res) => {
+    if (!req.session.authorized) {
+      return res.status(401).redirect('/');
+    }
+    let logPath = path.join(config.eagleEyeLogDir, req.params.log);
+    if (ValidatePathExists(res, logPath) === false){
+      res.status(500).json({ message: `File ${logPath} does not exist on server` })
+      return;
+    }
+    res.attachment(req.params.log);
+    res.download(
+      logPath,
+      req.params.log, // Remember to include file extension
+      (err) => {
+        if (err) {
+          console.log(err);
+          res.status(500).end();
+        }
+      });
+  });
+
   return app;
 };
