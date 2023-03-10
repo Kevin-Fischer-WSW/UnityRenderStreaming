@@ -151,12 +151,6 @@ export class VideoPlayer {
       let msgType = data[0];
       let msgContents = data.substring(1)
       switch(msgType){
-        case MessageTypes._Error:
-          Logger.error(msgContents);
-          if (_this.onErrorReceived) {
-            _this.onErrorReceived.call(_this, msgContents)
-          }
-          break;
         case MessageTypes._ParticipantData:
           if (_this.onParticipantDataReceived) {
             _this.onParticipantDataReceived.call(_this, msgContents);
@@ -167,11 +161,6 @@ export class VideoPlayer {
             _this.onAppStatusReceived.call(_this, msgContents);
           }
           break;
-        case MessageTypes._ChatHistory:
-          if (_this.onChatHistoryReceived) {
-            _this.onChatHistoryReceived.call(_this, msgContents);
-          }
-          break;
         case MessageTypes._StyleSchema:
           if (_this.onStyleSchemaReceived){
             _this.onStyleSchemaReceived.call(_this, msgContents);
@@ -180,6 +169,11 @@ export class VideoPlayer {
         case MessageTypes._StyleValues:
           if (_this.onStyleValuesReceived){
             _this.onStyleValuesReceived.call(_this, msgContents);
+          }
+          break;
+        case MessageTypes._LogMessageNotification:
+          if (_this.onLogMessageNotification){
+            _this.onLogMessageNotification.call(_this, msgContents);
           }
       }
     };

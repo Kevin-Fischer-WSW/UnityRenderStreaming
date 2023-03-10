@@ -17,7 +17,6 @@ let playButton;
 const playerDiv = document.getElementById("video-players");
 const outputDiv = document.getElementById("output-video-container");
 const previewDiv = document.getElementById("preview-video-container");
-const logDiv = document.getElementById("log-div");
 
 class MainNotifications extends EventTarget {
   notifyVideoSetup() {
@@ -101,9 +100,6 @@ function Play() {
     myVideoPlayer = value;
     // Notify the control implementation that the video player is ready.
     mainNotifications.notifyVideoSetup();
-    myVideoPlayer.onErrorReceived = function (errMsg) {
-      logDiv.innerHTML += `${errMsg}<br>`
-    }
   });
 
   // add mute button (mutes audio from the preview video)
@@ -178,11 +174,6 @@ async function onConnect() {
 }
 
 async function onDisconnect(message) {
-
-  if (message) {
-    logDiv.innerHTML += `${message}<br>`;
-  }
-
   // Clear generated elements.
   //playerDiv.removeChild(document.getElementById('playButtonElement'));
   playerDiv.removeChild(document.getElementById('mute-preview-btn'));

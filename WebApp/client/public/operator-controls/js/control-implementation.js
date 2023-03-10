@@ -14,17 +14,28 @@ import { createUploadProgressTracker } from "../../js/progresstracker.js";
 mainNotifications.addEventListener('setup', function () {
   myVideoPlayer.onParticipantDataReceived = participantDataReceived;
   myVideoPlayer.onAppStatusReceived = appStatusReceived;
-  myVideoPlayer.onChatHistoryReceived = validateChatHistory;
   myVideoPlayer.onStyleSchemaReceived = onReceiveStyleSchema;
   myVideoPlayer.onStyleValuesReceived = onReceiveStyleValues;
-  setTimeout(() => {
-    sendClickEvent(myVideoPlayer, OperatorControls._GetParticipantData);
-    sendClickEvent(myVideoPlayer, OperatorControls._GetAppStatus);
-  }, 1000);
-  setTimeout(() => {
-    sendClickEvent(myVideoPlayer, OperatorControls._GetChatHistory);
-  }, 1000);
+  myVideoPlayer.onLogMessageNotification = onLogMessageNotification;
 });
+
+function onLogMessageNotification () {
+  if (navLogTabBtn.classList.contains("active")){
+    fetchLogs();
+  }
+}
+
+function fetchLogs(){
+  unityFetch("/getLog")
+    .then(resp => resp.text())
+    .then((data) => {
+      let log = document.getElementById("log-div");
+      data = data.replaceAll("\n", "<br>")
+      data = data.replaceAll("\r", "<br>")
+      data = data.replaceAll("\t", "&nbsp;&nbsp;&nbsp;&nbsp;")
+      log.innerHTML = data;
+    });
+}
 
 /* SIGN OUT MODAL ELEMENTS */
 let signOutModal = document.getElementById("signout-modal")
@@ -491,7 +502,7 @@ disableAutoShowOnJoin.addEventListener("click", onDisableAutoShowOnJoin);
 
 let selectAllParticipantBtn = document.getElementById("check-uncheck-all-ppt-btn");
 let showSelectParticipantBtn = document.getElementById("show-select-ppt-btn");
-let hideSelectParticipantBtn = document.getElementById("hide-select-ppt-btn"); 
+let hideSelectParticipantBtn = document.getElementById("hide-select-ppt-btn");
 
 function addParticipantSelectCheckEventListener() {
   let cbs = document.getElementsByName('checked-participant');
@@ -525,11 +536,11 @@ function updateSelectParticipantBtnText() {
 }
 
 selectAllParticipantBtn.addEventListener("click", () => {
-  
+
   if (selectAllParticipantBtn.innerHTML === "Select All") {
     selectAllParticipantBtn.innerHTML = "Unselect All";
     let selectedParticipants = mapSelectParticiapntsToInputGroups();
-    
+
     for (let i = 0; i <  selectedParticipants.length; i++) {
       selectedParticipants[i].checked = true;
     }
@@ -549,7 +560,7 @@ showSelectParticipantBtn.addEventListener("click", () => {
   for (let i = 0; i <  selectedParticipants.length; i++) {
     if (selectedParticipants[i].checked) {
       let p = participantJsonParsed[i]
-      let str = p.id + ",true" 
+      let str = p.id + ",true"
       sendStringSubmitEvent(myVideoPlayer, OperatorControls._ToggleParticipantVisibilityButton, str)
     }
   }
@@ -633,7 +644,7 @@ function setupParticipantInputGroup(node, idx) {
 
   node.ondrop = (ev) => {
     ev.preventDefault();
-    if (node !== currentlyDraggedP) { 
+    if (node !== currentlyDraggedP) {
       let droppedIdx = 0, currentIdx = 0;
       for (let i = 0; i < participantInputGroups.length; i++) {
         if (currentlyDraggedP === participantInputGroups[i]) {
@@ -1426,7 +1437,7 @@ function downloadLog() {
       logDownloadBtn.disabled = false; // re-enable download button
     }, 1000)
   }
-  
+
 }
 
 async function listAvailableLogs() {
@@ -1587,7 +1598,7 @@ let navVideoTabBtn = document.getElementById("nav-video-tab");
 navVideoTabBtn.addEventListener("click", ()=>{navVideoTabBtn.scrollIntoView();});
 
 let navLogTabBtn = document.getElementById("nav-log-tab");
-navLogTabBtn.addEventListener("click", ()=>{navLogTabBtn.scrollIntoView();});
+navLogTabBtn.addEventListener("click", ()=>{navLogTabBtn.scrollIntoView(); fetchLogs();});
 
 let navUploadTabBtn = document.getElementById("nav-upload-tab");
 navUploadTabBtn.addEventListener("click", ()=>{navUploadTabBtn.scrollIntoView();});
