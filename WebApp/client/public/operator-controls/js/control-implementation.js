@@ -1373,6 +1373,84 @@ function validateVideoSwitchBtns(videos) {
   }
 }
 
+/* LOGS DOWNLOAD */
+
+let logDownloadBtn = document.getElementById("log-download-btn");
+let listLogFileOptions = document.getElementById("list-all-log-files");
+let errorAlertLogFile = document.getElementById("error-alert-log-file");
+
+logDownloadBtn.addEventListener("click", onLogDownloadClicked)
+listLogFileOptions.addEventListener("click", listAvailableLogs);
+
+function onLogDownloadClicked() {
+  if (listLogFileOptions.value === "none") {
+    alertDisplay(errorAlertLogFile);
+  } else {
+    downloadLog();
+  }
+}
+
+function downloadLog() {
+  let fname = listLogFileOptions.value;
+  let client = new XMLHttpRequest()
+  client.open("GET", "/download_log/" + fname)
+  client.responseType = "blob";
+  client.send()
+
+  // starts the download.
+  client.onload = function (e) {
+    if (this.readyState == 4 && this.status == 200) {
+      let blob = new Blob([this.response], { type: 'document' })
+      const href = URL.createObjectURL(blob);
+      const a = Object.assign(document.createElement("a"), {
+        client: client,
+        href: href,
+        style: "display:none",
+        download: fname,
+      });
+      document.body.appendChild(a);
+      a.click();
+      URL.revokeObjectURL(href);
+      a.remove();
+    }
+  }
+
+  // track progress during the download.
+  client.onprogress = function (e) { logDownloadBtn.disabled = true; }
+
+  // when download is complete.
+  client.onloadend = function (e) {
+    logDownloadBtn.innerHTML = "Downloaded!"
+    setTimeout(() => {
+      logDownloadBtn.innerHTML = "Download Log"
+      logDownloadBtn.disabled = false; // re-enable download button
+    }, 1000)
+  }
+  
+}
+
+async function listAvailableLogs() {
+  let resp = await fetch("/logs");
+  let files = await resp.json();
+
+  if (listLogFileOptions.childElementCount > files.length + 1) {
+    while (listLogFileOptions.childElementCount > files.length + 1) {
+      listLogFileOptions.removeChild(listFileOptions.lastChild);
+    }
+  } else {
+    while (listLogFileOptions.childElementCount < files.length + 1) {
+      let option = document.createElement("option");
+      listLogFileOptions.appendChild(option);
+    }
+  }
+
+  for (let i = files.length - 1; i >= 0; i--) {
+    let option = listLogFileOptions.children[i + 1];
+    option.value = files[i];
+    option.innerText = files[i];
+  }
+}
+
 /* RECORDING CONTROLS */
 let listFileOptions = document.getElementById("list-all-files")
 listFileOptions.addEventListener("click", listAvailableRecordings);
@@ -1507,9 +1585,6 @@ navMusicTabBtn.addEventListener("click", ()=>{navSlideTabBtn.scrollIntoView();})
 
 let navVideoTabBtn = document.getElementById("nav-video-tab");
 navVideoTabBtn.addEventListener("click", ()=>{navVideoTabBtn.scrollIntoView();});
-
-let navChatTabBtn = document.getElementById("nav-chat-tab");
-navChatTabBtn.addEventListener("click", ()=>{navChatTabBtn.scrollIntoView();});
 
 let navLogTabBtn = document.getElementById("nav-log-tab");
 navLogTabBtn.addEventListener("click", ()=>{navLogTabBtn.scrollIntoView();});

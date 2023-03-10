@@ -505,8 +505,21 @@
       <div class="tab-pane fade" id="nav-log" role="tabpanel" aria-labelledby="nav-log-tab">
         <fieldset>
           <legend class="title text-white mt-2">Log</legend>
+          <div id="error-alert-log-file" class="alert alert-danger d-none" role="alert">
+            <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Warning:">
+              <use xlink:href="#exclamation-triangle-fill" />
+            </svg>
+            <strong>Please select a file from the options below.</strong>
+          </div>
           <div id="message-div" class="lead"></div>
           <div id="log-div" class="overflow-auto p-3 bg-light overflow-div rounded"></div>
+          
+          <div class="input-group mt-2 w-50">
+            <select id="list-all-log-files" class="form-control form-select" required>
+              <option selected value="none">None Selected</option>
+            </select>
+            <button id="log-download-btn" class="btn btn-secondary" type="button">Download Log</button>
+          </div>
         </fieldset>
       </div>
       <!-- Upload controls -->
