@@ -1156,11 +1156,11 @@ function batchFileInputChanged(){
   for (let musicFile of musicFiles) {
     pushFormInput(musicFile.name, musicFile, "music")
   }
-  uploadDescriptor.innerHTML  += `${musicFiles.length} music files, <br>`
+  uploadDescriptor.innerHTML  += `${musicFiles.length} music file(s),`
   for (let videoFile of videoFiles) {
     pushFormInput(videoFile.name, videoFile, "video")
   }
-  uploadDescriptor.innerHTML  += `and ${videoFiles.length} video files. <br>`
+  uploadDescriptor.innerHTML  += ` and ${videoFiles.length} video file(s).`
   // Show edit button.
   editSlideBtn.style.display = "block";
 }
@@ -1191,7 +1191,7 @@ function CategorizeSlideFilesByKeywordForUpload(files) {
       customSlideCount++;
     }
   }
-  uploadDescriptor.innerHTML += `You will be uploading ${customSlideCount} custom slides.<br>`
+  uploadDescriptor.innerHTML += `You will be uploading ${customSlideCount} custom slide(s), `
 }
 
 function CategorizeSlideFilesBySlideTypeSelects(files) {
@@ -1214,7 +1214,7 @@ function CategorizeSlideFilesBySlideTypeSelects(files) {
       customSlideCount++;
     }
   }
-  uploadDescriptor.innerHTML += `You will be uploading ${customSlideCount} custom slides.<br>`
+  uploadDescriptor.innerHTML += `You will be uploading ${customSlideCount} custom slide(s), `
 }
 
 /* EDIT SLIDE ASSIGNMENT MODAL */
@@ -1274,11 +1274,11 @@ function editSlideSaveBtnClicked() {
   for (let musicFile of musicFiles) {
     pushFormInput(musicFile.name, musicFile, "music")
   }
-  uploadDescriptor.innerHTML += `${musicFiles.length} music files, `
+  uploadDescriptor.innerHTML += `${musicFiles.length} music file(s), `
   for (let videoFile of videoFiles) {
     pushFormInput(videoFile.name, videoFile, "video")
   }
-  uploadDescriptor.innerHTML += `and ${videoFiles.length} video files.`
+  uploadDescriptor.innerHTML += ` and ${videoFiles.length} video file(s).`
 }
 
 function uploadCustomSlideClicked() {
