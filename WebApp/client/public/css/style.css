@@ -8943,7 +8943,8 @@ button, input, optgroup, select, textarea {
   width: 85%; }
 
 .participant-on-vid-drag:hover {
-  opacity: 50%; }
+  opacity: 50%;
+  cursor: move; }
 
 .participant-on-vid-options {
   position: absolute;
@@ -8956,7 +8957,8 @@ button, input, optgroup, select, textarea {
   border: none; }
 
 .participant-on-vid-options:hover {
-  opacity: 50%; }
+  opacity: 50%;
+  cursor: pointer; }
 
 .participant-on-vid-mute {
   position: absolute;
@@ -8968,7 +8970,8 @@ button, input, optgroup, select, textarea {
   background-color: #0d6efd; }
 
 .participant-on-vid-mute:hover {
-  opacity: 50%; }
+  opacity: 50%;
+  cursor: pointer; }
 
 .participant-on-vid-ear {
   position: absolute;
@@ -8980,7 +8983,8 @@ button, input, optgroup, select, textarea {
   background-color: #0d6efd; }
 
 .participant-on-vid-ear:hover {
-  opacity: 50%; }
+  opacity: 50%;
+  cursor: pointer; }
 
 .participant-on-vid-eye {
   position: absolute;
@@ -8992,7 +8996,8 @@ button, input, optgroup, select, textarea {
   background-color: #0d6efd; }
 
 .participant-on-vid-eye:hover {
-  opacity: 50%; }
+  opacity: 50%;
+  cursor: pointer; }
 
 .card {
   background: #fff;
