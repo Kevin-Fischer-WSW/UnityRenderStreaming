@@ -6,6 +6,24 @@
   width: 50%;
   max-width: 100%; }
 
+#intro-preview, #techdiff-preview, #conc-preview, #slide-clear-btn {
+  height: 150px;
+  max-width: 25%;
+  border: 2px solid #3D3D3D; }
+
+#intro-preview, #techdiff-preview, #conc-preview {
+  background-size: cover;
+  padding: 0;
+  cursor: default;
+  display: inline-flex;
+  align-items: flex-end; }
+
+#slide-clear-btn, #video-clear-btn {
+  background-color: #7FDB6A; }
+
+#slide-btn-container {
+  border: 3px solid #3D3D3D; }
+
 #video-progress {
   height: 20px;
   display: flex;
@@ -8863,10 +8881,6 @@ button, input, optgroup, select, textarea {
   width: 100%;
   max-width: 100%; }
 
-#slide-clear-btn, #video-clear-btn {
-  background-color: #7FDB6A;
-  border: none; }
-
 .media-switch-thumb {
   aspect-ratio: 16/9;
   background-size: cover;
@@ -8890,6 +8904,11 @@ button, input, optgroup, select, textarea {
   position: absolute;
   top: 0;
   right: 0; }
+
+.media-three-dots-btn {
+  position: absolute;
+  top: 0;
+  right: 11%; }
 
 .media-btn-element {
   max-width: 30%;
