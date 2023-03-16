@@ -14,17 +14,28 @@ import { createUploadProgressTracker } from "../../js/progresstracker.js";
 mainNotifications.addEventListener('setup', function () {
   myVideoPlayer.onParticipantDataReceived = participantDataReceived;
   myVideoPlayer.onAppStatusReceived = appStatusReceived;
-  myVideoPlayer.onChatHistoryReceived = validateChatHistory;
   myVideoPlayer.onStyleSchemaReceived = onReceiveStyleSchema;
   myVideoPlayer.onStyleValuesReceived = onReceiveStyleValues;
-  setTimeout(() => {
-    sendClickEvent(myVideoPlayer, OperatorControls._GetParticipantData);
-    sendClickEvent(myVideoPlayer, OperatorControls._GetAppStatus);
-  }, 1000);
-  setTimeout(() => {
-    sendClickEvent(myVideoPlayer, OperatorControls._GetChatHistory);
-  }, 1000);
+  myVideoPlayer.onLogMessageNotification = onLogMessageNotification;
 });
+
+function onLogMessageNotification () {
+  if (navLogTabBtn.classList.contains("active")){
+    fetchLogs();
+  }
+}
+
+function fetchLogs(){
+  unityFetch("/getLog")
+    .then(resp => resp.text())
+    .then((data) => {
+      let log = document.getElementById("log-div");
+      data = data.replaceAll("\n", "<br>")
+      data = data.replaceAll("\r", "<br>")
+      data = data.replaceAll("\t", "&nbsp;&nbsp;&nbsp;&nbsp;")
+      log.innerHTML = data;
+    });
+}
 
 /* SIGN OUT MODAL ELEMENTS */
 let signOutModal = document.getElementById("signout-modal")
@@ -34,6 +45,7 @@ signOutModal.addEventListener('shown.bs.modal', function () {
 
 /* EXTEND */
 document.body.addEventListener("click", function() {
+
   setTimeout(function(){
     extend();
   }, 700)});
@@ -84,10 +96,10 @@ let currentlyDraggedPov
 function setupParticipantOnVidCtrl(node, idx) {
   let dragEl = document.querySelector(`div#${node.id} .participant-on-vid-drag`);
   let eyeEl = document.querySelector(`div#${node.id} .participant-on-vid-eye`);
+  let earEl = document.querySelector(`div#${node.id} .participant-on-vid-ear`);
   let muteEl = document.querySelector(`div#${node.id} .participant-on-vid-mute`);
   let renameEl = document.querySelector(`div#${node.id} a[target="action-rename"]`);
   let showLtEl = document.querySelector(`div#${node.id} a[target="action-show-lt"]`);
-  let showLtExclusiveEl = document.querySelector(`div#${node.id} a[target="action-show-lt-exclusive"]`);
   // let camEl = document.querySelector(`div#${node.id} .participant-on-vid-cam`);
 
   node.classList.remove("d-none");
@@ -112,6 +124,16 @@ function setupParticipantOnVidCtrl(node, idx) {
     }
   }
 
+  earEl.addEventListener("click", function () {
+    let p = participantJsonParsed[idx];
+    unityFetch(`/toggleParticipantAudibility?participantId=${p.id}&enable=${!p.audible}`, {method: "PUT"})
+      .then(resp => {
+        if (resp.ok) {
+          console.log("audibility toggled")
+        }
+      })
+  })
+
   eyeEl.addEventListener("click", function () {
     let p = participantJsonParsed[idx];
     let str = p.id + "," + !p.visible;
@@ -120,8 +142,12 @@ function setupParticipantOnVidCtrl(node, idx) {
 
   muteEl.addEventListener("click", function () {
     let p = participantJsonParsed[idx];
-    let str = p.id + "," + !p.muted;
-    sendStringSubmitEvent(myVideoPlayer, OperatorControls._MuteParticipantButton, str);
+    if (p.muted){
+      let str = p.id + ",false";
+      sendStringSubmitEvent(myVideoPlayer, OperatorControls._MuteParticipantButton, str);
+    } else {
+      console.log("Only can mute from zoom");
+    }
   })
 
   renameEl.addEventListener("click", function() {
@@ -135,13 +161,6 @@ function setupParticipantOnVidCtrl(node, idx) {
     let p = participantJsonParsed[idx];
     let str = p.id.toString();
     sendStringSubmitEvent(myVideoPlayer, OperatorControls._ToggleParticipantLowerThird, str);
-  })
-
-  showLtExclusiveEl.addEventListener("click", function(ev) {
-    ev.preventDefault();
-    let p = participantJsonParsed[idx];
-    let str = `${p.id}`;
-    sendStringSubmitEvent(myVideoPlayer, OperatorControls._JustShowSpecificParticipantLowerThird, str);
   })
 }
 
@@ -323,6 +342,8 @@ function appStatusReceived(json) {
   ActivateButtonHelper(liveBtn, false)
   ActivateButtonHelper(archiveBtn, false)
 
+  addParticipantSelectCheckEventListener(); // adds event listeners to each select checkbox
+
   generalStatBar.innerHTML =
   `Stream: ${jsonParsed.streaming ? "Yes": "No"} |
   Recording: ${jsonParsed.recording ? "Yes": "No"} |
@@ -479,6 +500,83 @@ let disableAutoShowOnJoin = document.getElementById("disable-autoshow-btn");
 enableAutoShowOnJoin.addEventListener("click", onEnableAutoShowOnJoin);
 disableAutoShowOnJoin.addEventListener("click", onDisableAutoShowOnJoin);
 
+let selectAllParticipantBtn = document.getElementById("check-uncheck-all-ppt-btn");
+let showSelectParticipantBtn = document.getElementById("show-select-ppt-btn");
+let hideSelectParticipantBtn = document.getElementById("hide-select-ppt-btn");
+
+function addParticipantSelectCheckEventListener() {
+  let cbs = document.getElementsByName('checked-participant');
+  for (let i = 0; i < cbs.length; i++) {
+    cbs[i].addEventListener('change', updateSelectParticipantBtnText);
+  }
+}
+
+function mapSelectParticiapntsToInputGroups() {
+  let arr = participantInputGroups.map(group => {
+    return group.querySelector(".check");
+  });
+  return arr;
+}
+
+function updateSelectParticipantBtnText() {
+  let counter = 0;
+  let selectedParticipants = mapSelectParticiapntsToInputGroups();
+
+  for (let i = 0; i <  selectedParticipants.length; i++) {
+    if (selectedParticipants[i].checked) {
+      counter++;
+    }
+  }
+
+  if (counter === selectedParticipants.length) {
+    selectAllParticipantBtn.innerHTML = "Unselect All";
+  } else {
+    selectAllParticipantBtn.innerHTML = "Select All";
+  }
+}
+
+selectAllParticipantBtn.addEventListener("click", () => {
+
+  if (selectAllParticipantBtn.innerHTML === "Select All") {
+    selectAllParticipantBtn.innerHTML = "Unselect All";
+    let selectedParticipants = mapSelectParticiapntsToInputGroups();
+
+    for (let i = 0; i <  selectedParticipants.length; i++) {
+      selectedParticipants[i].checked = true;
+    }
+  } else if (selectAllParticipantBtn.innerHTML === "Unselect All") {
+    selectAllParticipantBtn.innerHTML = "Select All";
+    let selectedParticipants = mapSelectParticiapntsToInputGroups();
+    for (let i = 0; i <  selectedParticipants.length; i++) {
+      selectedParticipants[i].checked = false;
+    }
+  }
+});
+
+showSelectParticipantBtn.addEventListener("click", () => {
+  let selectedParticipants = participantInputGroups.map(group => {
+    return group.querySelector(".check");
+  });
+  for (let i = 0; i <  selectedParticipants.length; i++) {
+    if (selectedParticipants[i].checked) {
+      let p = participantJsonParsed[i]
+      let str = p.id + ",true"
+      sendStringSubmitEvent(myVideoPlayer, OperatorControls._ToggleParticipantVisibilityButton, str)
+    }
+  }
+})
+
+hideSelectParticipantBtn.addEventListener("click", () => {
+  let selectedParticipants = mapSelectParticiapntsToInputGroups();
+  for (let i = 0; i <  selectedParticipants.length; i++) {
+    if (selectedParticipants[i].checked) {
+      let p = participantJsonParsed[i]
+      let str = p.id + ",false"
+      sendStringSubmitEvent(myVideoPlayer, OperatorControls._ToggleParticipantVisibilityButton, str)
+    }
+  }
+})
+
 function onEnableAutoShowOnJoin() {
   unityFetch("/enableOutputVideoByDefault?enable=true", {method: "PUT"});
 }
@@ -519,15 +617,25 @@ function validateParticipantInputGroups() {
 
 let currentlyDraggedP
 
+function ClearSelectParticipantsOnDrag() {
+  selectAllParticipantBtn.innerHTML = selectAllParticipantBtn.innerHTML == "Select All" ? "Unselect All" : "Select All";
+  let selectedParticipants = participantInputGroups.map(group => {
+    return group.querySelector(".check");
+  });
+  for (let i = 0; i <  selectedParticipants.length; i++) {
+    selectedParticipants[i].checked = false;
+  }
+}
+
 function setupParticipantInputGroup(node, idx) {
   let nameInput = document.querySelector("div#" + node.id + " .name-input")
   let visibilityBtn = document.querySelector("div#" + node.id + " .visibility-btn")
   let muteBtn = document.querySelector("div#" + node.id + " .mute-btn")
   let lowerThirdBtn = document.querySelector("div#" + node.id + " .show-lower-third-btn")
-  let exclusiveLowerThirdBtn = document.querySelector("div#" + node.id + " .show-lower-third-exclusive-btn")
 
   node.ondragstart = (ev) => {
     currentlyDraggedP = node;
+    ClearSelectParticipantsOnDrag();
   }
 
   node.ondragover = (ev) => {
@@ -570,12 +678,6 @@ function setupParticipantInputGroup(node, idx) {
     let p = participantJsonParsed[idx];
     let str = p.id.toString();
     sendStringSubmitEvent(myVideoPlayer, OperatorControls._ToggleParticipantLowerThird, str);
-  })
-
-  exclusiveLowerThirdBtn.addEventListener("click", function () {
-    let p = participantJsonParsed[idx]
-    let str = p.id.toString();
-    sendStringSubmitEvent(myVideoPlayer, OperatorControls._JustShowSpecificParticipantLowerThird, str)
   })
 
   nameInput.addEventListener("change", function () {
@@ -1054,11 +1156,11 @@ function batchFileInputChanged(){
   for (let musicFile of musicFiles) {
     pushFormInput(musicFile.name, musicFile, "music")
   }
-  uploadDescriptor.innerHTML  += `${musicFiles.length} music files, <br>`
+  uploadDescriptor.innerHTML  += `${musicFiles.length} music file(s),`
   for (let videoFile of videoFiles) {
     pushFormInput(videoFile.name, videoFile, "video")
   }
-  uploadDescriptor.innerHTML  += `and ${videoFiles.length} video files. <br>`
+  uploadDescriptor.innerHTML  += ` and ${videoFiles.length} video file(s).`
   // Show edit button.
   editSlideBtn.style.display = "block";
 }
@@ -1089,7 +1191,7 @@ function CategorizeSlideFilesByKeywordForUpload(files) {
       customSlideCount++;
     }
   }
-  uploadDescriptor.innerHTML += `You will be uploading ${customSlideCount} custom slides.<br>`
+  uploadDescriptor.innerHTML += `You will be uploading ${customSlideCount} custom slide(s), `
 }
 
 function CategorizeSlideFilesBySlideTypeSelects(files) {
@@ -1112,7 +1214,7 @@ function CategorizeSlideFilesBySlideTypeSelects(files) {
       customSlideCount++;
     }
   }
-  uploadDescriptor.innerHTML += `You will be uploading ${customSlideCount} custom slides.<br>`
+  uploadDescriptor.innerHTML += `You will be uploading ${customSlideCount} custom slide(s), `
 }
 
 /* EDIT SLIDE ASSIGNMENT MODAL */
@@ -1172,11 +1274,11 @@ function editSlideSaveBtnClicked() {
   for (let musicFile of musicFiles) {
     pushFormInput(musicFile.name, musicFile, "music")
   }
-  uploadDescriptor.innerHTML += `${musicFiles.length} music files, `
+  uploadDescriptor.innerHTML += `${musicFiles.length} music file(s), `
   for (let videoFile of videoFiles) {
     pushFormInput(videoFile.name, videoFile, "video")
   }
-  uploadDescriptor.innerHTML += `and ${videoFiles.length} video files.`
+  uploadDescriptor.innerHTML += ` and ${videoFiles.length} video file(s).`
 }
 
 function uploadCustomSlideClicked() {
@@ -1282,72 +1384,84 @@ function validateVideoSwitchBtns(videos) {
   }
 }
 
-/* CHAT CONTROLS */
-let chatHistory = document.querySelector("div.chat-history ul");
-let cHistory = document.getElementById("cHistory")
-let chatMessage = document.getElementById("chat-clone-source");
-let chatMessages = [];
+/* LOGS DOWNLOAD */
 
-let sendMessageInput = document.getElementById("send-message-input");
-let sendMessageBtn = document.getElementById("send-message-btn");
-sendMessageBtn.disabled = true;
-sendMessageInput.addEventListener("input", function() {
-  sendMessageBtn.disabled = (sendMessageInput.value === "") ? true : false;
-});
+let logDownloadBtn = document.getElementById("log-download-btn");
+let listLogFileOptions = document.getElementById("list-all-log-files");
+let errorAlertLogFile = document.getElementById("error-alert-log-file");
 
-sendMessageInput.addEventListener("keypress", function(e) {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    sendMessageBtn.click();
+logDownloadBtn.addEventListener("click", onLogDownloadClicked)
+listLogFileOptions.addEventListener("click", listAvailableLogs);
+
+function onLogDownloadClicked() {
+  if (listLogFileOptions.value === "none") {
+    alertDisplay(errorAlertLogFile);
+  } else {
+    downloadLog();
   }
-});
-sendMessageBtn.addEventListener("click", function() {
-  let str = sendMessageInput.value;
-  sendStringSubmitEvent(myVideoPlayer, OperatorControls._MessageReceived, str);
-  scrollToBottom(cHistory);
+}
 
-  // Take this opportunity to clear the input.
-  sendMessageInput.value = "";
-  sendMessageBtn.disabled = true;
+function downloadLog() {
+  let fname = listLogFileOptions.value;
+  let client = new XMLHttpRequest()
+  client.open("GET", "/download_log/" + fname)
+  client.responseType = "blob";
+  client.send()
 
-});
-
-let navChatTab = document.getElementById("nav-chat-tab");
-navChatTab.addEventListener("click", function() {
-  // Get the chat history.
-  sendClickEvent(myVideoPlayer, OperatorControls._GetChatHistory);
-  // Set utc offset.
-  let date = new Date();
-  // NOTE: This is inverted because Unity app will use offset to go from UTC-0 to client's local time.
-  let utcOffset = -date.getTimezoneOffset();
-  sendStringSubmitEvent(myVideoPlayer, OperatorControls._SetUtcOffset, String(utcOffset));
-});
-
-function scrollToBottom(obj) {
-  obj.scrollTop = obj.scrollHeight;
-};
-
-function validateChatHistory(history){
-  let setupChatMessage = function (clone) {
-    clone.classList.remove("d-none");
-  }
-  let validateChatMessage = function (clone, message) {
-    let messageText = document.querySelector(`#${clone.id} .message`);
-    let messageDataTime = document.querySelector(`#${clone.id} div.message-data .message-data-time`);
-    messageDataTime.innerText = `${message.name} - ${message.time}`;
-    messageText.innerText = message.message;
-    if (myVideoPlayer.connectionId === message.sender){
-      let messageData = document.querySelector(`#${clone.id} div.message-data`);
-      messageData.classList.remove("text-right");
-      messageText.classList.remove("float-right");
-      messageText.classList.remove("other-message");
-      messageText.classList.add("my-message");
+  // starts the download.
+  client.onload = function (e) {
+    if (this.readyState == 4 && this.status == 200) {
+      let blob = new Blob([this.response], { type: 'document' })
+      const href = URL.createObjectURL(blob);
+      const a = Object.assign(document.createElement("a"), {
+        client: client,
+        href: href,
+        style: "display:none",
+        download: fname,
+      });
+      document.body.appendChild(a);
+      a.click();
+      URL.revokeObjectURL(href);
+      a.remove();
     }
   }
-  let jsonHistory = JSON.parse(history);
-  ValidateClonesWithJsonArray(chatMessage, chatHistory, chatMessages, setupChatMessage, jsonHistory, validateChatMessage);
-  scrollToBottom(cHistory);
+
+  // track progress during the download.
+  client.onprogress = function (e) { logDownloadBtn.disabled = true; }
+
+  // when download is complete.
+  client.onloadend = function (e) {
+    logDownloadBtn.innerHTML = "Downloaded!"
+    setTimeout(() => {
+      logDownloadBtn.innerHTML = "Download Log"
+      logDownloadBtn.disabled = false; // re-enable download button
+    }, 1000)
+  }
+
 }
+
+async function listAvailableLogs() {
+  let resp = await fetch("/logs");
+  let files = await resp.json();
+
+  if (listLogFileOptions.childElementCount > files.length + 1) {
+    while (listLogFileOptions.childElementCount > files.length + 1) {
+      listLogFileOptions.removeChild(listFileOptions.lastChild);
+    }
+  } else {
+    while (listLogFileOptions.childElementCount < files.length + 1) {
+      let option = document.createElement("option");
+      listLogFileOptions.appendChild(option);
+    }
+  }
+
+  for (let i = files.length - 1; i >= 0; i--) {
+    let option = listLogFileOptions.children[i + 1];
+    option.value = files[i];
+    option.innerText = files[i];
+  }
+}
+
 /* RECORDING CONTROLS */
 let listFileOptions = document.getElementById("list-all-files")
 listFileOptions.addEventListener("click", listAvailableRecordings);
@@ -1483,11 +1597,8 @@ navMusicTabBtn.addEventListener("click", ()=>{navSlideTabBtn.scrollIntoView();})
 let navVideoTabBtn = document.getElementById("nav-video-tab");
 navVideoTabBtn.addEventListener("click", ()=>{navVideoTabBtn.scrollIntoView();});
 
-let navChatTabBtn = document.getElementById("nav-chat-tab");
-navChatTabBtn.addEventListener("click", ()=>{navChatTabBtn.scrollIntoView();});
-
 let navLogTabBtn = document.getElementById("nav-log-tab");
-navLogTabBtn.addEventListener("click", ()=>{navLogTabBtn.scrollIntoView();});
+navLogTabBtn.addEventListener("click", ()=>{navLogTabBtn.scrollIntoView(); fetchLogs();});
 
 let navUploadTabBtn = document.getElementById("nav-upload-tab");
 navUploadTabBtn.addEventListener("click", ()=>{navUploadTabBtn.scrollIntoView();});

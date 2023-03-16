@@ -10,4 +10,5 @@ export default interface Options {
   holdingMusicDir?: string;
   videoDir?: string;
   recordingsDir?: string;
+  eagleEyeLogDir?: string;
 }

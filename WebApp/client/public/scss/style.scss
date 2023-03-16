@@ -16,6 +16,7 @@ $body-bg: #616161;
   width: 50%;
   max-width: 100%;
 }
+
 .centered {
   position: absolute;
   top: 50%;
@@ -189,6 +190,19 @@ $secondary: #4c4c4c;
 @import "node_modules/bootstrap/scss/_functions";
 @import "node_modules/bootstrap/scss/_variables";
 @import "node_modules/bootstrap/scss/mixins";
+
+.check-box-centered {
+  padding-left: 6px;
+  padding-right: 6px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  min-height: 42px;
+  min-width: 42px;
+  display: inline-grid;
+  background-color: $secondary;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+}
 
 .video-container{
   aspect-ratio: 16 / 9;
@@ -684,12 +698,14 @@ button, input, optgroup, select, textarea {
   position: absolute;
   opacity: 1%;
   background-color: $blue;
-  height: 100%;
+  top: 25%;
+  height: 50%;
   width: 85%;
 }
 
 .participant-on-vid-drag:hover{
   opacity: 50%;
+    cursor: move;
 }
 
 .participant-on-vid-options{
@@ -705,12 +721,13 @@ button, input, optgroup, select, textarea {
 
 .participant-on-vid-options:hover{
   opacity: 50%;
+  cursor: pointer;
 }
 
 .participant-on-vid-mute {
   position: absolute;
-  right: 0;
-  top: 25%;
+  left: 15%;
+  top: 0;
   width: 15%;
   height: 25%;
   opacity: 1%;
@@ -719,20 +736,22 @@ button, input, optgroup, select, textarea {
 
 .participant-on-vid-mute:hover {
   opacity: 50%;
+  cursor: pointer;
 }
 
-.participant-on-vid-cam {
+.participant-on-vid-ear {
   position: absolute;
-  right: 0;
-  top: 50%;
+  right: 15%;
+  top: 75%;
   width: 15%;
   height: 25%;
   opacity: 1%;
   background-color: $blue;
 }
 
-.participant-on-vid-cam:hover {
+.participant-on-vid-ear:hover {
   opacity: 50%;
+  cursor: pointer;
 }
 
 .participant-on-vid-eye {
@@ -747,6 +766,7 @@ button, input, optgroup, select, textarea {
 
 .participant-on-vid-eye:hover {
   opacity: 50%;
+  cursor: pointer;
 }
 
 .card {
