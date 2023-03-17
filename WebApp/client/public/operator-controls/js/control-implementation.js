@@ -9,6 +9,7 @@ import { ValidateClonesWithJsonArray} from "/operator-controls/js/validation-hel
 import { unityFetch } from "../../js/unity-fetch.js";
 import {getVideoThumb} from "../../js/video-thumbnail.js";
 import { createUploadProgressTracker } from "../../js/progresstracker.js";
+import {CropWidget} from "../../js/crop-widget.js";
 
 
 mainNotifications.addEventListener('setup', function () {
@@ -692,12 +693,18 @@ let layoutFieldset = document.getElementById("layout-fieldset");
 let layoutDropdown = document.getElementById("layout-dropdown");
 let textSizeDropdown = document.getElementById("text-size-dropdown");
 let lowerThirdStyleDropdown = document.getElementById("lower-thirds-style-dropdown");
+let cropScreenShareBtn = document.getElementById("crop-screen-share-btn");
+let cropScreenSharePreview = document.getElementById("crop-screen-share-preview");
+let cropScreenShareApplyBtn = document.getElementById("crop-screen-share-apply-btn");
 let editStyleSelect = document.getElementById("edit-style-select");
 
 setupDropdown(layoutDropdown, onLayoutSelected)
 setupDropdown(textSizeDropdown, onTextSizeSelected)
 setupDropdown(lowerThirdStyleDropdown, onLowerThirdStyleSelected)
+cropScreenShareBtn.addEventListener("click", onCropScreenShareBtnClicked);
+cropScreenShareApplyBtn.addEventListener("click", onCropScreenShareApplyBtnClicked);
 editStyleSelect.addEventListener("change", editStyleSelectionChanged)
+
 
 /* LAYOUT CONTROLS IMPLEMENTATION */
 function onLayoutSelected(idx) {
@@ -718,6 +725,18 @@ function onLowerThirdStyleSelected(idx) {
       break;
   }
 }
+
+function onCropScreenShareBtnClicked() {
+  cropScreenSharePreview.src = "uapp/getScreenShareImage?t=" + Date.now();
+  let cropWidget = new CropWidget(cropScreenSharePreview);
+  cropScreenSharePreview.parentElement.appendChild(cropWidget.mainElement);
+  cropWidget.reset();
+}
+
+function onCropScreenShareApplyBtnClicked() {
+  // todo: send crop data to server
+}
+
 
 function editStyleSelectionChanged() {
   let style = editStyleSelect.options[editStyleSelect.selectedIndex];

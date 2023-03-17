@@ -9,6 +9,8 @@
 
   <!-- Bootstrap CSS -->
   <link href="../css/style.css" rel="stylesheet">
+  <!-- Resizable div CSS -->
+  <link href="../css/resizable-div.css" rel="stylesheet">
 
   <!-- Bootstrap Icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
@@ -368,11 +370,12 @@
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                  <img src="uapp/getScreenShareImage?t=0" alt="This is supposed to be a preview of the screen share texture" style="width: 100%">
+                  <img id="crop-screen-share-preview" src="uapp/getScreenShareImage?t=0" alt="This is supposed to be a preview of the screen share texture" style="width: 100%">
+
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                  <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Apply</button>
+                  <button id="crop-screen-share-apply-btn" type="button" class="btn btn-primary" data-bs-dismiss="modal">Apply</button>
                 </div>
               </div>
             </div>
@@ -534,7 +537,7 @@
           </div>
           <div id="message-div" class="lead"></div>
           <div id="log-div" class="overflow-auto p-3 bg-light overflow-div rounded"></div>
-          
+
           <div class="input-group mt-2 w-50">
             <select id="list-all-log-files" class="form-control form-select" required>
               <option selected value="none">None Selected</option>
