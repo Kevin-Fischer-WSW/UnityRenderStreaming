@@ -34,7 +34,7 @@ export function createUploadProgressTracker(parent, request, name, onUploadCompl
     request.upload.addEventListener("loadend", function (e) {
         setTimeout(() => {
             progressFieldUpload.remove(); // remove tracker
-        }, 2000)
+        }, 800)
     })
 
     request.upload.addEventListener("error", function (e) {
