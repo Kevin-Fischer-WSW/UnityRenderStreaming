@@ -1296,18 +1296,37 @@ function uploadCustomSlideClicked() {
   // Hide edit button.
   editSlideBtn.style.display = "none";
   let parentTracker = document.getElementById("uploadTrackerContainer");
-  for (let input of formInput) {
+  batchSlideUploadBtn.disabled = true;
 
-    let formData = new FormData()
-    formData.append("type", input.type)
-    formData.append(input.name, input.file)
-
-    let request = new XMLHttpRequest();
-    createUploadProgressTracker(parentTracker, request, input.name, FetchAllUploadedMediaAndUpdateDash);
-    request.open("POST", "/slide_upload");
-    request.send(formData);
+  let upload = function (input) {
+    return new Promise(function(resolve, reject) {
+      let formData = new FormData()
+      formData.append("type", input.type)
+      formData.append(input.name, input.file)
+  
+      let request = new XMLHttpRequest();
+      createUploadProgressTracker(parentTracker, request, input.name, FetchAllUploadedMediaAndUpdateDash);
+      request.onload = function() {
+        if (request.status >= 200 && request.status < 300) {
+          resolve(request.response);
+        } else {
+          reject(request.statusText);
+        }}; 
+      request.open("POST", "/slide_upload");
+      request.send(formData);
+    })
   }
+  
+  let uploads = formInput.map((file) => { return upload(file) });
+
+  // After all files are done uploading re-enable upload button.
+  Promise.all(uploads).then(() => {
+    batchSlideUploadBtn.disabled = false;
+  })
+
 }
+
+
 
 /* VIDEO CONTROLS */
 let videoFieldsetBar  = document.getElementById("video-fieldset-bar");
