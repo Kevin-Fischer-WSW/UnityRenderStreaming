@@ -61,11 +61,14 @@
 #pending-btn {
   background-color: #EEDC31;
   border: 2px solid #3D3D3D;
-  height: 100px;
+  height: 70px;
   width: 150px;
   font-size: 20px;
   cursor: pointer;
-  border-right: 2px solid #3D3D3D; }
+  border-right: 2px solid #3D3D3D;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap; }
 
 #pending-btn:hover {
   background-color: #c5b559; }
@@ -73,7 +76,7 @@
 #live-btn {
   background-color: #7FDB6A;
   border: 2px solid #3D3D3D;
-  height: 100px;
+  height: 70px;
   width: 250px;
   font-size: 20px;
   cursor: pointer;
@@ -86,7 +89,7 @@
 #technical-diff-btn {
   background-color: #F57A37;
   border: 2px solid #3D3D3D;
-  height: 100px;
+  height: 70px;
   width: 150px;
   font-size: 20px;
   cursor: pointer;
@@ -99,11 +102,16 @@
 #archive-btn {
   background-color: #F44747;
   border: 2px solid #3D3D3D;
-  height: 100px;
+  height: 70px;
   width: 150px;
   font-size: 20px;
   cursor: pointer;
   border-left: 1px solid #3D3D3D; }
+
+#pending-btn, #live-btn, #technical-diff-btn, #archive-btn {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap; }
 
 #archive-btn:hover {
   background-color: #db3333; }
@@ -142,6 +150,18 @@
 video {
   width: 100%; }
 
+.check-box-centered {
+  padding-left: 6px;
+  padding-right: 6px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  min-height: 42px;
+  min-width: 42px;
+  display: inline-grid;
+  background-color: #4c4c4c;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px; }
+
 .video-container {
   aspect-ratio: 16 / 9;
   background-color: #212529; }
@@ -155,6 +175,13 @@ video {
   color: #fff;
   width: 100%;
   height: 100%; }
+
+#general-status-bar {
+  background-color: #4c4c4c;
+  height: 8%;
+  border: none;
+  color: white;
+  padding: 0.2rem; }
 
 /*!
    * Bootstrap  v5.2.2 (https://getbootstrap.com/)
@@ -8559,6 +8586,9 @@ textarea.form-control-lg {
 .padding {
   padding: 3rem !important; }
 
+body {
+  padding-bottom: 3%; }
+
 .card-header:first-child {
   border-radius: calc(.25rem - 1px) calc(.25rem - 1px) 0 0; }
 
@@ -8909,11 +8939,13 @@ button, input, optgroup, select, textarea {
   position: absolute;
   opacity: 1%;
   background-color: #0d6efd;
-  height: 100%;
+  top: 25%;
+  height: 50%;
   width: 85%; }
 
 .participant-on-vid-drag:hover {
-  opacity: 50%; }
+  opacity: 50%;
+  cursor: move; }
 
 .participant-on-vid-options {
   position: absolute;
@@ -8926,31 +8958,34 @@ button, input, optgroup, select, textarea {
   border: none; }
 
 .participant-on-vid-options:hover {
-  opacity: 50%; }
+  opacity: 50%;
+  cursor: pointer; }
 
 .participant-on-vid-mute {
   position: absolute;
-  right: 0;
-  top: 25%;
+  left: 15%;
+  top: 0;
   width: 15%;
   height: 25%;
   opacity: 1%;
   background-color: #0d6efd; }
 
 .participant-on-vid-mute:hover {
-  opacity: 50%; }
+  opacity: 50%;
+  cursor: pointer; }
 
-.participant-on-vid-cam {
+.participant-on-vid-ear {
   position: absolute;
-  right: 0;
-  top: 50%;
+  right: 15%;
+  top: 75%;
   width: 15%;
   height: 25%;
   opacity: 1%;
   background-color: #0d6efd; }
 
-.participant-on-vid-cam:hover {
-  opacity: 50%; }
+.participant-on-vid-ear:hover {
+  opacity: 50%;
+  cursor: pointer; }
 
 .participant-on-vid-eye {
   position: absolute;
@@ -8962,7 +8997,8 @@ button, input, optgroup, select, textarea {
   background-color: #0d6efd; }
 
 .participant-on-vid-eye:hover {
-  opacity: 50%; }
+  opacity: 50%;
+  cursor: pointer; }
 
 .card {
   background: #fff;
