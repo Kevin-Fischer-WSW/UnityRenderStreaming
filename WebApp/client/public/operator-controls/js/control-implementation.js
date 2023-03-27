@@ -817,6 +817,14 @@ let intro_preview = document.getElementById("intro-preview");
 let techdiff_preview = document.getElementById("techdiff-preview");
 let conc_preview = document.getElementById("conc-preview");
 
+function onSlideTabClicked() {
+  unityFetch("/getHoldingSlides")
+    .then(resp => resp.json())
+    .then(json => {
+      validateSlideSwitchBtns(json);
+    })
+}
+
 /** Scratch work on logic */
 if (localStorage["currentIntroSlide"] !== "") {
   intro_preview.style.backgroundImage = `url("/slides/${localStorage["currentIntroSlide"]}")`;
@@ -908,6 +916,7 @@ function validateSlideSwitchBtns(slides) {
     slide.style.display = "flex";
     let span = document.querySelector(`#${slide.id} span`)
     let img = document.querySelector(`#${slide.id} img`);
+    setupSlideSetAsOptionsButton(slide);
     setupDeleteButton(slide, "/uapp/deleteHoldingSlide?url={0}", span, onSlideTabClicked);
     slide.addEventListener("click", function () {
       unityFetch("/setHoldingSlide?url=" + img.src, {method: "PUT"})
