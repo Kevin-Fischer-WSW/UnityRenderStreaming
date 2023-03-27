@@ -183,15 +183,11 @@ export const createServer = (config: Options): express.Application => {
   });
 
   let holdingSlidePath = config.holdingSlideDir;
-  let customSlidePath = path.join(holdingSlidePath, 'Custom Slides')
   // Get specific slide image.
   app.get('/slides/:slide', (req, res) => {
-    // Check custom slides directory first.
-    let slidePath = path.join(customSlidePath, req.params.slide);
-    if (!fs.existsSync(slidePath)) {
-      res.sendFile(path.join(holdingSlidePath, req.params.slide))
-    } else {
-      res.sendFile(slidePath)
+    let slidePath = path.join(holdingSlidePath, req.params.slide);
+    if (ValidatePathExists(res, slidePath)){
+      res.sendFile(slidePath);
     }
   });
 
@@ -214,11 +210,6 @@ export const createServer = (config: Options): express.Application => {
     let data = fs.readdirSync(dir);
     res.status(200).json(data);
   }
-
-  // Get all custom slides.
-  app.get('/all_custom_slides', (req, res) => {
-    getFiles(res, customSlidePath);
-  })
 
   // Get all holding music.
   app.get('/all_holding_music', (req, res) => {
@@ -263,9 +254,7 @@ export const createServer = (config: Options): express.Application => {
       }
       // Determine upload path via type.
       let uploadPath;
-      if (fields.type === 'custom_slide') {
-        uploadPath = customSlidePath;
-      } else if (fields.type === 'slide') {
+      if (fields.type === 'slide') {
         uploadPath = holdingSlidePath;
       } else if (fields.type === 'music') {
         uploadPath = holdingMusicDir;
@@ -292,7 +281,7 @@ export const createServer = (config: Options): express.Application => {
   }
 
   app.delete('/slide_delete/:slide', (req, res) => {
-    let slidePath = path.join(customSlidePath, req.params.slide);
+    let slidePath = path.join(holdingSlidePath, req.params.slide);
     DeleteFile(res, slidePath);
   });
 
