@@ -27,7 +27,7 @@ $body-bg: #616161;
   background-color: #7FDB6A;
 }
 
-#slide-btn-container{
+#slide-btn-container, #video-btn-container {
   border: 3px solid #3D3D3D;
 }
 
@@ -163,13 +163,14 @@ $body-bg: #616161;
   background-color: #db3333;
 }
 
-#stream-settings, #logout {
+#logout, #stream-settings  {
   cursor: pointer;
-  font-size: 32px;
   float: right;
   color: white;
-  height: 40px;
-  width: 40px;
+}
+
+.bi-gear-fill, .bi-box-arrow-right {
+  font-size: 32px;
 }
 
 #stream-settings:hover, #logout:hover {
@@ -247,8 +248,12 @@ $secondary: #4c4c4c;
   background-color: $secondary;
   height: 8%;
   border: none;
+  border-radius: 5px;
   color: $primary;
   padding: 0.2rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  text-align: center;
 }
 
 // Import all of Bootstrap's css.
@@ -483,7 +488,6 @@ h4.card-title {
   border-radius: 3px;
 }
 
-
 .border-light {
   border-color: #f1f2f3 !important;
 }
@@ -653,19 +657,19 @@ button, input, optgroup, select, textarea {
   border-radius: 0px 0px $border-radius 0px;
 }
 
-.media-delete-btn{
+.media-delete-btn {
   position: absolute;
   top: 0;
   right: 0;
 }
 
-.media-three-dots-btn{
+.media-set-as-btn {
   position: absolute;
   top: 0;
-  right: 11%;
+  right: 42px;
 }
 
-.media-btn-element{
+.media-btn-element {
   max-width: 30%;
   min-width: 30%;
   position: relative;

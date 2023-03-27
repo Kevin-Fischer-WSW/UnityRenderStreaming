@@ -348,7 +348,8 @@ function appStatusReceived(json) {
   `Stream: ${jsonParsed.streaming ? "Yes": "No"} |
   Recording: ${jsonParsed.recording ? "Yes": "No"} |
   Holding Slide: ${jsonParsed.holdingSlide} |
-  Holding Music: ${jsonParsed.playingHoldingMusic ? "Playing": "Not Playing"}.`
+  Holding Music: ${jsonParsed.playingHoldingMusic ? "Playing" : "Not Playing"} | 
+  Holding Video: ${jsonParsed. playingVideo ? "Playing" : "Not Playing"}.`
 
   if (jsonParsed.inMeeting || jsonParsed.meetingSimulated) {
     validateTracksInPlaylist(jsonParsed.playlist, jsonParsed.currentlyPlayingIndex)
@@ -423,6 +424,7 @@ function appStatusReceived(json) {
     }
 
   } else {
+    generalStatBar.innerHTML = "Connection State: Connected";
     meetingNoInputField.disabled = false;
     joinMeetingBtn.disabled = false;
     leaveMeetingBtn.disabled = true;
@@ -442,7 +444,7 @@ function appStatusReceived(json) {
 }
 
 
-/* HOLDING SLIDE BUTTONS */
+/* STREAM BUTTONS */
 let pendingBtn = document.getElementById("pending-btn");
 pendingBtn.addEventListener("click", onPendingClick);
 let liveBtn = document.getElementById("live-btn");
@@ -452,7 +454,7 @@ technicalDiffBtn.addEventListener("click", onTechnicalDiff);
 let archiveBtn = document.getElementById("archive-btn")
 archiveBtn.addEventListener("click", onArchiveClick);
 
-/* HOLDING SLIDE BUTTON IMPLEMENTATION */
+/* STREAM BUTTON IMPLEMENTATION */
 function onPendingClick() {
   sendClickEvent(myVideoPlayer, OperatorControls._PendingButton)
 }
@@ -484,6 +486,7 @@ function onJoinClick() {
 }
 
 function onLeaveClicked() {
+  
   sendClickEvent(myVideoPlayer, OperatorControls._LeaveMeetingButton);
 }
 
@@ -802,9 +805,72 @@ function validateSchema() {
   return true;
 }
 
+/* SLIDE CONTROLS */
+let slideFieldset = document.getElementById("slide-fieldset");
+let slideBtnContainer = document.getElementById("slide-btn-container");
+let slideSwitchBtn = document.getElementById("slide-btn-element");
+let slideSwitchBtns = [];
+let slideClearBtn = document.getElementById("slide-clear-btn");
+slideClearBtn.addEventListener("click", onSlideClearClicked);
 
+let intro_preview = document.getElementById("intro-preview");
+let techdiff_preview = document.getElementById("techdiff-preview");
+let conc_preview = document.getElementById("conc-preview");
 
-/* DELETE BUTTON */
+/** Scratch work on logic */
+if (localStorage["currentIntroSlide"] !== "") {
+  intro_preview.style.backgroundImage = `url("/slides/${localStorage["currentIntroSlide"]}")`;
+} 
+if (localStorage["currentTechDiffSlide"] !== "") {
+  techdiff_preview.style.backgroundImage = `url("/slides/${localStorage["currentTechDiffSlide"]}")`;
+}
+if (localStorage["currentConclusionSlide"] !== "") {
+  conc_preview.style.backgroundImage = `url("/slides/${localStorage["currentConclusionSlide"]}")`;
+}
+
+function onSlideClearClicked() {
+  sendClickEvent(myVideoPlayer, OperatorControls._LiveButton);
+}
+
+slideSwitchBtn.style.display = "none";
+
+function setupSlideSetAsOptionsButton(owner) {
+  let slideSetAsIntro = document.querySelector(`div#${owner.id} a[target="action-set-as-intro"]`);
+  let slideSetAsTechDiff = document.querySelector(`div#${owner.id} a[target="action-set-as-techdiff"]`);
+  let slideSetAsConclusion= document.querySelector(`div#${owner.id} a[target="action-set-as-conclusion"]`);
+
+  slideSetAsIntro.addEventListener("click", (e)=>{
+    intro_preview.style.backgroundImage = `url("/slides/${owner.childNodes[1].innerHTML}")`;
+    localStorage.setItem("currentIntroSlide", owner.childNodes[1].innerHTML);
+  });
+  
+  slideSetAsTechDiff.addEventListener("click", (e)=>{
+    techdiff_preview.style.backgroundImage = `url("/slides/${owner.childNodes[1].innerHTML}")`;
+    localStorage.setItem("currentTechDiffSlide", owner.childNodes[1].innerHTML);
+  });
+  
+  slideSetAsConclusion.addEventListener("click", (e)=>{
+    conc_preview.style.backgroundImage = `url("/slides/${owner.childNodes[1].innerHTML}")`;
+    localStorage.setItem("currentConclusionSlide", owner.childNodes[1].innerHTML);
+  });
+}
+
+function checkToClearPreviewOnSlideDelete(owner) {
+  if (localStorage["currentIntroSlide"] === owner.childNodes[1].innerHTML) {
+    intro_preview.style.backgroundImage = "";
+    localStorage["currentIntroSlide"] = "";
+  } 
+  if (localStorage["currentTechDiffSlide"] === owner.childNodes[1].innerHTML) {
+    techdiff_preview.style.backgroundImage = ""
+    localStorage["currentTechDiffSlide"] = "";
+  } 
+  if (localStorage["currentConclusionSlide"] === owner.childNodes[1].innerHTML) {
+    conc_preview.style.backgroundImage = ""
+    localStorage["currentConclusionSlide"] = "";
+  }
+}
+
+// slide delete pill button.
 function setupDeleteButton(owner, route, elementWithFilename, onDeleteConfirmed) {
   let deleteBtn = document.querySelector(`#${owner.id} .media-delete-btn`);
   let ogDeleteContents = deleteBtn.innerHTML;
@@ -832,33 +898,10 @@ function setupDeleteButton(owner, route, elementWithFilename, onDeleteConfirmed)
         //Reset delete button.
         deleteBtn.innerHTML = ogDeleteContents;
       });
+      checkToClearPreviewOnSlideDelete(owner);
     }
   });
 }
-
-/* SLIDE CONTROLS */
-/* It seems that now, we should request a list of slides from Unity. Unity could have a list of strings or urls. This
-* list could be sent as a part of app status, so if this list changes, all operators get this updated info. Might also
-* be helpful since Unity could also report on whether the slide is cached or not, if there were any problems loading it
-* etc. */
-let slideTab = document.getElementById("nav-slide-tab");
-let slideFieldset = document.getElementById("slide-fieldset");
-let slideBtnContainer = document.getElementById("slide-btn-container");
-let slideSwitchBtn = document.getElementById("slide-btn-element");
-let slideSwitchBtns = [];
-let slideClearBtn = document.getElementById("slide-clear-btn");
-slideTab.addEventListener("click", onSlideTabClicked);
-slideClearBtn.addEventListener("click", onSlideClearClicked);
-
-let intro_preview = document.getElementById("intro-preview");
-let techdiff_preview = document.getElementById("techdiff-preview");
-let conc_preview = document.getElementById("conc-preview");
-
-function onSlideClearClicked() {
-  sendClickEvent(myVideoPlayer, OperatorControls._LiveButton);
-}
-
-slideSwitchBtn.style.display = "none";
 
 function validateSlideSwitchBtns(slides) {
   let setupSlide = function (slide) {
@@ -1010,9 +1053,7 @@ batchSlideFileInput.addEventListener("change", batchFileInputChanged) // todo ma
 let batchSlideUploadBtn = document.getElementById("batch-slide-upload-btn") // todo Make this function less specific as well. Verify files based on extension.
 batchSlideUploadBtn.addEventListener("click", uploadCustomSlideClicked)
 
-/** SLIDE BROWSE CONTROLS */
-
-/** HOLD MUSIC BROWSE CONTROLS */
+/** HOLD MUSIC PREVIEW CONTROLS */
 let holdMusicSelect = document.getElementById("hold-music-select")
 let holdMusicOptionGroup = document.getElementById("hold-music-options-group")
 holdMusicSelect.addEventListener("change", UpdateHoldMusicBrowsePreviewElement)
@@ -1045,10 +1086,11 @@ function UpdateBrowsePreviewElement(lmtRoute, element, select, srcRoute) {
 }
 
 function UpdateSlideBrowsePreviewElement() {
-  UpdateEachSlidePreview("/last_slide_update", intro_preview, "intro")
-  UpdateEachSlidePreview("/last_slide_update", techdiff_preview, "technicalDifficulty")
-  UpdateEachSlidePreview("/last_slide_update", conc_preview, "conclusion")
+  // UpdateEachSlidePreview("/last_slide_update", intro_preview, "intro")
+  // UpdateEachSlidePreview("/last_slide_update", techdiff_preview, "technicalDifficulty")
+  // UpdateEachSlidePreview("/last_slide_update", conc_preview, "conclusion")
 }
+
 function UpdateHoldMusicBrowsePreviewElement() {
   UpdateBrowsePreviewElement("/last_holding_music_update", holdMusicAudioPlayer, holdMusicSelect, "/music")
 }
@@ -1306,7 +1348,7 @@ function uploadCustomSlideClicked() {
       formData.append(input.name, input.file)
   
       let request = new XMLHttpRequest();
-      createUploadProgressTracker(parentTracker, request, input.name, FetchAllUploadedMediaAndUpdateDash);
+      createUploadProgressTracker(parentTracker, request, input.name);
       request.onload = function() {
         if (request.status >= 200 && request.status < 300) {
           resolve(request.response);
@@ -1323,6 +1365,7 @@ function uploadCustomSlideClicked() {
   // After all files are done uploading re-enable upload button.
   Promise.all(uploads).then(() => {
     batchSlideUploadBtn.disabled = false;
+    FetchAllUploadedMediaAndUpdateDash();
   })
 
 }
