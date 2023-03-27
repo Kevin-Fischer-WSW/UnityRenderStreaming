@@ -21,7 +21,7 @@
 #slide-clear-btn, #video-clear-btn {
   background-color: #7FDB6A; }
 
-#slide-btn-container {
+#slide-btn-container, #video-btn-container {
   border: 3px solid #3D3D3D; }
 
 #video-progress {
@@ -134,13 +134,13 @@
 #archive-btn:hover {
   background-color: #db3333; }
 
-#stream-settings, #logout {
+#logout, #stream-settings {
   cursor: pointer;
-  font-size: 32px;
   float: right;
-  color: white;
-  height: 40px;
-  width: 40px; }
+  color: white; }
+
+.bi-gear-fill, .bi-box-arrow-right {
+  font-size: 32px; }
 
 #stream-settings:hover, #logout:hover {
   color: #000; }
@@ -198,8 +198,12 @@ video {
   background-color: #4c4c4c;
   height: 8%;
   border: none;
+  border-radius: 5px;
   color: white;
-  padding: 0.2rem; }
+  padding: 0.2rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  text-align: center; }
 
 /*!
    * Bootstrap  v5.2.2 (https://getbootstrap.com/)
@@ -8905,10 +8909,10 @@ button, input, optgroup, select, textarea {
   top: 0;
   right: 0; }
 
-.media-three-dots-btn {
+.media-set-as-btn {
   position: absolute;
   top: 0;
-  right: 11%; }
+  right: 42px; }
 
 .media-btn-element {
   max-width: 30%;
