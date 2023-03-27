@@ -850,13 +850,9 @@ let slideClearBtn = document.getElementById("slide-clear-btn");
 slideTab.addEventListener("click", onSlideTabClicked);
 slideClearBtn.addEventListener("click", onSlideClearClicked);
 
-function onSlideTabClicked() {
-  unityFetch("/getHoldingSlides")
-    .then(resp => resp.json())
-    .then(json => {
-      validateSlideSwitchBtns(json);
-    })
-}
+let intro_preview = document.getElementById("intro-preview");
+let techdiff_preview = document.getElementById("techdiff-preview");
+let conc_preview = document.getElementById("conc-preview");
 
 function onSlideClearClicked() {
   sendClickEvent(myVideoPlayer, OperatorControls._LiveButton);
@@ -1015,10 +1011,6 @@ let batchSlideUploadBtn = document.getElementById("batch-slide-upload-btn") // t
 batchSlideUploadBtn.addEventListener("click", uploadCustomSlideClicked)
 
 /** SLIDE BROWSE CONTROLS */
-let slideSelect = document.getElementById("slide-select")
-let customSlideOptionGroup = document.getElementById("custom-slide-option-group")
-slideSelect.addEventListener("change", UpdateSlideBrowsePreviewElement)
-let slideImg = document.getElementById("slide-img")
 
 /** HOLD MUSIC BROWSE CONTROLS */
 let holdMusicSelect = document.getElementById("hold-music-select")
@@ -1032,18 +1024,30 @@ let videoOptionGroup = document.getElementById("video-option-group")
 videoSelect.addEventListener("change", UpdateVideoBrowsePreviewElement)
 let videoPlayer = document.getElementById("video")
 
+function UpdateEachSlidePreview(lmtRoute, element, type) {
+  fetch(`${lmtRoute}/${type}`)
+  .then(value => value.json())
+  .then(value => {
+    let lastModifiedTime;
+    lastModifiedTime = value.lastUpdate
+    element.style.backgroundImage = `url(/slides/${type}?${lastModifiedTime.toString()})`
+  })
+}
+
 function UpdateBrowsePreviewElement(lmtRoute, element, select, srcRoute) {
   fetch(`${lmtRoute}/{element.value}`)
     .then(value => value.json())
     .then(value => {
       let lastModifiedTime;
       lastModifiedTime = value.lastUpdate
-      element.src = `${srcRoute}/${select.value}?${lastModifiedTime.toString()}`
+      element.src  = `${srcRoute}/${select.value}?${lastModifiedTime.toString()}`;
     })
 }
 
 function UpdateSlideBrowsePreviewElement() {
-  UpdateBrowsePreviewElement("/last_slide_update", slideImg, slideSelect, "/slides")
+  UpdateEachSlidePreview("/last_slide_update", intro_preview, "intro")
+  UpdateEachSlidePreview("/last_slide_update", techdiff_preview, "technicalDifficulty")
+  UpdateEachSlidePreview("/last_slide_update", conc_preview, "conclusion")
 }
 function UpdateHoldMusicBrowsePreviewElement() {
   UpdateBrowsePreviewElement("/last_holding_music_update", holdMusicAudioPlayer, holdMusicSelect, "/music")
@@ -1071,8 +1075,8 @@ function FetchAllUploadedMediaAndUpdateDash() {
   unityFetch("/getHoldingSlides")
     .then(value => value.json())
     .then(slides => {
-      //UpdateOptionGroupWithValues(customSlideOptionGroup, slides);
-      //UpdateSlideBrowsePreviewElement();
+      UpdateOptionGroupWithValues(customSlideOptionGroup, slides);
+      UpdateSlideBrowsePreviewElement();
       validateSlideSwitchBtns(slides);
     })
   // Fetch holding music.
@@ -1616,7 +1620,7 @@ let navLayoutTabBtn = document.getElementById("nav-layout-tab");
 navLayoutTabBtn.addEventListener("click", ()=>{navLayoutTabBtn.scrollIntoView();});
 
 let navSlideTabBtn = document.getElementById("nav-slide-tab");
-navSlideTabBtn.addEventListener("click", ()=>{navSlideTabBtn.scrollIntoView();});
+navSlideTabBtn.addEventListener("click", ()=>{UpdateSlideBrowsePreviewElement(); navSlideTabBtn.scrollIntoView();});
 
 let navMusicTabBtn = document.getElementById("nav-music-tab");
 navMusicTabBtn.addEventListener("click", ()=>{navSlideTabBtn.scrollIntoView();});
