@@ -348,7 +348,7 @@ function appStatusReceived(json) {
   `Stream: ${jsonParsed.streaming ? "Yes": "No"} |
   Recording: ${jsonParsed.recording ? "Yes": "No"} |
   Holding Slide: ${jsonParsed.holdingSlide} |
-  Holding Music: ${jsonParsed.playingHoldingMusic ? "Playing" : "Not Playing"} | 
+  Holding Music: ${jsonParsed.playingHoldingMusic ? "Playing" : "Not Playing"} |
   Holding Video: ${jsonParsed. playingVideo ? "Playing" : "Not Playing"}.`
 
   if (jsonParsed.inMeeting || jsonParsed.meetingSimulated) {
@@ -486,7 +486,7 @@ function onJoinClick() {
 }
 
 function onLeaveClicked() {
-  
+
   sendClickEvent(myVideoPlayer, OperatorControls._LeaveMeetingButton);
 }
 
@@ -828,7 +828,7 @@ function onSlideTabClicked() {
 /** Scratch work on logic */
 if (localStorage["currentIntroSlide"] !== "") {
   intro_preview.style.backgroundImage = `url("/slides/${localStorage["currentIntroSlide"]}")`;
-} 
+}
 if (localStorage["currentTechDiffSlide"] !== "") {
   techdiff_preview.style.backgroundImage = `url("/slides/${localStorage["currentTechDiffSlide"]}")`;
 }
@@ -851,12 +851,12 @@ function setupSlideSetAsOptionsButton(owner) {
     intro_preview.style.backgroundImage = `url("/slides/${owner.childNodes[1].innerHTML}")`;
     localStorage.setItem("currentIntroSlide", owner.childNodes[1].innerHTML);
   });
-  
+
   slideSetAsTechDiff.addEventListener("click", (e)=>{
     techdiff_preview.style.backgroundImage = `url("/slides/${owner.childNodes[1].innerHTML}")`;
     localStorage.setItem("currentTechDiffSlide", owner.childNodes[1].innerHTML);
   });
-  
+
   slideSetAsConclusion.addEventListener("click", (e)=>{
     conc_preview.style.backgroundImage = `url("/slides/${owner.childNodes[1].innerHTML}")`;
     localStorage.setItem("currentConclusionSlide", owner.childNodes[1].innerHTML);
@@ -867,11 +867,11 @@ function checkToClearPreviewOnSlideDelete(owner) {
   if (localStorage["currentIntroSlide"] === owner.childNodes[1].innerHTML) {
     intro_preview.style.backgroundImage = "";
     localStorage["currentIntroSlide"] = "";
-  } 
+  }
   if (localStorage["currentTechDiffSlide"] === owner.childNodes[1].innerHTML) {
     techdiff_preview.style.backgroundImage = ""
     localStorage["currentTechDiffSlide"] = "";
-  } 
+  }
   if (localStorage["currentConclusionSlide"] === owner.childNodes[1].innerHTML) {
     conc_preview.style.backgroundImage = ""
     localStorage["currentConclusionSlide"] = "";
@@ -883,7 +883,8 @@ function setupDeleteButton(owner, route, elementWithFilename, onDeleteConfirmed)
   let deleteBtn = document.querySelector(`#${owner.id} .media-delete-btn`);
   let ogDeleteContents = deleteBtn.innerHTML;
   let confirmDeleteContents = `Confirm delete?`;
-  deleteBtn.addEventListener("click", function () {
+  deleteBtn.addEventListener("click", function (ev) {
+    ev.stopPropagation();
     if (deleteBtn.innerHTML !== confirmDeleteContents) {
       // Confirm deletion.
       deleteBtn.innerHTML = confirmDeleteContents;
@@ -1126,7 +1127,6 @@ function FetchAllUploadedMediaAndUpdateDash() {
   unityFetch("/getHoldingSlides")
     .then(value => value.json())
     .then(slides => {
-      UpdateOptionGroupWithValues(customSlideOptionGroup, slides);
       UpdateSlideBrowsePreviewElement();
       validateSlideSwitchBtns(slides);
     })
@@ -1250,7 +1250,7 @@ function CategorizeSlideFilesByKeywordForUpload(files) {
       return false; // keep looking.
     })) {
       // Type could not be identified. Will upload as custom slide.
-      pushFormInput(file.name, file, "custom_slide")
+      pushFormInput(file.name, file, "slide")
       customSlideCount++;
     }
   }
@@ -1273,7 +1273,7 @@ function CategorizeSlideFilesBySlideTypeSelects(files) {
       uploadDescriptor.innerHTML += `'${file.name}' will be used as your ${select.dataset.type} slide.<br>`
     } else {
       // Type could not be identified. Will upload as custom slide.
-      pushFormInput(file.name, file, "custom_slide")
+      pushFormInput(file.name, file, "slide")
       customSlideCount++;
     }
   }
@@ -1314,7 +1314,7 @@ function editSlideBtnClicked() {
     // Create option for every slide.
     for (let i = 0; i < formInput.length; i++) {
       // Skip if not a slide.
-      if (formInput[i].type !== "slide" && formInput[i].type !== "custom_slide") continue;
+      if (formInput[i].type !== "slide") continue;
       let option = document.createElement("option");
       option.value = formInput[i].ogName;
       option.innerText = formInput[i].ogName;
@@ -1355,7 +1355,7 @@ function uploadCustomSlideClicked() {
       let formData = new FormData()
       formData.append("type", input.type)
       formData.append(input.name, input.file)
-  
+
       let request = new XMLHttpRequest();
       createUploadProgressTracker(parentTracker, request, input.name);
       request.onload = function() {
@@ -1363,12 +1363,12 @@ function uploadCustomSlideClicked() {
           resolve(request.response);
         } else {
           reject(request.statusText);
-        }}; 
+        }};
       request.open("POST", "/slide_upload");
       request.send(formData);
     })
   }
-  
+
   let uploads = formInput.map((file) => { return upload(file) });
 
   // After all files are done uploading re-enable upload button.
@@ -1672,7 +1672,7 @@ let navLayoutTabBtn = document.getElementById("nav-layout-tab");
 navLayoutTabBtn.addEventListener("click", ()=>{navLayoutTabBtn.scrollIntoView();});
 
 let navSlideTabBtn = document.getElementById("nav-slide-tab");
-navSlideTabBtn.addEventListener("click", ()=>{UpdateSlideBrowsePreviewElement(); navSlideTabBtn.scrollIntoView();});
+navSlideTabBtn.addEventListener("click", ()=>{onSlideTabClicked(); navSlideTabBtn.scrollIntoView();});
 
 let navMusicTabBtn = document.getElementById("nav-music-tab");
 navMusicTabBtn.addEventListener("click", ()=>{navSlideTabBtn.scrollIntoView();});
