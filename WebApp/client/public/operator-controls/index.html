@@ -176,9 +176,13 @@
             </div>
 
           </div>
-          <div class="modal-footer d-flex">
-            <button type="button" id="save-btn" class="btn btn-secondary">Save changes</button>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <div class="modal-footer d-inline-block">
+            <div class="form-check form-switch mt-2" style="float: left;">
+              <input class="form-check-input" type="checkbox" role="switch" id="advancedSettingsToggle">
+              <label class="form-check-label" for="advancedSettingsToggle">Advanced Settings</label>
+            </div>
+            <button type="button" class="btn btn-secondary float-end" data-bs-dismiss="modal">Close</button>
+            <button type="button" id="save-btn" class="btn btn-secondary float-end">Save changes</button>
           </div>
         </div>
       </div>
@@ -460,7 +464,7 @@
           </div>
           <div id="preview-music"class="border-top mt-2">
             <legend class="title text-white">Preview</legend>
-            <div class="container m-0 w-100 d-flex">
+            <div class="d-flex m-0 w-100">
               <select id="hold-music-select" class="form-select w-50" aria-label="Hold music select">
                 <!-- <option value="" selected disabled> Selected Track to Preview</option> -->
                 <optgroup id="hold-music-options-group" label="Music">
