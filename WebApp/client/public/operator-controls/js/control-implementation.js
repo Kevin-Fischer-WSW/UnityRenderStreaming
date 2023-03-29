@@ -847,35 +847,48 @@ function setupSlideSetAsOptionsButton(owner) {
   let slideSetAsIntro = document.querySelector(`div#${owner.id} a[target="action-set-as-intro"]`);
   let slideSetAsTechDiff = document.querySelector(`div#${owner.id} a[target="action-set-as-techdiff"]`);
   let slideSetAsConclusion= document.querySelector(`div#${owner.id} a[target="action-set-as-conclusion"]`);
+  let img = document.querySelector(`div#${owner.id} img`);
 
   slideSetAsIntro.addEventListener("click", (e)=>{
-    intro_preview.style.backgroundImage = `url("/slides/${owner.childNodes[1].innerHTML}")`;
-    localStorage.setItem("currentIntroSlide", owner.childNodes[1].innerHTML);
+     unityFetch(`/assignIntroSlide?url=${img.alt}`, {method:"PUT"})
+    .then( resp => { 
+      if (resp.ok) {
+        intro_preview.style.backgroundImage = img.src;
+      }
+    });
   });
 
   slideSetAsTechDiff.addEventListener("click", (e)=>{
-    techdiff_preview.style.backgroundImage = `url("/slides/${owner.childNodes[1].innerHTML}")`;
-    localStorage.setItem("currentTechDiffSlide", owner.childNodes[1].innerHTML);
+    unityFetch(`/assignTechnicalDifficultySlide?url=${img.alt}`, {method:"PUT"})
+    .then( resp => { 
+      if (resp.ok) {
+        techdiff_preview.style.backgroundImage = img.src;
+      }
+    });
   });
 
   slideSetAsConclusion.addEventListener("click", (e)=>{
-    conc_preview.style.backgroundImage = `url("/slides/${owner.childNodes[1].innerHTML}")`;
-    localStorage.setItem("currentConclusionSlide", owner.childNodes[1].innerHTML);
+    unityFetch(`/assignConclusionSlide?url=${img.alt}`, {method:"PUT"})
+    .then( resp => { 
+      if (resp.ok) {
+        conc_preview.style.backgroundImage = img.src;
+      }
+    });
   });
 }
 
+/* NEEDS FURTHER IMPLEMENTATION */
 function checkToClearPreviewOnSlideDelete(owner) {
-  if (localStorage["currentIntroSlide"] === owner.childNodes[1].innerHTML) {
+  let img = document.querySelector(`div#${owner.id} img`);
+
+  if (img.src ===  intro_preview.style.backgroundImage) {
     intro_preview.style.backgroundImage = "";
-    localStorage["currentIntroSlide"] = "";
   }
-  if (localStorage["currentTechDiffSlide"] === owner.childNodes[1].innerHTML) {
+  else if (img.src === techdiff_preview.style.backgroundImage) {
     techdiff_preview.style.backgroundImage = ""
-    localStorage["currentTechDiffSlide"] = "";
   }
-  if (localStorage["currentConclusionSlide"] === owner.childNodes[1].innerHTML) {
+  else if (img.src === conc_preview.style.backgroundImage) {
     conc_preview.style.backgroundImage = ""
-    localStorage["currentConclusionSlide"] = "";
   }
 }
 
