@@ -372,14 +372,14 @@
       <div class="tab-pane fade" id="nav-slide" role="tabpanel" aria-labelledby="nav-slide-tab">
         <fieldset id="slide-fieldset">
           <legend class="title text-white mt-2">Slide controls</legend>
-          
+
           <div class="btn-group d-flex w-100 mt-2">
             <button id= "intro-preview" type="button" class="btn btn-primary"><span class="bg-dark text-light p-1">Intro</span></button>
             <button id= "techdiff-preview" type="button" class="btn btn-primary"><span class="bg-dark text-light p-1">Technical Difficulty</span></button>
             <button id= "conc-preview" type="button" class="btn btn-primary"><span class="bg-dark text-light p-1">Conclusion</span></button>
             <button id="slide-clear-btn" type="button" class="btn btn-primary">Live</button>
           </div>
-          
+
           <legend class="title text-white border-top mt-2">Custom Slides</legend>
           <div id="slide-btn-container" class="container overflow-auto overflow-div d-flex flex-wrap rounded w-60 mt-2">
             <!-- Single slide control element. Will be cloned for each slide -->
@@ -426,7 +426,7 @@
             <div class="row gap-2 ">
               <div class="col-sm bg-dark rounded">
                 <h6 class="text-white m-0 p-1">Library</h6>
-                <div id="library" class="overflow-auto overflow-div p-1">    
+                <div id="library" class="overflow-auto overflow-div p-1">
                     <div id="track-in-library" class="input-group flex-nowrap mb-1">
                       <div class="input-group-text flex-grow-1 overflow-hidden bg-secondary text-white border-0">
                         <span class="track-title">Track title goes here.</span>
@@ -479,9 +479,9 @@
           <legend class="title text-white mt-2">Video controls</legend>
           <fieldset id="video-fieldset-bar">
             <!-- Video controls bar -->
-            <div class="d-flex w-100 gap-5 mb-3">   
+            <div class="d-flex w-100 gap-5 mb-3">
               <button id="video-play-stop-btn" type="button" class="btn btn-secondary"><i class="bi bi-play"></i></button>
-              
+
               <div class="input-group w-75">
                 <div class="input-group-prepend">
                   <label class="text-white" for="video-progress">Progress</label>
@@ -489,7 +489,7 @@
                 <input type="range" class="custom-range w-100" min="0" id="video-progress">
                 <span id="video-playback-time" class="text-white">00:00</span>
               </div>
-              
+
               <div class="input-group w-25">
                 <div class="input-group-prepend">
                   <label class="text-white" for="volume-range-video">Volume</label>
@@ -507,12 +507,21 @@
             <div id="video-btn-element" class="media-btn-element flex-column m-1">
               <span class="media-btn-label">Switch</span>
               <img src="..." alt="..." class="media-switch-thumb rounded">
+              <button class="media-set-as-btn btn btn-primary rounded-pill" type="button" data-bs-toggle="dropdown">
+                <i class="bi bi-three-dots"></i>
+              </button>
+              <ul class="dropdown-menu">
+                Set As
+                <li><a target="action-set-as-intro" class="dropdown-item">Intro</a></li>
+                <li><a target="action-set-as-techdiff" class="dropdown-item">Technical Difficulty</a></li>
+                <li><a target="action-set-as-conclusion" class="dropdown-item">Conclusion</a></li>
+              </ul>
               <button class="media-delete-btn btn btn-danger rounded-pill" type="button"><i
                   class="bi bi-trash"></i></button>
               <button class="media-left-btn btn btn-secondary"><i class="bi bi-volume-up"></i></button>
               <button class="media-right-btn btn btn-secondary"><i class="bi bi-volume-mute"></i></button>
             </div>
-            
+
           </div>
 
             <!-- Video Browsing -->
@@ -527,7 +536,7 @@
               <!-- Preview of video on server -->
               <div id="video-container"><video id="video" src="..." controls></video></div>
             </div>
-          
+
         </fieldset>
       </div>
 
@@ -543,7 +552,7 @@
           </div>
           <div id="message-div" class="lead"></div>
           <div id="log-div" class="overflow-auto p-3 bg-light overflow-div rounded"></div>
-          
+
           <div class="input-group mt-2 w-50">
             <select id="list-all-log-files" class="form-control form-select" required>
               <option selected value="none">None Selected</option>
@@ -605,7 +614,7 @@
             <input id="batch-slide-file-input" type="file" class="form-control" aria-label="Browse" value="Browse" multiple>
             <button id="batch-slide-upload-btn" class="btn btn-secondary" type="button">Upload</button>
           </div>
-          
+
           <div id="uploadTrackerContainer" class="container overflow-auto overflow-div"></div>
         </fieldset>
       </div>

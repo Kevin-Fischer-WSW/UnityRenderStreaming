@@ -412,9 +412,10 @@ function appStatusReceived(json) {
     } else {
       pendingBtn.innerHTML = "Start stream"
       viewModal.disabled = false;
-      if (jsonParsed.holdingSlide === "endOfStream" || jsonParsed.holdingSlide === "conclusion") {
-        sendClickEvent(myVideoPlayer, OperatorControls._LiveButton);
-      }
+      // todo: This causes a custom slide named "conclusion" to immediately be dismissed.
+      // if (jsonParsed.holdingSlide === "endOfStream" || jsonParsed.holdingSlide === "conclusion") {
+      //   sendClickEvent(myVideoPlayer, OperatorControls._LiveButton);
+      // }
     }
 
     if (jsonParsed.secondClickEndsStream) {
@@ -920,7 +921,7 @@ function validateSlideSwitchBtns(slides) {
     setupSlideSetAsOptionsButton(slide);
     setupDeleteButton(slide, "/uapp/deleteHoldingSlide?url={0}", span, onSlideTabClicked);
     slide.addEventListener("click", function () {
-      unityFetch("/setHoldingSlide?url=" + img.src, {method: "PUT"})
+      unityFetch("/setHoldingSlide?url=" + img.alt, {method: "PUT"})
         .then(response => {
           if (response.ok) {
             console.log("Slide set.");
@@ -933,15 +934,7 @@ function validateSlideSwitchBtns(slides) {
     let label = document.querySelector(`#${slide.id} span`);
     label.thingToDelete = slideInfo.url;
     label.innerHTML = slideInfo.name;
-    if (slideInfo.extension === "mp4" || slideInfo.extension === "mov" || slideInfo.extension === "webm") {
-      getVideoThumb(slideInfo.url, 1).then(function (blob) {
-        img.src = URL.createObjectURL(blob);
-      }).catch(function (err) {
-        img.src = slideInfo.url;
-      });
-    } else {
-      img.alt = img.src = slideInfo.url;
-    }
+    img.src = img.alt = slideInfo.url;
   }
   ValidateClonesWithJsonArray(slideSwitchBtn, slideBtnContainer, slideSwitchBtns, setupSlide, slides, validateSlide);
 }
@@ -1105,7 +1098,7 @@ function UpdateHoldMusicBrowsePreviewElement() {
   UpdateBrowsePreviewElement("/last_holding_music_update", holdMusicAudioPlayer, holdMusicSelect, "/music")
 }
 function UpdateVideoBrowsePreviewElement() {
-  UpdateBrowsePreviewElement("/last_video_update", videoPlayer, videoSelect, "/videos")
+  UpdateBrowsePreviewElement("/last_slide_update", videoPlayer, videoSelect, "/slides")
 }
 
 function UpdateOptionGroupWithValues(optionGroup, options) {
@@ -1139,10 +1132,11 @@ function FetchAllUploadedMediaAndUpdateDash() {
       validateTracksInLibrary(music);
     })
   // Fetch videos.
-  fetch("/all_videos")
+  unityFetch("/getVideos")
     .then(value => value.json())
     .then(videos => {
-      UpdateOptionGroupWithValues(videoOptionGroup, videos);
+      let videoNames = videos.map(video => video.name);
+      UpdateOptionGroupWithValues(videoOptionGroup, videoNames);
       UpdateVideoBrowsePreviewElement();
       validateVideoSwitchBtns(videos);
     })
@@ -1198,10 +1192,9 @@ function clearFormInput() {
   formInput = []
 }
 
-function pushFormInput(nameOnServer, file, type) {
+function pushFormInput(file, type) {
   formInput.push({
     type: type,
-    name: nameOnServer,
     ogName: file.name,
     file: file
   })
@@ -1217,11 +1210,11 @@ function batchFileInputChanged(){
   CategorizeSlideFilesByKeywordForUpload(slideFiles)
   // Simply push music and videos.
   for (let musicFile of musicFiles) {
-    pushFormInput(musicFile.name, musicFile, "music")
+    pushFormInput(musicFile, "music")
   }
   uploadDescriptor.innerHTML  += `${musicFiles.length} music file(s),`
   for (let videoFile of videoFiles) {
-    pushFormInput(videoFile.name, videoFile, "video")
+    pushFormInput(videoFile, "video")
   }
   uploadDescriptor.innerHTML  += ` and ${videoFiles.length} video file(s).`
   // Show edit button.
@@ -1242,7 +1235,7 @@ function CategorizeSlideFilesByKeywordForUpload(files) {
       // Search for keywords in file name.
       if (keywords.some(keyword => file.name.toLowerCase().includes(keyword))) {
         // Append to form input. Will be uploaded as found type.
-        pushFormInput(tKey, file, "slide")
+        pushFormInput(file, "slide")
         uploadDescriptor.innerHTML += `'${file.name}' will be used as your ${tKey} slide.<br>`
         accountedSlides.push(tKey)
         return true;
@@ -1250,7 +1243,7 @@ function CategorizeSlideFilesByKeywordForUpload(files) {
       return false; // keep looking.
     })) {
       // Type could not be identified. Will upload as custom slide.
-      pushFormInput(file.name, file, "slide")
+      pushFormInput(file, "slide")
       customSlideCount++;
     }
   }
@@ -1269,11 +1262,11 @@ function CategorizeSlideFilesBySlideTypeSelects(files) {
     })
     if (select !== undefined) {
       // Type identified. Append to form input. Will be uploaded as found type.
-      pushFormInput(select.dataset.type, file, "slide")
+      pushFormInput(file, "slide")
       uploadDescriptor.innerHTML += `'${file.name}' will be used as your ${select.dataset.type} slide.<br>`
     } else {
       // Type could not be identified. Will upload as custom slide.
-      pushFormInput(file.name, file, "slide")
+      pushFormInput(file, "slide")
       customSlideCount++;
     }
   }
@@ -1335,11 +1328,11 @@ function editSlideSaveBtnClicked() {
   CategorizeSlideFilesBySlideTypeSelects(slideFiles)
   // Simply push music and videos.
   for (let musicFile of musicFiles) {
-    pushFormInput(musicFile.name, musicFile, "music")
+    pushFormInput(musicFile, "music")
   }
   uploadDescriptor.innerHTML += `${musicFiles.length} music file(s), `
   for (let videoFile of videoFiles) {
-    pushFormInput(videoFile.name, videoFile, "video")
+    pushFormInput(videoFile, "video")
   }
   uploadDescriptor.innerHTML += ` and ${videoFiles.length} video file(s).`
 }
@@ -1354,7 +1347,7 @@ function uploadCustomSlideClicked() {
     return new Promise(function(resolve, reject) {
       let formData = new FormData()
       formData.append("type", input.type)
-      formData.append(input.name, input.file)
+      formData.append(input.ogName, input.file)
 
       let request = new XMLHttpRequest();
       createUploadProgressTracker(parentTracker, request, input.name);
@@ -1424,47 +1417,33 @@ function onVideoClearClicked() {
 videoSwitchBtn.style.display = "none";
 
 function validateVideoSwitchBtns(videos) {
-  // Be sure there are enough buttons for videos.
-  if (videoSwitchBtns.length < videos.length) {
-    while (videoSwitchBtns.length < videos.length) {
-      // Elements must be added.
-      let clone = videoSwitchBtn.cloneNode(true);
-      clone.id += "-" + videoSwitchBtns.length;
-      clone.style.display = "flex"
-      videoBtnContainer.appendChild(clone);
-      videoSwitchBtns.push(clone);
-      let span = document.querySelector(`#${clone.id} span`)
-      setupDeleteButton(clone, "/video_delete/{0}", span, FetchAllUploadedMediaAndUpdateDash);
-      let button1 = document.querySelector(`#${clone.id} .media-left-btn`);
-      let button2 = document.querySelector(`#${clone.id} .media-right-btn`);
-      button1.addEventListener("click", function () {
-        let str = `${span.innerHTML},false`
-        sendStringSubmitEvent(myVideoPlayer, OperatorControls._ShowVideoButton, str);
-      })
-      button2.addEventListener("click", function () {
-        let str = `${span.innerHTML},true`
-        sendStringSubmitEvent(myVideoPlayer, OperatorControls._ShowVideoButton, str);
-      })
-
-    }
-  } else {
-    while (videoSwitchBtns.length > videos.length) {
-      // Elements must be destroyed.
-      videoSwitchBtns.pop().remove();
-    }
-  }
-  // Set data of each button.
-  for (let i = 0; i < videos.length; i += 1) {
-    let btn = videoSwitchBtns[i];
-    let img = document.querySelector(`#${btn.id} img`);
-    let label = document.querySelector(`#${btn.id} span`);
-    label.thingToDelete = label.innerHTML = videos[i];
-    getVideoThumb("/videos/" + label.innerHTML, 1).then(function (blob) {
-      img.src = URL.createObjectURL(blob);
-    }).catch(function (err) {
-      console.error(err);
+  let setupVideoSwitchBtn = function (videoBtn) {
+    videoBtn.style.display = "flex"
+    let label = document.querySelector(`#${videoBtn.id} span`)
+    let img = document.querySelector(`#${videoBtn.id} img`);
+    setupSlideSetAsOptionsButton(videoBtn);
+    setupDeleteButton(videoBtn, "/uapp/deleteVideo?url={0}", label, FetchAllUploadedMediaAndUpdateDash);
+    videoBtn.addEventListener("click", function () {
+      unityFetch("/setHoldingSlide?url=" + img.alt, {method: "PUT"})
+        .then(response => {
+          if (response.ok) {
+            console.log("Slide set");
+          }
+        });
     });
   }
+  let validateVideoSwitchBtn = function (video, slideInfo) {
+    let img = document.querySelector(`#${video.id} img`);
+    let label = document.querySelector(`#${video.id} span`);
+    label.thingToDelete = img.alt = slideInfo.url;
+    label.innerHTML = slideInfo.name;
+    getVideoThumb(slideInfo.url, 1).then(function (blob) {
+      img.src = URL.createObjectURL(blob);
+    }).catch(function (err) {
+      img.src = slideInfo.url;
+    });
+  }
+  ValidateClonesWithJsonArray(videoSwitchBtn, videoBtnContainer, videoSwitchBtns, setupVideoSwitchBtn, videos, validateVideoSwitchBtn);
 }
 
 /* LOGS DOWNLOAD */

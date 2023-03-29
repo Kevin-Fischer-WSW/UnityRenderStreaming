@@ -176,11 +176,6 @@ export const createServer = (config: Options): express.Application => {
     let music = path.join(config.holdingMusicDir, req.params.music);
     res.json({ lastUpdate: GetLastModifiedTime(music) })
   });
-  // Get the last time a video file was updated.
-  app.get('/last_video_update/:video', (req, res) => {
-    let video = path.join(config.videoDir, req.params.video);
-    res.json({ lastUpdate: GetLastModifiedTime(video) })
-  });
 
   let holdingSlidePath = config.holdingSlideDir;
   // Get specific slide image.
@@ -197,12 +192,6 @@ export const createServer = (config: Options): express.Application => {
     res.sendFile(path.join(holdingMusicDir, req.params.music))
   });
 
-  let videoDir = config.videoDir;
-  // Get specific video file.
-  app.get('/videos/:video', (req, res) => {
-    res.sendFile(path.join(videoDir, req.params.video))
-  });
-
   // Helper function to get all files in a directory.
   function getFiles(res, dir) {
     if (ValidatePathExists(res, dir) === false) return;
@@ -214,11 +203,6 @@ export const createServer = (config: Options): express.Application => {
   // Get all holding music.
   app.get('/all_holding_music', (req, res) => {
     getFiles(res, holdingMusicDir);
-  })
-
-  // Get all videos.
-  app.get('/all_videos', (req, res) => {
-    getFiles(res, videoDir);
   })
 
   function MoveFiles(res, files, _path){
@@ -259,7 +243,7 @@ export const createServer = (config: Options): express.Application => {
       } else if (fields.type === 'music') {
         uploadPath = holdingMusicDir;
       } else if (fields.type === 'video') {
-        uploadPath = videoDir;
+        uploadPath = holdingSlidePath;
       } else {
         res.status(400).json({messages: ['Invalid upload type']});
         return;
@@ -288,11 +272,6 @@ export const createServer = (config: Options): express.Application => {
   app.delete('/music_delete/:music', (req, res) => {
     let musicPath = path.join(holdingMusicDir, req.params.music);
     DeleteFile(res, musicPath);
-  });
-
-  app.delete('/video_delete/:video', (req, res) => {
-    let videoPath = path.join(videoDir, req.params.video);
-    DeleteFile(res, videoPath);
   });
 
   //list recordings
