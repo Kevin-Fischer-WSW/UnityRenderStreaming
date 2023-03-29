@@ -805,23 +805,20 @@ function validateSchema() {
   return true;
 }
 
-/* SLIDE CONTROLS */
-let slideFieldset = document.getElementById("slide-fieldset");
-let slideBtnContainer = document.getElementById("slide-btn-container");
-let slideSwitchBtn = document.getElementById("slide-btn-element");
-let slideSwitchBtns = [];
-let slideClearBtn = document.getElementById("slide-clear-btn");
-slideClearBtn.addEventListener("click", onSlideClearClicked);
 
-let intro_preview = document.getElementById("intro-preview");
-let techdiff_preview = document.getElementById("techdiff-preview");
-let conc_preview = document.getElementById("conc-preview");
 
+function onSlideTabClicked() {
+  unityFetch("/getHoldingSlides")
+    .then(resp => resp.json())
+    .then(json => {
+      validateSlideSwitchBtns(json);
+    })
+}
 
 /** Scratch work on logic */
 if (localStorage["currentIntroSlide"] !== "") {
   intro_preview.style.backgroundImage = `url("/slides/${localStorage["currentIntroSlide"]}")`;
-} 
+}
 if (localStorage["currentTechDiffSlide"] !== "") {
   techdiff_preview.style.backgroundImage = `url("/slides/${localStorage["currentTechDiffSlide"]}")`;
 }
@@ -844,12 +841,12 @@ function setupSlideSetAsOptionsButton(owner) {
     intro_preview.style.backgroundImage = `url("/slides/${owner.childNodes[1].innerHTML}")`;
     localStorage.setItem("currentIntroSlide", owner.childNodes[1].innerHTML);
   });
-  
+
   slideSetAsTechDiff.addEventListener("click", (e)=>{
     techdiff_preview.style.backgroundImage = `url("/slides/${owner.childNodes[1].innerHTML}")`;
     localStorage.setItem("currentTechDiffSlide", owner.childNodes[1].innerHTML);
   });
-  
+
   slideSetAsConclusion.addEventListener("click", (e)=>{
     conc_preview.style.backgroundImage = `url("/slides/${owner.childNodes[1].innerHTML}")`;
     localStorage.setItem("currentConclusionSlide", owner.childNodes[1].innerHTML);
@@ -860,11 +857,11 @@ function checkToClearPreviewOnSlideDelete(owner) {
   if (localStorage["currentIntroSlide"] === owner.childNodes[1].innerHTML) {
     intro_preview.style.backgroundImage = "";
     localStorage["currentIntroSlide"] = "";
-  } 
+  }
   if (localStorage["currentTechDiffSlide"] === owner.childNodes[1].innerHTML) {
     techdiff_preview.style.backgroundImage = ""
     localStorage["currentTechDiffSlide"] = "";
-  } 
+  }
   if (localStorage["currentConclusionSlide"] === owner.childNodes[1].innerHTML) {
     conc_preview.style.backgroundImage = ""
     localStorage["currentConclusionSlide"] = "";
@@ -872,11 +869,12 @@ function checkToClearPreviewOnSlideDelete(owner) {
 }
 
 // slide delete pill button.
-function setupDeleteButton(owner, route, spanWithFilename) {
+function setupDeleteButton(owner, route, elementWithFilename, onDeleteConfirmed) {
   let deleteBtn = document.querySelector(`#${owner.id} .media-delete-btn`);
   let ogDeleteContents = deleteBtn.innerHTML;
   let confirmDeleteContents = `Confirm delete?`;
-  deleteBtn.addEventListener("click", function () {
+  deleteBtn.addEventListener("click", function (ev) {
+    ev.stopPropagation();
     if (deleteBtn.innerHTML !== confirmDeleteContents) {
       // Confirm deletion.
       deleteBtn.innerHTML = confirmDeleteContents;
@@ -888,9 +886,10 @@ function setupDeleteButton(owner, route, spanWithFilename) {
       owner.style.opacity = 0.5;
       deleteBtn.innerHTML = "Deleting...";
       // Delete media.
-      fetch(`${route}/${spanWithFilename.innerHTML}`, {method: "DELETE"}).then(function (response) {
+      // todo Add callback to handle response. Also make route a parameter.
+      fetch(route.replace("{0}", elementWithFilename.thingToDelete), {method: "DELETE"}).then(function (response) {
         if (response.ok) {
-          FetchAllUploadedMediaAndUpdateDash();
+          onDeleteConfirmed();
         }
       }).finally(function () {
         // Reset owner opacity.
@@ -904,44 +903,37 @@ function setupDeleteButton(owner, route, spanWithFilename) {
 }
 
 function validateSlideSwitchBtns(slides) {
-  // Be sure there are enough buttons for slides.
-  if (slideSwitchBtns.length < slides.length) {
-    while (slideSwitchBtns.length < slides.length) {
-      // Elements must be added.
-      let clone = slideSwitchBtn.cloneNode(true);
-      clone.id += "-" + slideSwitchBtns.length;
-      clone.style.display = "flex"
-      slideBtnContainer.appendChild(clone);
-      slideSwitchBtns.push(clone);
-      let span = document.querySelector(`#${clone.id} span`)
-      //let deleteBtn = document.querySelector(`#${clone.id} .media-delete-btn`); // todo: make a function to create delete buttons.
-      setupSlideSetAsOptionsButton(clone);
-      setupDeleteButton(clone, "/slide_delete", span);
-      let button1 = document.querySelector(`#${clone.id} .media-left-btn`);
-      let button2 = document.querySelector(`#${clone.id} .media-right-btn`);
-      button1.addEventListener("click", function () {
-        let str = `${span.innerHTML},false`
-        sendStringSubmitEvent(myVideoPlayer, OperatorControls._CustomSlideButton, str);
-      })
-      button2.addEventListener("click", function () {
-        let str = `${span.innerHTML},true`
-        sendStringSubmitEvent(myVideoPlayer, OperatorControls._CustomSlideButton, str);
-      })
-    }
-  } else {
-    while (slideSwitchBtns.length > slides.length) {
-      // Elements must be destroyed.
-      slideSwitchBtns.pop().remove();
+  let setupSlide = function (slide) {
+    slide.style.display = "flex";
+    let span = document.querySelector(`#${slide.id} span`)
+    let img = document.querySelector(`#${slide.id} img`);
+    setupSlideSetAsOptionsButton(slide);
+    setupDeleteButton(slide, "/uapp/deleteHoldingSlide?url={0}", span, onSlideTabClicked);
+    slide.addEventListener("click", function () {
+      unityFetch("/setHoldingSlide?url=" + img.src, {method: "PUT"})
+        .then(response => {
+          if (response.ok) {
+            console.log("Slide set.");
+          }
+        })
+    });
+  }
+  let validateSlide = function (slide, slideInfo) {
+    let img = document.querySelector(`#${slide.id} img`);
+    let label = document.querySelector(`#${slide.id} span`);
+    label.thingToDelete = slideInfo.url;
+    label.innerHTML = slideInfo.name;
+    if (slideInfo.extension === "mp4" || slideInfo.extension === "mov" || slideInfo.extension === "webm") {
+      getVideoThumb(slideInfo.url, 1).then(function (blob) {
+        img.src = URL.createObjectURL(blob);
+      }).catch(function (err) {
+        img.src = slideInfo.url;
+      });
+    } else {
+      img.alt = img.src = slideInfo.url;
     }
   }
-  // Set data of each button.
-  for (let i = 0; i < slides.length; i += 1) {
-    let btn = slideSwitchBtns[i];
-    let img = document.querySelector(`#${btn.id} img`);
-    let label = document.querySelector(`#${btn.id} span`);
-    label.innerHTML = slides[i];
-    img.alt = img.src = `/slides/${slides[i]}`;
-  }
+  ValidateClonesWithJsonArray(slideSwitchBtn, slideBtnContainer, slideSwitchBtns, setupSlide, slides, validateSlide);
 }
 
 /* Music and Video volume Level Helper */
@@ -989,7 +981,7 @@ function validateTracksInLibrary(tracks) {
   let setupBtn = function (clone) {
     clone.classList.remove("d-none");
     let span = document.querySelector(`#${clone.id} span`)
-    setupDeleteButton(clone, "/music_delete", span);
+    setupDeleteButton(clone, "/music_delete/{0}", span, FetchAllUploadedMediaAndUpdateDash);
     let addTrackBtn = document.querySelector(`#${clone.id} .add-track-btn`);
     addTrackBtn.addEventListener("click", function () {
       // Add to playlist
@@ -998,7 +990,7 @@ function validateTracksInLibrary(tracks) {
   }
   let validateBtn = function (btn, music) {
     let label = document.querySelector(`#${btn.id} span`);
-    label.innerHTML = music;
+    label.thingToDelete = label.innerHTML = music;
   }
   ValidateClonesWithJsonArray(trackInLibrary, library, tracksInLibrary, setupBtn, tracks, validateBtn)
 }
@@ -1122,7 +1114,7 @@ function UpdateOptionGroupWithValues(optionGroup, options) {
 
 function FetchAllUploadedMediaAndUpdateDash() {
   // Fetch custom slides.
-  fetch("/all_custom_slides")
+  unityFetch("/getHoldingSlides")
     .then(value => value.json())
     .then(slides => {
       UpdateSlideBrowsePreviewElement();
@@ -1248,7 +1240,7 @@ function CategorizeSlideFilesByKeywordForUpload(files) {
       return false; // keep looking.
     })) {
       // Type could not be identified. Will upload as custom slide.
-      pushFormInput(file.name, file, "custom_slide")
+      pushFormInput(file.name, file, "slide")
       customSlideCount++;
     }
   }
@@ -1271,7 +1263,7 @@ function CategorizeSlideFilesBySlideTypeSelects(files) {
       uploadDescriptor.innerHTML += `'${file.name}' will be used as your ${select.dataset.type} slide.<br>`
     } else {
       // Type could not be identified. Will upload as custom slide.
-      pushFormInput(file.name, file, "custom_slide")
+      pushFormInput(file.name, file, "slide")
       customSlideCount++;
     }
   }
@@ -1312,7 +1304,7 @@ function editSlideBtnClicked() {
     // Create option for every slide.
     for (let i = 0; i < formInput.length; i++) {
       // Skip if not a slide.
-      if (formInput[i].type !== "slide" && formInput[i].type !== "custom_slide") continue;
+      if (formInput[i].type !== "slide") continue;
       let option = document.createElement("option");
       option.value = formInput[i].ogName;
       option.innerText = formInput[i].ogName;
@@ -1353,7 +1345,7 @@ function uploadCustomSlideClicked() {
       let formData = new FormData()
       formData.append("type", input.type)
       formData.append(input.name, input.file)
-  
+
       let request = new XMLHttpRequest();
       createUploadProgressTracker(parentTracker, request, input.name);
       request.onload = function() {
@@ -1361,12 +1353,12 @@ function uploadCustomSlideClicked() {
           resolve(request.response);
         } else {
           reject(request.statusText);
-        }}; 
+        }};
       request.open("POST", "/slide_upload");
       request.send(formData);
     })
   }
-  
+
   let uploads = formInput.map((file) => { return upload(file) });
 
   // After all files are done uploading re-enable upload button.
@@ -1432,7 +1424,7 @@ function validateVideoSwitchBtns(videos) {
       videoBtnContainer.appendChild(clone);
       videoSwitchBtns.push(clone);
       let span = document.querySelector(`#${clone.id} span`)
-      setupDeleteButton(clone, "/video_delete", span);
+      setupDeleteButton(clone, "/video_delete/{0}", span, FetchAllUploadedMediaAndUpdateDash);
       let button1 = document.querySelector(`#${clone.id} .media-left-btn`);
       let button2 = document.querySelector(`#${clone.id} .media-right-btn`);
       button1.addEventListener("click", function () {
@@ -1456,7 +1448,7 @@ function validateVideoSwitchBtns(videos) {
     let btn = videoSwitchBtns[i];
     let img = document.querySelector(`#${btn.id} img`);
     let label = document.querySelector(`#${btn.id} span`);
-    label.innerHTML = videos[i];
+    label.thingToDelete = label.innerHTML = videos[i];
     getVideoThumb("/videos/" + label.innerHTML, 1).then(function (blob) {
       img.src = URL.createObjectURL(blob);
     }).catch(function (err) {
@@ -1670,7 +1662,7 @@ let navLayoutTabBtn = document.getElementById("nav-layout-tab");
 navLayoutTabBtn.addEventListener("click", ()=>{navLayoutTabBtn.scrollIntoView();});
 
 let navSlideTabBtn = document.getElementById("nav-slide-tab");
-navSlideTabBtn.addEventListener("click", ()=>{UpdateSlideBrowsePreviewElement(); navSlideTabBtn.scrollIntoView();});
+navSlideTabBtn.addEventListener("click", ()=>{onSlideTabClicked(); navSlideTabBtn.scrollIntoView();});
 
 let navMusicTabBtn = document.getElementById("nav-music-tab");
 navMusicTabBtn.addEventListener("click", ()=>{navSlideTabBtn.scrollIntoView();});
