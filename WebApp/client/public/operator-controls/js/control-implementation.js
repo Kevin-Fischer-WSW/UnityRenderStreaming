@@ -7,8 +7,9 @@ import { sendClickEvent, sendStringSubmitEvent } from "/videoplayer/js/register-
 import { myVideoPlayer, mainNotifications } from "/operator-controls/js/control-main.js";
 import { ValidateClonesWithJsonArray} from "/operator-controls/js/validation-helper.js";
 import { unityFetch } from "../../js/unity-fetch.js";
-import {getVideoThumb} from "../../js/video-thumbnail.js";
+import { getVideoThumb } from "../../js/video-thumbnail.js";
 import { createUploadProgressTracker } from "../../js/progresstracker.js";
+import { onEnableAdvancedSettings } from "./advancedSettings.js";
 
 
 mainNotifications.addEventListener('setup', function () {
@@ -357,7 +358,7 @@ function appStatusReceived(json) {
     joinMeetingBtn.disabled = true;
     leaveMeetingBtn.disabled = false;
     holdMusicFieldset.disabled = false;
-    musicPlayStopBtn.innerHTML = jsonParsed.playingHoldingMusic ? "Stop" : "Play";
+    musicPlayStopBtn.innerHTML = jsonParsed.playingHoldingMusic ? '<i class="bi bi-pause"></i>' : '<i class="bi bi-play"></i>';
     currentlyPlayingSpan.innerHTML = jsonParsed.currentlyPlayingTrack;
     if (jsonParsed.playingHoldingMusic) {
       holdingMusicTimer = Math.round(jsonParsed.currentTrackTimeLeft);
@@ -377,7 +378,6 @@ function appStatusReceived(json) {
     }
 
     videoFieldsetBar.disabled = !jsonParsed.videoIsShowing;
-
     if (jsonParsed.playingVideo) {
 
       videoTimer = Math.round(jsonParsed.currentVideoPlaybackTime);
@@ -805,7 +805,16 @@ function validateSchema() {
   return true;
 }
 
+let slideFieldset = document.getElementById("slide-fieldset");
+let slideBtnContainer = document.getElementById("slide-btn-container");
+let slideSwitchBtn = document.getElementById("slide-btn-element");
+let slideSwitchBtns = [];
+let slideClearBtn = document.getElementById("slide-clear-btn");
+slideClearBtn.addEventListener("click", onSlideClearClicked);
 
+let intro_preview = document.getElementById("intro-preview");
+let techdiff_preview = document.getElementById("techdiff-preview");
+let conc_preview = document.getElementById("conc-preview");
 
 function onSlideTabClicked() {
   unityFetch("/getHoldingSlides")
@@ -813,17 +822,6 @@ function onSlideTabClicked() {
     .then(json => {
       validateSlideSwitchBtns(json);
     })
-}
-
-/** Scratch work on logic */
-if (localStorage["currentIntroSlide"] !== "") {
-  intro_preview.style.backgroundImage = `url("/slides/${localStorage["currentIntroSlide"]}")`;
-}
-if (localStorage["currentTechDiffSlide"] !== "") {
-  techdiff_preview.style.backgroundImage = `url("/slides/${localStorage["currentTechDiffSlide"]}")`;
-}
-if (localStorage["currentConclusionSlide"] !== "") {
-  conc_preview.style.backgroundImage = `url("/slides/${localStorage["currentConclusionSlide"]}")`;
 }
 
 function onSlideClearClicked() {
@@ -1678,3 +1676,10 @@ navUploadTabBtn.addEventListener("click", ()=>{navUploadTabBtn.scrollIntoView();
 
 let navRecordingTabBtn = document.getElementById("nav-recording-tab");
 navRecordingTabBtn.addEventListener("click", ()=>{navRecordingTabBtn.scrollIntoView();});
+
+/* ADVANCED SETTINGS */
+let advancedSettingsToggle = document.getElementById("advancedSettingsToggle");
+let streamSettingsFieldset = document.getElementById("stream-settings-fieldset");
+let participantAutoShowBtnGrp = document.getElementById("participant-autoshow-btn-grp");
+advancedSettingsToggle.addEventListener("change", 
+() => {onEnableAdvancedSettings(advancedSettingsToggle, navZoomTabBtn, streamSettingsFieldset, participantAutoShowBtnGrp, navLayoutTabBtn, navLogTabBtn)});

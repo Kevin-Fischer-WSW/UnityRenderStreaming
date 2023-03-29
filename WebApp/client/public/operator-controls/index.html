@@ -90,7 +90,7 @@
 
           <!-- Modal Body -->
           <div class="modal-body">
-            <fieldset id="view-modal">
+            <fieldset id="stream-settings-fieldset" class="d-none">
 
               <div id="success-alert" class="alert alert-success d-none fade show align-items-center" role="alert">
                 <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img">
@@ -246,7 +246,7 @@
         <button class="nav-link" id="nav-participants-tab" data-bs-toggle="tab" data-bs-target="#nav-participants"
           type="button" role="tab" aria-controls="nav-participants" aria-selected="false">Participants
         </button>
-        <button class="nav-link" id="nav-layout-tab" data-bs-toggle="tab" data-bs-target="#nav-layout" type="button"
+        <button class="nav-link d-none" id="nav-layout-tab" data-bs-toggle="tab" data-bs-target="#nav-layout" type="button"
           role="tab" aria-controls="nav-layout" aria-selected="false">Layout
         </button>
         <button class="nav-link" id="nav-slide-tab" data-bs-toggle="tab" data-bs-target="#nav-slide" type="button"
@@ -258,7 +258,7 @@
         <button class="nav-link" id="nav-video-tab" data-bs-toggle="tab" data-bs-target="#nav-video" type="button"
           role="tab" aria-controls="nav-video" aria-selected="false">Video
         </button>
-        <button class="nav-link" id="nav-log-tab" data-bs-toggle="tab" data-bs-target="#nav-log" type="button"
+        <button class="nav-link d-none" id="nav-log-tab" data-bs-toggle="tab" data-bs-target="#nav-log" type="button"
           role="tab" aria-controls="nav-log" aria-selected="false">Log
         </button>
         <button class="nav-link" id="nav-upload-tab" data-bs-toggle="tab" data-bs-target="#nav-upload" type="button"
@@ -292,7 +292,7 @@
             <button id="hide-all-lower-thirds-btn" type="button" class="btn btn-secondary">Hide all lower
               thirds</button>
           </div>
-          <div class="btn-group w-50 mt-2" role="group" aria-label="Enable/Disable Autoshow all participants.">
+          <div id="participant-autoshow-btn-grp" class="btn-group d-none w-50 mt-2" role="group" aria-label="Enable/Disable Autoshow all participants.">
             <button id="enable-autoshow-btn" type="button" class="btn btn-secondary">Enable Auto Show</button>
             <button id="disable-autoshow-btn" type="button" class="btn btn-secondary">Disable Auto Show</button>
           </div>
