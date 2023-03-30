@@ -826,17 +826,6 @@ function onSlideTabClicked() {
     })
 }
 
-/** Scratch work on logic */
-if (localStorage["currentIntroSlide"] !== "") {
-  intro_preview.style.backgroundImage = `url("/slides/${localStorage["currentIntroSlide"]}")`;
-}
-if (localStorage["currentTechDiffSlide"] !== "") {
-  techdiff_preview.style.backgroundImage = `url("/slides/${localStorage["currentTechDiffSlide"]}")`;
-}
-if (localStorage["currentConclusionSlide"] !== "") {
-  conc_preview.style.backgroundImage = `url("/slides/${localStorage["currentConclusionSlide"]}")`;
-}
-
 function onSlideClearClicked() {
   sendClickEvent(myVideoPlayer, OperatorControls._LiveButton);
 }
@@ -850,47 +839,70 @@ function setupSlideSetAsOptionsButton(owner) {
   let img = document.querySelector(`div#${owner.id} img`);
 
   slideSetAsIntro.addEventListener("click", (e)=>{
-     unityFetch(`/assignIntroSlide?url=${img.alt}`, {method:"PUT"})
-    .then( resp => { 
-      if (resp.ok) {
-        intro_preview.style.backgroundImage = img.src;
-      }
-    });
+    unityFetch(`/assignIntroSlide?url=${img.alt}`, {method:"PUT"})
+      .then( resp => {
+        if (resp.ok) {
+          intro_preview.style.backgroundImage = `url("${img.src}")`;
+          fetchAssignedHoldingSlidesAndUpdatePreviews();
+        }
+      });
   });
 
   slideSetAsTechDiff.addEventListener("click", (e)=>{
     unityFetch(`/assignTechnicalDifficultySlide?url=${img.alt}`, {method:"PUT"})
-    .then( resp => { 
-      if (resp.ok) {
-        techdiff_preview.style.backgroundImage = img.src;
-      }
-    });
+      .then( resp => {
+        if (resp.ok) {
+          techdiff_preview.style.backgroundImage = `url("${img.src}")`;
+          fetchAssignedHoldingSlidesAndUpdatePreviews();
+        }
+      });
   });
 
   slideSetAsConclusion.addEventListener("click", (e)=>{
     unityFetch(`/assignConclusionSlide?url=${img.alt}`, {method:"PUT"})
-    .then( resp => { 
-      if (resp.ok) {
-        conc_preview.style.backgroundImage = img.src;
-      }
-    });
+      .then( resp => {
+        if (resp.ok) {
+          conc_preview.style.backgroundImage = `url("${img.src}")`;
+          fetchAssignedHoldingSlidesAndUpdatePreviews();
+        }
+      });
   });
+
 }
 
-/* NEEDS FURTHER IMPLEMENTATION */
-function checkToClearPreviewOnSlideDelete(owner) {
-  let img = document.querySelector(`div#${owner.id} img`);
+function fetchAssignedHoldingSlidesAndUpdatePreviews() {
+  unityFetch("/getAssignedHoldingSlides")
+    .then(resp => resp.json())
+    .then(json => {
+      // todo set to placeholder image instead of clearing.
+      intro_preview.style.backgroundImage = "";
+      techdiff_preview.style.backgroundImage = "";
+      conc_preview.style.backgroundImage = "";
 
-  if (img.src ===  intro_preview.style.backgroundImage) {
-    intro_preview.style.backgroundImage = "";
-  }
-  else if (img.src === techdiff_preview.style.backgroundImage) {
-    techdiff_preview.style.backgroundImage = ""
-  }
-  else if (img.src === conc_preview.style.backgroundImage) {
-    conc_preview.style.backgroundImage = ""
-  }
+      for (let i = 0; i < json.length; i++) {
+        let slideInfo = json[i];
+        if (slideInfo.isVideo) {
+          getVideoThumb(slideInfo.url, 1).then(blob => {
+            setBackgroundImageHelper(URL.createObjectURL(blob))
+          });
+        }else{
+          setBackgroundImageHelper(slideInfo.url);
+        }
+
+        function setBackgroundImageHelper(url) {
+          if (slideInfo.type === "intro") {
+            intro_preview.style.backgroundImage = `url("${url}")`;
+          } else if (slideInfo.type === "technicalDifficulties") {
+            techdiff_preview.style.backgroundImage = `url("${url}")`;
+          } else if (slideInfo.type === "outro") {
+            conc_preview.style.backgroundImage = `url("${url}")`;
+          }
+        }
+      }
+    })
 }
+// Update previews on load.
+fetchAssignedHoldingSlidesAndUpdatePreviews();
 
 // slide delete pill button.
 function setupDeleteButton(owner, route, elementWithFilename, onDeleteConfirmed) {
@@ -921,7 +933,7 @@ function setupDeleteButton(owner, route, elementWithFilename, onDeleteConfirmed)
         //Reset delete button.
         deleteBtn.innerHTML = ogDeleteContents;
       });
-      checkToClearPreviewOnSlideDelete(owner);
+      fetchAssignedHoldingSlidesAndUpdatePreviews();
     }
   });
 }
@@ -933,7 +945,7 @@ function validateSlideSwitchBtns(slides) {
     let img = document.querySelector(`#${slide.id} img`);
     setupSlideSetAsOptionsButton(slide);
     setupDeleteButton(slide, "/uapp/deleteHoldingSlide?url={0}", span, onSlideTabClicked);
-    slide.addEventListener("click", function () {
+    img.addEventListener("click", function () {
       unityFetch("/setHoldingSlide?url=" + img.alt, {method: "PUT"})
         .then(response => {
           if (response.ok) {
@@ -1436,7 +1448,7 @@ function validateVideoSwitchBtns(videos) {
     let img = document.querySelector(`#${videoBtn.id} img`);
     setupSlideSetAsOptionsButton(videoBtn);
     setupDeleteButton(videoBtn, "/uapp/deleteVideo?url={0}", label, FetchAllUploadedMediaAndUpdateDash);
-    videoBtn.addEventListener("click", function () {
+    img.addEventListener("click", function () {
       unityFetch("/setHoldingSlide?url=" + img.alt, {method: "PUT"})
         .then(response => {
           if (response.ok) {
