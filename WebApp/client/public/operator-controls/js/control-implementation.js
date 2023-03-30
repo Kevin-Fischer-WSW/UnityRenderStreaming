@@ -177,7 +177,7 @@ meetingNoInput.value = localStorage.getItem("urlOrNumber");
 /* STREAM PREFERENCES MODAL ELEMENTS */
 let streamPrefModal = document.getElementById("stream-pref-modal")
 let serverAddressSelect = document.getElementById('serverAddressSelect')
-let viewModal = document.getElementById("view-modal")
+let streamSettingsFieldset = document.getElementById("stream-settings-fieldset")
 
 let streamSettingsBtn = document.getElementById("stream-settings")
 streamSettingsBtn.addEventListener("click", updateStreamPref)
@@ -398,7 +398,7 @@ function appStatusReceived(json) {
     videoPlayPauseBtn.innerHTML = jsonParsed.playingVideo ? '<i class="bi bi-pause"></i>' : '<i class="bi bi-play"></i>';
 
     if (jsonParsed.streaming) {
-      viewModal.disabled = true;
+      streamSettingsFieldset.disabled = true;
       pendingBtn.innerHTML = "Intro Slide"
       if (jsonParsed.holdingSlide === "pending") {
         ActivateButtonHelper(pendingBtn, true)
@@ -411,7 +411,7 @@ function appStatusReceived(json) {
       }
     } else {
       pendingBtn.innerHTML = "Start stream"
-      viewModal.disabled = false;
+      streamSettingsFieldset.disabled = false;
       // todo: This causes a custom slide named "conclusion" to immediately be dismissed.
       // if (jsonParsed.holdingSlide === "endOfStream" || jsonParsed.holdingSlide === "conclusion") {
       //   sendClickEvent(myVideoPlayer, OperatorControls._LiveButton);
@@ -983,7 +983,7 @@ volumeRangeMusic.addEventListener("input", function () {
 
 let musicPlayStopBtn = document.getElementById("music-play-stop-btn");
 musicPlayStopBtn.addEventListener("click", function () {
-  if (musicPlayStopBtn.innerHTML === "Play") {
+  if (musicPlayStopBtn.innerHTML === `<i className="bi bi-play"></i>`) {
     sendClickEvent(myVideoPlayer, OperatorControls._PlayHoldingMusic);
   } else {
     sendClickEvent(myVideoPlayer, OperatorControls._StopHoldingMusic);
