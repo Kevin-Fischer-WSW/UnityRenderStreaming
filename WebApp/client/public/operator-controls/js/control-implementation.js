@@ -843,7 +843,7 @@ function setupSlideSetAsOptionsButton(owner) {
       .then( resp => {
         if (resp.ok) {
           intro_preview.style.backgroundImage = `url("${img.src}")`;
-          fetchAssignedHoldingSlidesAndUpdatePreviews();
+          FetchAssignedHoldingSlidesAndUpdatePreviews();
         }
       });
   });
@@ -853,7 +853,7 @@ function setupSlideSetAsOptionsButton(owner) {
       .then( resp => {
         if (resp.ok) {
           techdiff_preview.style.backgroundImage = `url("${img.src}")`;
-          fetchAssignedHoldingSlidesAndUpdatePreviews();
+          FetchAssignedHoldingSlidesAndUpdatePreviews();
         }
       });
   });
@@ -863,14 +863,14 @@ function setupSlideSetAsOptionsButton(owner) {
       .then( resp => {
         if (resp.ok) {
           conc_preview.style.backgroundImage = `url("${img.src}")`;
-          fetchAssignedHoldingSlidesAndUpdatePreviews();
+          FetchAssignedHoldingSlidesAndUpdatePreviews();
         }
       });
   });
 
 }
 
-function fetchAssignedHoldingSlidesAndUpdatePreviews() {
+function FetchAssignedHoldingSlidesAndUpdatePreviews() {
   unityFetch("/getAssignedHoldingSlides")
     .then(resp => resp.json())
     .then(json => {
@@ -902,7 +902,7 @@ function fetchAssignedHoldingSlidesAndUpdatePreviews() {
     })
 }
 // Update previews on load.
-fetchAssignedHoldingSlidesAndUpdatePreviews();
+FetchAssignedHoldingSlidesAndUpdatePreviews();
 
 // slide delete pill button.
 function setupDeleteButton(owner, route, elementWithFilename, onDeleteConfirmed) {
@@ -933,7 +933,7 @@ function setupDeleteButton(owner, route, elementWithFilename, onDeleteConfirmed)
         //Reset delete button.
         deleteBtn.innerHTML = ogDeleteContents;
       });
-      fetchAssignedHoldingSlidesAndUpdatePreviews();
+      FetchAssignedHoldingSlidesAndUpdatePreviews();
     }
   });
 }
@@ -1093,16 +1093,6 @@ let videoOptionGroup = document.getElementById("video-option-group")
 videoSelect.addEventListener("change", UpdateVideoBrowsePreviewElement)
 let videoPlayer = document.getElementById("video")
 
-function UpdateEachSlidePreview(lmtRoute, element, type) {
-  fetch(`${lmtRoute}/${type}`)
-  .then(value => value.json())
-  .then(value => {
-    let lastModifiedTime;
-    lastModifiedTime = value.lastUpdate
-    element.style.backgroundImage = `url(/slides/${type}?${lastModifiedTime.toString()})`
-  })
-}
-
 function UpdateBrowsePreviewElement(lmtRoute, element, select, srcRoute) {
   fetch(`${lmtRoute}/{element.value}`)
     .then(value => value.json())
@@ -1111,12 +1101,6 @@ function UpdateBrowsePreviewElement(lmtRoute, element, select, srcRoute) {
       lastModifiedTime = value.lastUpdate
       element.src  = `${srcRoute}/${select.value}?${lastModifiedTime.toString()}`;
     })
-}
-
-function UpdateSlideBrowsePreviewElement() {
-  // UpdateEachSlidePreview("/last_slide_update", intro_preview, "intro")
-  // UpdateEachSlidePreview("/last_slide_update", techdiff_preview, "technicalDifficulty")
-  // UpdateEachSlidePreview("/last_slide_update", conc_preview, "conclusion")
 }
 
 function UpdateHoldMusicBrowsePreviewElement() {
@@ -1145,7 +1129,6 @@ function FetchAllUploadedMediaAndUpdateDash() {
   unityFetch("/getHoldingSlides")
     .then(value => value.json())
     .then(slides => {
-      UpdateSlideBrowsePreviewElement();
       validateSlideSwitchBtns(slides);
     })
   // Fetch holding music.
@@ -1189,7 +1172,7 @@ let typeToKeyWords = {
 let extensionToMethod = {
   "slide" : ["png", "jpg", "jpeg"],
   "music" : ["mp3", "ogg", "wav"],
-  "video" : ["mp4", "webmd"]
+  "video" : ["mp4", "mov"]
 }
 
 function SortFilesByExtension(files){
@@ -1217,9 +1200,10 @@ function clearFormInput() {
   formInput = []
 }
 
-function pushFormInput(file, type) {
+function pushFormInput(file, type, assignTo = "none") {
   formInput.push({
     type: type,
+    assignTo: assignTo,
     ogName: file.name,
     file: file
   })
@@ -1239,7 +1223,7 @@ function batchFileInputChanged(){
   }
   uploadDescriptor.innerHTML  += `${musicFiles.length} music file(s),`
   for (let videoFile of videoFiles) {
-    pushFormInput(videoFile, "video")
+    pushFormInput(videoFile, "slide")
   }
   uploadDescriptor.innerHTML  += ` and ${videoFiles.length} video file(s).`
   // Show edit button.
@@ -1259,8 +1243,8 @@ function CategorizeSlideFilesByKeywordForUpload(files) {
       let keywords = typeToKeyWords[tKey]
       // Search for keywords in file name.
       if (keywords.some(keyword => file.name.toLowerCase().includes(keyword))) {
-        // Append to form input. Will be uploaded as found type.
-        pushFormInput(file, "slide")
+        // Append to form input. Will be assigned as found type after upload.
+        pushFormInput(file, "slide", tKey)
         uploadDescriptor.innerHTML += `'${file.name}' will be used as your ${tKey} slide.<br>`
         accountedSlides.push(tKey)
         return true;
@@ -1287,7 +1271,7 @@ function CategorizeSlideFilesBySlideTypeSelects(files) {
     })
     if (select !== undefined) {
       // Type identified. Append to form input. Will be uploaded as found type.
-      pushFormInput(file, "slide")
+      pushFormInput(file, "slide", select.dataset.type)
       uploadDescriptor.innerHTML += `'${file.name}' will be used as your ${select.dataset.type} slide.<br>`
     } else {
       // Type could not be identified. Will upload as custom slide.
@@ -1331,14 +1315,14 @@ function editSlideBtnClicked() {
     }
     // Create option for every slide.
     for (let i = 0; i < formInput.length; i++) {
-      // Skip if not a slide.
+      // Skip if not a video/slide.
       if (formInput[i].type !== "slide") continue;
       let option = document.createElement("option");
       option.value = formInput[i].ogName;
       option.innerText = formInput[i].ogName;
       select.appendChild(option);
       // Select option if it's name matches the slide type.
-      if (formInput[i].name === select.dataset.type) {
+      if (formInput[i].assignTo === select.dataset.type) {
         select.selectedIndex = i + 1;
       }
     }
@@ -1350,15 +1334,14 @@ function editSlideSaveBtnClicked() {
   // Clear descriptor
   uploadDescriptor.innerHTML = ""
   let [slideFiles, musicFiles, videoFiles] = SortFilesByExtension(batchSlideFileInput.files)
+  // Combine video and slide files.
+  slideFiles = slideFiles.concat(videoFiles)
   CategorizeSlideFilesBySlideTypeSelects(slideFiles)
-  // Simply push music and videos.
+  // Simply push music files.
   for (let musicFile of musicFiles) {
     pushFormInput(musicFile, "music")
   }
   uploadDescriptor.innerHTML += `${musicFiles.length} music file(s), `
-  for (let videoFile of videoFiles) {
-    pushFormInput(videoFile, "video")
-  }
   uploadDescriptor.innerHTML += ` and ${videoFiles.length} video file(s).`
 }
 
@@ -1381,18 +1364,33 @@ function uploadCustomSlideClicked() {
           resolve(request.response);
         } else {
           reject(request.statusText);
-        }};
+        }
+        if (input.assignTo !== "none"){
+          let assignTo2Route = {
+            "intro": "/assignIntroSlide",
+            "technicalDifficulty": "/assignTechnicalDifficultySlide",
+            "conclusion": "/assignConclusionSlide"
+          }
+          unityFetch(`${assignTo2Route[input.assignTo]}?url=/slides/${input.ogName}`, {method: "PUT"})
+            .then((resp) => {
+              if (resp.ok){
+                console.log("Slide assigned.")
+              }
+            })
+        }
+      };
       request.open("POST", "/slide_upload");
       request.send(formData);
     })
   }
 
-  let uploads = formInput.map((file) => { return upload(file) });
+  let uploads = formInput.map((input) => { return upload(input) });
 
   // After all files are done uploading re-enable upload button.
   Promise.all(uploads).then(() => {
     batchSlideUploadBtn.disabled = false;
     FetchAllUploadedMediaAndUpdateDash();
+    FetchAssignedHoldingSlidesAndUpdatePreviews();
   })
 
 }
