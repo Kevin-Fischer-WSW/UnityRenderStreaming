@@ -333,9 +333,6 @@ h4.card-title {
 //   color:#fff !important;
 // }
 
-
-
-
 .card-title {
   font-family: Roboto,sans-serif;
   font-weight: 300;
@@ -345,6 +342,10 @@ h4.card-title {
   border-bottom: 1px solid rgba(77,82,89,0.07);
 }
 
+.form-check-input:checked {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
 
 .ps-container {
   position: relative;

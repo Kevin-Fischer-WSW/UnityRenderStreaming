@@ -7,8 +7,9 @@ import { sendClickEvent, sendStringSubmitEvent } from "/videoplayer/js/register-
 import { myVideoPlayer, mainNotifications } from "/operator-controls/js/control-main.js";
 import { ValidateClonesWithJsonArray} from "/operator-controls/js/validation-helper.js";
 import { unityFetch } from "../../js/unity-fetch.js";
-import {getVideoThumb} from "../../js/video-thumbnail.js";
+import { getVideoThumb } from "../../js/video-thumbnail.js";
 import { createUploadProgressTracker } from "../../js/progresstracker.js";
+import { onEnableAdvancedSettings } from "./advancedSettings.js";
 
 
 mainNotifications.addEventListener('setup', function () {
@@ -348,7 +349,7 @@ function appStatusReceived(json) {
   `Stream: ${jsonParsed.streaming ? "Yes": "No"} |
   Recording: ${jsonParsed.recording ? "Yes": "No"} |
   Holding Slide: ${jsonParsed.holdingSlide} |
-  Holding Music: ${jsonParsed.playingHoldingMusic ? "Playing" : "Not Playing"} |
+  Holding Music: ${jsonParsed.playingHoldingMusic ? "Playing" : "Not Playing"} | 
   Holding Video: ${jsonParsed. playingVideo ? "Playing" : "Not Playing"}.`
 
   if (jsonParsed.inMeeting || jsonParsed.meetingSimulated) {
@@ -357,7 +358,7 @@ function appStatusReceived(json) {
     joinMeetingBtn.disabled = true;
     leaveMeetingBtn.disabled = false;
     holdMusicFieldset.disabled = false;
-    musicPlayStopBtn.innerHTML = jsonParsed.playingHoldingMusic ? "Stop" : "Play";
+    musicPlayStopBtn.innerHTML = jsonParsed.playingHoldingMusic ? '<i class="bi bi-pause"></i>' : '<i class="bi bi-play"></i>';
     currentlyPlayingSpan.innerHTML = jsonParsed.currentlyPlayingTrack;
     if (jsonParsed.playingHoldingMusic) {
       holdingMusicTimer = Math.round(jsonParsed.currentTrackTimeLeft);
@@ -377,7 +378,6 @@ function appStatusReceived(json) {
     }
 
     videoFieldsetBar.disabled = !jsonParsed.videoIsShowing;
-
     if (jsonParsed.playingVideo) {
 
       videoTimer = Math.round(jsonParsed.currentVideoPlaybackTime);
@@ -487,7 +487,7 @@ function onJoinClick() {
 }
 
 function onLeaveClicked() {
-
+  
   sendClickEvent(myVideoPlayer, OperatorControls._LeaveMeetingButton);
 }
 
@@ -806,7 +806,6 @@ function validateSchema() {
   return true;
 }
 
-/* SLIDE CONTROLS */
 let slideFieldset = document.getElementById("slide-fieldset");
 let slideBtnContainer = document.getElementById("slide-btn-container");
 let slideSwitchBtn = document.getElementById("slide-btn-element");
@@ -1690,3 +1689,10 @@ navUploadTabBtn.addEventListener("click", ()=>{navUploadTabBtn.scrollIntoView();
 
 let navRecordingTabBtn = document.getElementById("nav-recording-tab");
 navRecordingTabBtn.addEventListener("click", ()=>{navRecordingTabBtn.scrollIntoView();});
+
+/* ADVANCED SETTINGS */
+let advancedSettingsToggle = document.getElementById("advancedSettingsToggle");
+let streamSettingsFieldset = document.getElementById("stream-settings-fieldset");
+let participantAutoShowBtnGrp = document.getElementById("participant-autoshow-btn-grp");
+advancedSettingsToggle.addEventListener("change", 
+() => {onEnableAdvancedSettings(advancedSettingsToggle, navZoomTabBtn, streamSettingsFieldset, participantAutoShowBtnGrp, navLayoutTabBtn, navLogTabBtn)});
