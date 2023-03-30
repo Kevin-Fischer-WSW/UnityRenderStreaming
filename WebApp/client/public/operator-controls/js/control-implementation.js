@@ -349,7 +349,7 @@ function appStatusReceived(json) {
   `Stream: ${jsonParsed.streaming ? "Yes": "No"} |
   Recording: ${jsonParsed.recording ? "Yes": "No"} |
   Holding Slide: ${jsonParsed.holdingSlide} |
-  Holding Music: ${jsonParsed.playingHoldingMusic ? "Playing" : "Not Playing"} | 
+  Holding Music: ${jsonParsed.playingHoldingMusic ? "Playing" : "Not Playing"} |
   Holding Video: ${jsonParsed. playingVideo ? "Playing" : "Not Playing"}.`
 
   if (jsonParsed.inMeeting || jsonParsed.meetingSimulated) {
@@ -487,7 +487,7 @@ function onJoinClick() {
 }
 
 function onLeaveClicked() {
-  
+
   sendClickEvent(myVideoPlayer, OperatorControls._LeaveMeetingButton);
 }
 
@@ -1357,25 +1357,25 @@ function uploadCustomSlideClicked() {
       formData.append(input.ogName, input.file)
 
       let request = new XMLHttpRequest();
-      createUploadProgressTracker(parentTracker, request, input.name);
+      createUploadProgressTracker(parentTracker, request, input.ogName);
       request.onload = function() {
         if (request.status >= 200 && request.status < 300) {
           resolve(request.response);
+          if (input.assignTo !== "none"){
+            let assignTo2Route = {
+              "intro": "/assignIntroSlide",
+              "technicalDifficulty": "/assignTechnicalDifficultySlide",
+              "conclusion": "/assignConclusionSlide"
+            }
+            unityFetch(`${assignTo2Route[input.assignTo]}?url=/slides/${input.ogName}`, {method: "PUT"})
+              .then((resp) => {
+                if (resp.ok){
+                  console.log("Slide assigned.")
+                }
+              })
+          }
         } else {
           reject(request.statusText);
-        }
-        if (input.assignTo !== "none"){
-          let assignTo2Route = {
-            "intro": "/assignIntroSlide",
-            "technicalDifficulty": "/assignTechnicalDifficultySlide",
-            "conclusion": "/assignConclusionSlide"
-          }
-          unityFetch(`${assignTo2Route[input.assignTo]}?url=/slides/${input.ogName}`, {method: "PUT"})
-            .then((resp) => {
-              if (resp.ok){
-                console.log("Slide assigned.")
-              }
-            })
         }
       };
       request.open("POST", "/slide_upload");
@@ -1694,5 +1694,5 @@ navRecordingTabBtn.addEventListener("click", ()=>{navRecordingTabBtn.scrollIntoV
 let advancedSettingsToggle = document.getElementById("advancedSettingsToggle");
 let streamSettingsFieldset = document.getElementById("stream-settings-fieldset");
 let participantAutoShowBtnGrp = document.getElementById("participant-autoshow-btn-grp");
-advancedSettingsToggle.addEventListener("change", 
+advancedSettingsToggle.addEventListener("change",
 () => {onEnableAdvancedSettings(advancedSettingsToggle, navZoomTabBtn, streamSettingsFieldset, participantAutoShowBtnGrp, navLayoutTabBtn, navLogTabBtn)});
