@@ -983,7 +983,7 @@ volumeRangeMusic.addEventListener("input", function () {
 
 let musicPlayStopBtn = document.getElementById("music-play-stop-btn");
 musicPlayStopBtn.addEventListener("click", function () {
-  if (musicPlayStopBtn.innerHTML === `<i className="bi bi-play"></i>`) {
+  if (musicPlayStopBtn.innerHTML === `<i class="bi bi-play"></i>`) {
     sendClickEvent(myVideoPlayer, OperatorControls._PlayHoldingMusic);
   } else {
     sendClickEvent(myVideoPlayer, OperatorControls._StopHoldingMusic);
