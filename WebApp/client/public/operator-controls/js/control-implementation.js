@@ -1692,7 +1692,6 @@ navRecordingTabBtn.addEventListener("click", ()=>{navRecordingTabBtn.scrollIntoV
 
 /* ADVANCED SETTINGS */
 let advancedSettingsToggle = document.getElementById("advancedSettingsToggle");
-let streamSettingsFieldset = document.getElementById("stream-settings-fieldset");
 let participantAutoShowBtnGrp = document.getElementById("participant-autoshow-btn-grp");
 advancedSettingsToggle.addEventListener("change",
 () => {onEnableAdvancedSettings(advancedSettingsToggle, navZoomTabBtn, streamSettingsFieldset, participantAutoShowBtnGrp, navLayoutTabBtn, navLogTabBtn)});
