@@ -174,6 +174,21 @@ meetingNoInput.addEventListener("change", () => {
 })
 meetingNoInput.value = localStorage.getItem("urlOrNumber");
 
+/* RESET APP SETTINGS */
+let resetModal = document.getElementById("reset-modal");
+let resetAppSettingsBtn = document.getElementById("resetAppSettings");
+
+resetModal.addEventListener('shown.bs.modal', function () {
+  resetModal.focus()
+});
+
+resetAppSettingsBtn.addEventListener("click", onClickResetAppSettings);
+
+function onClickResetAppSettings() {
+  unityFetch("/resetAppSettings", {method:"DELETE"});
+  FetchAllUploadedMediaAndUpdateDash();
+}
+
 /* STREAM PREFERENCES MODAL ELEMENTS */
 let streamPrefModal = document.getElementById("stream-pref-modal")
 let serverAddressSelect = document.getElementById('serverAddressSelect')
@@ -249,7 +264,7 @@ async function updateStreamPref() {
     uname.value = data.streamServiceSettings.username;
     pwd.value = data.streamServiceSettings.password;
     streamUrl.innerHTML = data.streamServiceSettings.server;
-    boardData.innerHTML = data.streamServiceSettings.server + data.streamServiceSettings.key;
+    boardData.innerHTML = url[3] === "none" ? "" : data.streamServiceSettings.server + data.streamServiceSettings.key;
   }
 
 }

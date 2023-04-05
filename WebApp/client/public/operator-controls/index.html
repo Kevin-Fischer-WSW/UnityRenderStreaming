@@ -20,6 +20,7 @@
     <h1 class="display-5 border-bottom text-white d-inline-block w-100">Operator Dashboard
       <button id="logout" class="btn border-0 m-0" data-bs-toggle="modal" data-bs-target="#signout-modal"><i class="bi bi-box-arrow-right"></i></button>
       <button id="stream-settings" class="btn border-0 m-0" data-bs-toggle="modal" data-bs-target="#stream-pref-modal"><i class="bi bi-gear-fill"></i></button>
+      <button id="reset-to-default" class="btn border-0 m-0" data-bs-toggle="modal" data-bs-target="#reset-modal"><i class="bi bi-bootstrap-reboot"></i></i></button>
     </h1>
 
     <!-- Alert svgs -->
@@ -54,6 +55,24 @@
             </form>
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Stay</button>
 
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reset settings to default -->
+    <div class="modal fade" id="reset-modal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Reset Settings</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p>Are you sure you want to reset settings? <b>Note:</b> This will erase all uploaded media.</p>
+          </div>
+          <div class="modal-footer">
+            <button id="resetAppSettings" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Reset</button>
           </div>
         </div>
       </div>
