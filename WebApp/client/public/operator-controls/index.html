@@ -68,12 +68,14 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <fieldset class="input-group">
-              <input id="participant-rename" type="text" class="form-control">
-              <button id="rename-btn" class="btn btn-secondary" type="button" data-bs-dismiss="modal">Rename</button>
-            </fieldset>
+            <label for="participant-rename-name">Name</label>
+            <input id="participant-rename-name" type="text" class="form-control">
+            <label for="participant-rename-title">Title</label>
+            <input id="participant-rename-title" type="text" class="form-control">
           </div>
           <div class="modal-footer">
+            <button id="rename-btn" class="btn btn-secondary" type="button" data-bs-dismiss="modal">Rename</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           </div>
         </div>
       </div>
@@ -309,8 +311,8 @@
             </div>
 
             <span class="input-group-text" draggable="true"><i class="bi bi-grip-vertical"></i></span>
-            <input type="text" class="form-control name-input" placeholder="Participant's name"
-              aria-label="Participant's name">
+            <span class="input-group-text name-span" style="flex-grow: 1">Name & Title</span>
+            <button class="btn btn-secondary rename-btn" aria-label="Participant's name" data-bs-toggle="modal" data-bs-target="#rename-modal"><i class="bi bi-pencil"></i></button>
             <button class="btn btn-secondary visibility-btn" type="button"><i class="bi bi-eye"></i></button>
             <button class="btn btn-secondary mute-btn" type="button"><i class="bi bi-mic"></i></button>
             <button class="btn btn-secondary show-lower-third-btn" type="button"><i class="bi bi-type"></i></button>

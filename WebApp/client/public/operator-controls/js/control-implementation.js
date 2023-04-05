@@ -79,14 +79,16 @@ function validateParticipantOnVidCtrls() {
 
 /* RENAME MODAL ELEMENTS */
 let renameModal = document.getElementById("rename-modal")
-let participantName = document.getElementById("participant-rename")
+let participantName = document.getElementById("participant-rename-name")
+let participantTitle = document.getElementById("participant-rename-title")
 let renameButton = document.getElementById("rename-btn")
 let participantToRename;
 //TODO ALERT IF ANY ERRORS
 renameButton.addEventListener("click", function() {
   let p = participantJsonParsed[participantToRename];
-  let str = p.id + "," + participantName.value;
-  sendStringSubmitEvent(myVideoPlayer, OperatorControls._SetParticipantDisplayName, str);
+  let name = encodeURIComponent(participantName.value)
+  let title = encodeURIComponent(participantTitle.value)
+  unityFetch(`/setParticipantDisplayName?participantId=${p.id}&name=${name}&title=${title}`, {method: "PUT"})
 })
 renameModal.addEventListener('shown.bs.modal', function () {
   renameModal.focus()
@@ -153,7 +155,8 @@ function setupParticipantOnVidCtrl(node, idx) {
 
   renameEl.addEventListener("click", function() {
     let p = participantJsonParsed[idx];
-    participantName.value = p.username;
+    participantName.value = p.name;
+    participantTitle.value = p.title;
     participantToRename = idx;
   })
 
@@ -608,12 +611,14 @@ function validateParticipantInputGroups() {
   let validateGroup = function (clone, data){
     let visibilityBtn = document.querySelector(`#${clone.id} .visibility-btn`);
     let muteBtn = document.querySelector(`#${clone.id} .mute-btn`);
-    let nameInput = document.querySelector(`#${clone.id} .name-input`);
+    let nameSpan = document.querySelector(`#${clone.id} .name-span`);
 
     visibilityBtn.firstChild.className = data.visible ? "bi bi-eye" : "bi bi-eye-slash";
     muteBtn.firstChild.className = data.muted ? "bi bi-mic-mute" : "bi bi-mic";
-    if (nameInput !== document.activeElement) {
-      nameInput.value = data.username;
+    if (data.title === ""){
+      nameSpan.innerHTML = `<b>${data.name}</b>`;
+    }else{
+      nameSpan.innerHTML = `<b>${data.name}</b>&nbsp-&nbsp<i>${data.title}</i>`;
     }
   }
   ValidateClonesWithJsonArray(participantInputGroupOg, participantFieldset, participantInputGroups, setupGroup, participantJsonParsed, validateGroup);
@@ -632,7 +637,7 @@ function ClearSelectParticipantsOnDrag() {
 }
 
 function setupParticipantInputGroup(node, idx) {
-  let nameInput = document.querySelector("div#" + node.id + " .name-input")
+  let renameBtn = document.querySelector("div#" + node.id + " .rename-btn")
   let visibilityBtn = document.querySelector("div#" + node.id + " .visibility-btn")
   let muteBtn = document.querySelector("div#" + node.id + " .mute-btn")
   let lowerThirdBtn = document.querySelector("div#" + node.id + " .show-lower-third-btn")
@@ -684,10 +689,11 @@ function setupParticipantInputGroup(node, idx) {
     sendStringSubmitEvent(myVideoPlayer, OperatorControls._ToggleParticipantLowerThird, str);
   })
 
-  nameInput.addEventListener("change", function () {
-    let str = participantJsonParsed[idx].id + "," + nameInput.value;
-
-    sendStringSubmitEvent(myVideoPlayer, OperatorControls._SetParticipantDisplayName, str)
+  renameBtn.addEventListener("click", function () {
+    let p = participantJsonParsed[idx];
+    participantName.value = p.name;
+    participantTitle.value = p.title;
+    participantToRename = idx;
   })
 }
 
