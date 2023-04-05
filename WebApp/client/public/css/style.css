@@ -134,15 +134,15 @@
 #archive-btn:hover {
   background-color: #db3333; }
 
-#logout, #stream-settings {
+#logout, #stream-settings, #reset-to-default {
   cursor: pointer;
   float: right;
   color: white; }
 
-.bi-gear-fill, .bi-box-arrow-right {
+.bi-gear-fill, .bi-box-arrow-right, .bi-bootstrap-reboot {
   font-size: 32px; }
 
-#stream-settings:hover, #logout:hover {
+#stream-settings:hover, #logout:hover, #reset-to-default:hover {
   color: #000; }
 
 #video-players {
@@ -8892,6 +8892,7 @@ button, input, optgroup, select, textarea {
 .media-switch-thumb {
   aspect-ratio: 16/9;
   background-size: cover;
+  background-color: aliceblue;
   min-width: 100%; }
 
 .slide-switch-audio-btn, .media-left-btn, .media-right-btn {
