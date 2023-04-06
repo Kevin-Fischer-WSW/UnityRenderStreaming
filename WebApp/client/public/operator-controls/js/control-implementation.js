@@ -485,13 +485,25 @@ leaveMeetingBtn.addEventListener("click", onLeaveClicked)
 
 /* ZOOM CONTROL IMPLEMENTATION */
 function onJoinClick() {
-  let str = meetingNumberInput.value + "," + meetingPasswordInput.value;
-  sendStringSubmitEvent(myVideoPlayer, OperatorControls._JoinMeetingButton, str);
+  unityFetch(`/joinMeeting?meetingId=${meetingNumberInput.value}&password=${meetingPasswordInput.value}`, { method : "PUT"})
+    .then(response => {
+      if (response.ok) {
+        console.log("Joined meeting")
+      }else{
+        console.log(response.statusText)
+      }
+    })
 }
 
 function onLeaveClicked() {
-
-  sendClickEvent(myVideoPlayer, OperatorControls._LeaveMeetingButton);
+  unityFetch(`/leaveMeeting`, { method : "PUT"})
+    .then(response => {
+      if (response.ok) {
+        console.log("Left meeting")
+      }else{
+        console.log(response.statusText)
+      }
+    })
 }
 
 /* PARTICIPANT CONTROLS */
