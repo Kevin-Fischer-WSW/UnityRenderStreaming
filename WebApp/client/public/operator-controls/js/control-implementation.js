@@ -349,11 +349,12 @@ function appStatusReceived(json) {
   addParticipantSelectCheckEventListener(); // adds event listeners to each select checkbox
 
   generalStatBar.innerHTML =
-  `Stream: ${jsonParsed.streaming ? "Yes": "No"} |
-  Recording: ${jsonParsed.recording ? "Yes": "No"} |
+  `Stream: ${jsonParsed.streaming ? "Yes" : "No"} |
+  Recording Stream: ${jsonParsed.recording ? "Yes" : "No"} | 
+  Zoom Local Recording: ${jsonParsed.canRecordLocalFiles ? "Allowed" : "Not Allowed"} | 
   Holding Slide: ${jsonParsed.holdingSlide} |
   Holding Music: ${jsonParsed.playingHoldingMusic ? "Playing" : "Not Playing"} |
-  Holding Video: ${jsonParsed. playingVideo ? "Playing" : "Not Playing"}.`
+  Holding Video: ${jsonParsed. playingVideo ? "Playing" : "Not Playing"}`
 
   if (jsonParsed.inMeeting || jsonParsed.meetingSimulated) {
     validateTracksInPlaylist(jsonParsed.playlist, jsonParsed.currentlyPlayingIndex)
