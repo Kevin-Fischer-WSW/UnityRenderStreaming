@@ -350,8 +350,8 @@ function appStatusReceived(json) {
 
   generalStatBar.innerHTML =
   `Stream: ${jsonParsed.streaming ? "Yes" : "No"} |
-  Recording Stream: ${jsonParsed.recording ? "Yes" : "No"} | 
-  Zoom Local Recording: ${jsonParsed.canRecordLocalFiles ? "Allowed" : "Not Allowed"} | 
+  Recording Stream: ${jsonParsed.recording ? "Yes" : "No"} |
+  Zoom Local Recording: ${jsonParsed.canRecordLocalFiles ? "Allowed" : "Not Allowed"} |
   Holding Slide: ${jsonParsed.holdingSlide} |
   Holding Music: ${jsonParsed.playingHoldingMusic ? "Playing" : "Not Playing"} |
   Holding Video: ${jsonParsed. playingVideo ? "Playing" : "Not Playing"}`
@@ -486,7 +486,9 @@ leaveMeetingBtn.addEventListener("click", onLeaveClicked)
 
 /* ZOOM CONTROL IMPLEMENTATION */
 function onJoinClick() {
-  unityFetch(`/joinMeeting?meetingId=${meetingNumberInput.value}&password=${meetingPasswordInput.value}`, { method : "PUT"})
+  // Meeting number can also be entered as a URI. This is helpful since query parameters can be passed along with the meeting number.
+  let meetingNumberUri = encodeURIComponent(meetingNumberInput.value)
+  unityFetch(`/joinMeeting?meetingId=${meetingNumberUri}&password=${meetingPasswordInput.value}`, { method : "PUT"})
     .then(response => {
       if (response.ok) {
         console.log("Joined meeting")
