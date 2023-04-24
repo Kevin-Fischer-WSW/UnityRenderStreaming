@@ -362,3 +362,6 @@ WebApp/**/coverage/*
 
 .DS_Store
 WebApp/data.json
+
+# Exclude generated files for WebApp
+WebApp/client/public/operator-controls/js/*.gen.js
