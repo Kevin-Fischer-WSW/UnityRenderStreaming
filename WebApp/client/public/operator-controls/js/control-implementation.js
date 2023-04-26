@@ -461,7 +461,7 @@ archiveBtn.addEventListener("click", onArchiveClick);
 
 /* STREAM BUTTON IMPLEMENTATION */
 function onPendingClick() {
-  sendClickEvent(myVideoPlayer, OperatorControls._PendingButton)
+  unityFetch("/startStreamAndDisplayIntroSlide", { method : "PUT"})
 }
 
 function onLiveClick() {
@@ -473,7 +473,7 @@ function onTechnicalDiff() {
 }
 
 function onArchiveClick() {
-  sendClickEvent(myVideoPlayer, OperatorControls._ArchiveButton)
+  unityFetch("/stopStreamAndDisplayConclusionSlide", { method : "PUT"})
 }
 
 /* ZOOM CONTROLS */
