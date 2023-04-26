@@ -267,7 +267,10 @@
           role="tab" aria-controls="nav-upload" aria-selected="false">Upload
         </button>
         <button class="nav-link" id="nav-recording-tab" data-bs-toggle="tab" data-bs-target="#nav-recording"
-          type="button" role="tab" aria-controls="nav-reording" aria-selected="false">Recording(s)
+          type="button" role="tab" aria-controls="nav-recording" aria-selected="false">Recording(s)
+        </button>
+        <button class="nav-link" id="nav-config-tab" data-bs-toggle="tab" data-bs-target="#nav-config"
+                type="button" role="tab" aria-controls="nav-config" aria-selected="false">Configuration
         </button>
       </div>
     </nav>
@@ -545,7 +548,6 @@
 
         </fieldset>
       </div>
-
       <!-- Log controls -->
       <div class="tab-pane fade" id="nav-log" role="tabpanel" aria-labelledby="nav-log-tab">
         <fieldset>
@@ -645,6 +647,20 @@
             </select>
             <button id="recording-download" class="btn btn-secondary" type="button">Download</button>
           </div>
+        </fieldset>
+      </div>
+      <!-- Configuration upload controls -->
+      <div class="tab-pane fade" id="nav-config" role="tabpanel" aria-labelledby="nav-config-tab">
+        <fieldset>
+          <legend class="title text-white mt-2">Configuration</legend>
+          <!-- Input for uploading configuration -->
+          <div class="input-group">
+            <input id="config-file-input" type="file" class="form-control" aria-label="Browse" value="Browse">
+            <button id="config-upload-btn" class="btn btn-secondary" type="button">Upload</button>
+          </div>
+          <!-- Button to download configuration -->
+          <button id="config-download-btn" class="btn btn-primary mt-2" type="button">Download</button>
+          <div id="configTrackerContainer" class="container overflow-auto overflow-div"></div>
         </fieldset>
       </div>
     </div>

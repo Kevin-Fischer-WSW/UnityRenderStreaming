@@ -1415,7 +1415,39 @@ function uploadCustomSlideClicked() {
 
 }
 
+/* CONFIGURATION UPLOAD CONTROLS */
+let configFileInput = document.getElementById("config-file-input");
+let configUploadBtn = document.getElementById("config-upload-btn");
+let configDownloadBtn = document.getElementById("config-download-btn");
 
+configUploadBtn.addEventListener("click", function() {
+  let file = configFileInput.files[0];
+  let formData = new FormData();
+  formData.append("config", file);
+  unityFetch("/setConfig", {method: "PUT", body: formData})
+    .then((resp) => {
+      if (resp.ok) {
+        console.log("Config uploaded.");
+        FetchAllUploadedMediaAndUpdateDash();
+      }
+    })
+})
+
+configDownloadBtn.addEventListener("click", function() {
+  unityFetch("/getConfig", {method: "GET"})
+    .then((resp) => {
+      if (resp.ok) {
+        resp.blob().then((blob) => {
+          let url = window.URL.createObjectURL(blob);
+          let a = document.createElement('a');
+          a.href = url;
+          a.download = "config.zip";
+          a.click();
+          a.remove();
+        })
+      }
+    })
+})
 
 /* VIDEO CONTROLS */
 let videoFieldsetBar  = document.getElementById("video-fieldset-bar");
