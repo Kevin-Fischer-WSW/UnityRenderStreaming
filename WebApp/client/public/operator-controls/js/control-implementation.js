@@ -364,10 +364,11 @@ function appStatusReceived(json) {
     holdMusicFieldset.disabled = false;
     musicPlayStopBtn.innerHTML = jsonParsed.playingHoldingMusic ? '<i class="bi bi-pause"></i>' : '<i class="bi bi-play"></i>';
     currentlyPlayingSpan.innerHTML = jsonParsed.currentlyPlayingTrack;
+    volumeRangeMusic.value = jsonParsed.holdingMusicVolume;
+    volumeLevelMusic.innerHTML = getVolumeLevel(volumeRangeMusic.value);
     if (jsonParsed.playingHoldingMusic) {
       holdingMusicTimer = Math.round(jsonParsed.currentTrackTimeLeft);
       currentlyPlayingTrackTime.innerHTML = `-${holdingMusicTimer}`;
-      volumeRangeMusic.value = jsonParsed.holdingMusicVolume;
       if (musicTimerIntervalId === 0) {
         musicTimerIntervalId = setInterval(function () {
           // Decrease the time left by 1 second
@@ -382,11 +383,11 @@ function appStatusReceived(json) {
     }
 
     videoFieldsetBar.disabled = !jsonParsed.videoIsShowing;
+    volumeRangeVideo.value = jsonParsed.currentVideoVolume;
+    volumeLevelVideo.innerHTML = getVolumeLevel(volumeRangeVideo.value);
     if (jsonParsed.playingVideo) {
-
       videoTimer = Math.round(jsonParsed.currentVideoPlaybackTime);
       videoPlaybackTime.innerHTML = videoProgress.value = videoTimer;
-      videoVolume.value = jsonParsed.currentVideoVolume;
       if (videoTimerIntervalId === 0) {
         videoTimerIntervalId = setInterval ( function() {
           videoTimer++;
@@ -1458,14 +1459,14 @@ let videoSwitchBtns = [];
 let videoClearBtn = document.getElementById("video-clear-btn");
 let videoProgress = document.getElementById("video-progress");
 let videoPlaybackTime = document.getElementById("video-playback-time");
-let videoVolume  = document.getElementById("volume-range-video");
-let videoVolumeLevel  = document.getElementById("video-volume-level");
-videoVolumeLevel.innerHTML = getVolumeLevel(videoVolume.value);
+let volumeRangeVideo  = document.getElementById("volume-range-video");
+let volumeLevelVideo  = document.getElementById("video-volume-level");
+volumeLevelVideo.innerHTML = getVolumeLevel(volumeRangeVideo.value);
 videoClearBtn.addEventListener("click", onVideoClearClicked);
 
-videoVolume.addEventListener("input", function() {
-  let str = videoVolume.value;
-  videoVolumeLevel.innerHTML = getVolumeLevel(videoVolume.value);
+volumeRangeVideo.addEventListener("input", function() {
+  let str = volumeRangeVideo.value;
+  volumeLevelVideo.innerHTML = getVolumeLevel(volumeRangeVideo.value);
   sendStringSubmitEvent(myVideoPlayer, OperatorControls._VolumeVideo, str);
 });
 
