@@ -44,22 +44,6 @@ signOutModal.addEventListener('shown.bs.modal', function () {
   signOutModal.focus()
 })
 
-/* EXTEND */
-document.body.addEventListener("click", function() {
-
-  setTimeout(function(){
-    extend();
-  }, 700)});
-
-async function extend() {
-  let resp = await fetch("/extend");
-  let data = await resp.json();
-  if (!data.valid) {
-    alert("Your session has expired! You're being redirected...");
-    window.location = window.location.origin;
-  }
-}
-
 /* PARTICIPANT ACTION BUTTONS ON VIDEO ELEMENT */
 let previewVideoContainer = document.getElementById("preview-video-container");
 let participantOnVidCtrlOg = document.getElementById("participant-on-vid-ctrl-og");

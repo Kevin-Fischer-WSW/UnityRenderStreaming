@@ -8,9 +8,8 @@ import { log, LogLevel } from './log';
 import Options from './class/options';
 import { reset as resetHandler }from './class/httphandler';
 import { env } from "process";
-import * as session from 'express-session';
-import * as nocache from "nocache";
-import { rejects } from 'assert';
+import { auth, requiresAuth, claimCheck, claimEquals, claimIncludes } from 'express-openid-connect';
+import * as dotenv from 'dotenv';
 
 declare module 'express-session' {
   export interface SessionData {
@@ -19,10 +18,6 @@ declare module 'express-session' {
   }
 }
 
-const accessCode = "xcc662245mc1"
-
-const hours = 7200000
-
 export const createServer = (config: Options): express.Application => {
   const app: express.Application = express();
   resetHandler(config.mode);
@@ -30,26 +25,29 @@ export const createServer = (config: Options): express.Application => {
   if (config.logging != "none") {
     app.use(morgan(config.logging));
   }
-  // const signal = require('./signaling');
-  app.use(session({
-    secret: 'secret',
-    resave: true,
-    saveUninitialized: true,
-    rolling: true,
-    // cookie: {
-    //   maxAge: hours,
-    // }
-  }));
+
+  dotenv.config({ path: path.resolve(__dirname, "../.env") });
+
+  const auth0_config = {
+    authRequired: false,
+    auth0Logout: true,
+    secret: env.SECRET,
+    baseURL: env.BASEURL,
+    clientID: env.CLIENTID,
+    issuerBaseURL: env.ISSUER,
+  };
+
+  // auth router attaches /login, /logout, and /callback routes to the baseURL
+  app.use(auth(auth0_config));
+
+  //TODO: Add endpoint authentication in the near future.
 
   app.all('/operator-controls/*', function(req, res, next) {
-    if (!req.session.authorized) {
-      return res.status(401).redirect('/');
-    }
-    //return res.status(200).redirect('/dashboard');
     next();
   });
 
-  app.all('/uapp/:endpoint', function(req, res, next) {
+  app.all('/uapp/:endpoint',
+  function(req, res, next) {
     // Make a http request to the endpoint at http://localhost:4444/endpoint
     // and return the response to the client.
     const http = require('http');
@@ -65,6 +63,7 @@ export const createServer = (config: Options): express.Application => {
       method: req.method,
       headers: req.headers,
     };
+    
     const request = http.request(options, (response) => {
       res.writeHead(response.statusCode, response.statusMessage, response.headers);
       response.pipe(res);
@@ -84,69 +83,10 @@ export const createServer = (config: Options): express.Application => {
   app.use(express.static(path.join(__dirname, '../client/public')));
   app.use('/module', express.static(path.join(__dirname, '../client/src')));
   app.use('/node_modules', express.static(path.join(__dirname, '../node_modules')));
-  app.get('/', (req, res) => {
-    if (req.session.authorized) {
-      return res.status(200).redirect('/dashboard');
-    } else {
-      const indexPagePath: string = path.join(__dirname, '../client/public/operator-controls/login.html');
-      res.sendFile(indexPagePath);
-    }
-  });
 
-  app.post("/auth", (req, res) => {
-    if (!req.session.authorized) {
-      let uname = req.body.username;
-      let pwd = req.body.password;
-
-      const fs = require('fs');
-      const objPath: string = path.join(process.cwd(), 'data.json');
-      if (fs.existsSync(objPath) === false) {
-        // Create the file.
-        fs.writeFileSync(objPath, JSON.stringify({uname: "admin", pwd: "EagleEye2023"}), 'utf8');
-      }
-      let rawdata = fs.readFileSync(objPath);
-      let obj = JSON.parse(rawdata);
-
-      if (uname === obj.uname && pwd === obj.pwd) {
-        req.session.username = uname;
-        req.session.authorized = true;
-        req.session.cookie.maxAge = hours;
-        res.status(200).redirect('/dashboard')
-      } else {
-        res.status(401).redirect('/')
-      }
-    } else {
-      res.status(200).redirect('/dashboard')
-    }
-  });
-
-  app.get("/dashboard", (req, res) => {
-    if (req.session.authorized) {
-      const indexPagePath: string = path.join(__dirname, '../client/public/operator-controls/index.html');
-      return res.sendFile(path.join(indexPagePath));
-    } else {
-      return res.status(401).redirect("/");
-    }
-  });
-
-  app.get("/signout", (req, res) => {
-    req.session.destroy((err) => {
-      if (err) {
-        console.log(err);
-        res.status(400).send(err)
-      } else {
-        res.status(200).redirect("/");
-      }
-    })
-  });
-
-  // todo Use a different method to extend the session
-  app.get('/extend', (req, res) => {
-    if (req.session.authorized) {
-      res.status(200).json({valid:true})
-    } else {
-      res.status(401).json({valid:false})
-    }
+  app.get('/', requiresAuth(), async (req, res) => {
+    const indexPagePath: string = path.join(__dirname, '../client/public/operator-controls/index.html');
+    res.sendFile(path.join(indexPagePath));
   });
 
   function ValidatePathExists(res, filePath) {
@@ -201,7 +141,7 @@ export const createServer = (config: Options): express.Application => {
   }
 
   // Get all holding music.
-  app.get('/all_holding_music', (req, res) => {
+  app.get('/all_holding_music', requiresAuth(), (req, res) => {
     getFiles(res, holdingMusicDir);
   })
 
@@ -312,41 +252,6 @@ export const createServer = (config: Options): express.Application => {
       });
   });
 
-  app.get("/update_info", (req, res) => {
-    if (!req.session.authorized) {
-      return res.status(401).redirect('/');
-    }
-    const updatePagePath: string = path.join(__dirname, '../client/public/operator-controls/update.html');
-    return res.sendFile(path.join(updatePagePath));
-
-  });
-
-  app.post("/save_info", (req, res) => {
-    if (req.session.authorized) {
-      let uname = req.body.username;
-      let pwd = req.body.password;
-      let access_code = req.body.accesscode;
-
-      //console.log(req.body.username, req.body.password, req.body.accesscode)
-
-      if (access_code === accessCode) {
-
-        const objPath: string = path.join(process.cwd(), 'data.json');
-        let obj = JSON.stringify({"uname":uname, "pwd":pwd});
-
-        var fs = require('fs');
-        fs.writeFile(objPath, obj, 'utf8', (err) => {
-          if (err) console.log(err);
-          console.log("Save Successfull");
-        });
-        res.status(200).redirect('/signout')
-      } else {
-        res.status(401).redirect('/update_info')
-      }
-    } else {
-      res.status(200).redirect('/')
-    }
-  });
 
   app.get("/logs", (req, res) => {
     if (!req.session.authorized) {
