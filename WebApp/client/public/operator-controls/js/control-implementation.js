@@ -935,11 +935,13 @@ function FetchAssignedHoldingSlidesAndUpdatePreviews() {
         }
 
         function setBackgroundImageHelper(url) {
-          if (slideInfo.type === "intro") {
+          if (slideInfo.assignedTo.includes("intro")) {
             intro_preview.style.backgroundImage = `url("${url}")`;
-          } else if (slideInfo.type === "technicalDifficulties") {
+          }
+          if (slideInfo.assignedTo.includes("technicalDifficulties")) {
             techdiff_preview.style.backgroundImage = `url("${url}")`;
-          } else if (slideInfo.type === "outro") {
+          }
+          if (slideInfo.assignedTo.includes("outro")) {
             conc_preview.style.backgroundImage = `url("${url}")`;
           }
         }
