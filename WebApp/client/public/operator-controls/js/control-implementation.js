@@ -526,6 +526,8 @@ disableAutoShowOnJoin.addEventListener("click", onDisableAutoShowOnJoin);
 let selectAllParticipantBtn = document.getElementById("check-uncheck-all-ppt-btn");
 let showSelectParticipantBtn = document.getElementById("show-select-ppt-btn");
 let hideSelectParticipantBtn = document.getElementById("hide-select-ppt-btn");
+let muteSelectParticipantBtn = document.getElementById("mute-select-ppt-btn");
+let unmuteSelectParticipantBtn = document.getElementById("unmute-select-ppt-btn");
 
 function addParticipantSelectCheckEventListener() {
   let cbs = document.getElementsByName('checked-participant');
@@ -589,6 +591,18 @@ showSelectParticipantBtn.addEventListener("click", () => {
   }
 })
 
+muteSelectParticipantBtn.addEventListener("click", () => {
+  let selectedParticipants = participantInputGroups.map(group => {
+    return group.querySelector(".check");
+  });
+  for (let i = 0; i <  selectedParticipants.length; i++) {
+    if (selectedParticipants[i].checked) {
+      let p = participantJsonParsed[i]
+      unityFetch(`/toggleParticipantAudibility?enable=false&participantId=${p.id}`, {method:"PUT"})
+    }
+  }
+})
+
 hideSelectParticipantBtn.addEventListener("click", () => {
   let selectedParticipants = mapSelectParticiapntsToInputGroups();
   for (let i = 0; i <  selectedParticipants.length; i++) {
@@ -596,6 +610,16 @@ hideSelectParticipantBtn.addEventListener("click", () => {
       let p = participantJsonParsed[i]
       let str = p.id + ",false"
       sendStringSubmitEvent(myVideoPlayer, OperatorControls._ToggleParticipantVisibilityButton, str)
+    }
+  }
+})
+
+unmuteSelectParticipantBtn.addEventListener("click", () => {
+  let selectedParticipants = mapSelectParticiapntsToInputGroups();
+  for (let i = 0; i <  selectedParticipants.length; i++) {
+    if (selectedParticipants[i].checked) {
+      let p = participantJsonParsed[i]
+      unityFetch(`/toggleParticipantAudibility?enable=true&participantId=${p.id}`, {method:"PUT"})
     }
   }
 })
