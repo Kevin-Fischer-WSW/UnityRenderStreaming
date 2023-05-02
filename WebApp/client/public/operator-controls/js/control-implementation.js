@@ -11,7 +11,6 @@ import { getVideoThumb } from "../../js/video-thumbnail.js";
 import { createUploadProgressTracker } from "../../js/progresstracker.js";
 import { onEnableAdvancedSettings } from "./advancedSettings.js";
 
-
 mainNotifications.addEventListener('setup', function () {
   myVideoPlayer.onParticipantDataReceived = participantDataReceived;
   myVideoPlayer.onAppStatusReceived = appStatusReceived;
