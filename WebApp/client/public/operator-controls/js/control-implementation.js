@@ -211,7 +211,6 @@ pwd.addEventListener("input", flagStreamPrefChange);
 /* -> Feedback Alerts */
 let streamUrl = document.getElementById("url-span");
 let successAlert = document.getElementById("success-alert");
-let successAlertRename = document.getElementById("success-alert-rename");
 let errorMsg = document.getElementById("err-span");
 let errorAlert = document.getElementById("error-alert");
 let errorAlertFile = document.getElementById("error-alert-file");
@@ -337,6 +336,13 @@ let musicTimerIntervalId = 0;
 let videoTimer = 0;
 let videoTimerIntervalId = 0;
 
+function convertSecondsToTimestamp(sec) {
+  let hh = Math.floor(sec / 3600);
+  let mm = Math.floor(sec / 60);
+  let ss = sec % 60;
+  return `${hh < 10 ? "0" + hh : hh}:${mm < 10 ? "0" + mm : mm}:${ss < 10 ? "0" + ss : ss}`
+}
+
 function appStatusReceived(json) {
 
   let jsonParsed = JSON.parse(json)
@@ -368,38 +374,44 @@ function appStatusReceived(json) {
     volumeLevelMusic.innerHTML = getVolumeLevel(volumeRangeMusic.value);
     if (jsonParsed.playingHoldingMusic) {
       holdingMusicTimer = Math.round(jsonParsed.currentTrackTimeLeft);
+      musicPlaybackTime.innerHTML = convertSecondsToTimestamp(holdingMusicTimer);
       currentlyPlayingTrackTime.innerHTML = `-${holdingMusicTimer}`;
       if (musicTimerIntervalId === 0) {
         musicTimerIntervalId = setInterval(function () {
           // Decrease the time left by 1 second
           holdingMusicTimer--;
+          musicPlaybackTime.innerHTML = convertSecondsToTimestamp(holdingMusicTimer);
           currentlyPlayingTrackTime.innerHTML = `-${holdingMusicTimer}`;
         }, 1000);
       }
     } else {
       clearInterval(musicTimerIntervalId);
       musicTimerIntervalId = 0;
+      musicPlaybackTime.innerHTML = "00:00:00";
       currentlyPlayingTrackTime.innerHTML = "";
     }
 
-    videoFieldsetBar.disabled = !jsonParsed.videoIsShowing;
+    //videoFieldsetBar.disabled = !jsonParsed.videoIsShowing;
     volumeRangeVideo.value = jsonParsed.currentVideoVolume;
     volumeLevelVideo.innerHTML = getVolumeLevel(volumeRangeVideo.value);
     if (jsonParsed.playingVideo) {
       videoTimer = Math.round(jsonParsed.currentVideoPlaybackTime);
-      videoPlaybackTime.innerHTML = videoProgress.value = videoTimer;
+      videoPlaybackTime.innerHTML = convertSecondsToTimestamp(videoTimer);
+      videoProgress.value = videoTimer > videoProgress.max ? videoProgress.max : videoTimer;
       if (videoTimerIntervalId === 0) {
         videoTimerIntervalId = setInterval ( function() {
           videoTimer++;
-          videoPlaybackTime.innerHTML = videoProgress.value = videoTimer;
+          time = convertSecondsToTimestamp(videoTimer);
+          videoPlaybackTime.innerHTML = convertSecondsToTimestamp(videoTimer);
+          videoProgress.value = videoTimer > videoProgress.max ? videoProgress.max : videoTimer;
         }, 1000);
       }
     } else {
       clearInterval(videoTimerIntervalId);
       videoTimerIntervalId = 0;
-      videoPlaybackTime.innerHTML = "00:00";
+      //videoPlaybackTime.innerHTML = "00:00:00";
     }
-    videoProgress.max = jsonParsed.currentVideoDuration;
+    videoProgress.max = Math.round(jsonParsed.currentVideoDuration);
     videoPlayPauseBtn.innerHTML = jsonParsed.playingVideo ? '<i class="bi bi-pause"></i>' : '<i class="bi bi-play"></i>';
 
     if (jsonParsed.streaming) {
@@ -415,7 +427,7 @@ function appStatusReceived(json) {
         ActivateButtonHelper(archiveBtn, true)
       }
     } else {
-      pendingBtn.innerHTML = "Start stream"
+      pendingBtn.innerHTML = "Start Stream"
       streamSettingsFieldset.disabled = false;
       // todo: This causes a custom slide named "conclusion" to immediately be dismissed.
       // if (jsonParsed.holdingSlide === "endOfStream" || jsonParsed.holdingSlide === "conclusion") {
@@ -426,7 +438,7 @@ function appStatusReceived(json) {
     if (jsonParsed.secondClickEndsStream) {
       archiveBtn.innerHTML = "End Stream"
     } else {
-      archiveBtn.innerHTML = "Archive"
+      archiveBtn.innerHTML = "Conclusion Slide"
     }
 
   } else {
@@ -435,7 +447,7 @@ function appStatusReceived(json) {
     joinMeetingBtn.disabled = false;
     leaveMeetingBtn.disabled = true;
     holdMusicFieldset.disabled = true;
-    videoFieldsetBar.disabled = true;
+    //videoFieldsetBar.disabled = true;
   }
 
   function ActivateButtonHelper(btn, active) {
@@ -1021,6 +1033,13 @@ let holdMusicFieldset = document.getElementById("music-fieldset");
 let volumeRangeMusic = document.getElementById("volume-range-music");
 let volumeLevelMusic  = document.getElementById("music-volume-level");
 volumeLevelMusic.innerHTML = getVolumeLevel(volumeRangeMusic.value);
+let musicProgress = document.getElementById("music-progress");
+let musicPlaybackTime = document.getElementById("music-playback-time");
+
+musicProgress.addEventListener("change", function () {
+  let str = musicProgress.value;
+  musicPlaybackTime.innerHTML = convertSecondsToTimestamp(musicProgress.value);;
+});
 
 volumeRangeMusic.addEventListener("input", function () {
   let str = volumeRangeMusic.value;
@@ -1123,6 +1142,7 @@ function validateTracksInPlaylist(playlistData, currentlyPlayingIndex){
 
 /* UPLOAD CONTROLS */
 let uploadDescriptor = document.getElementById("slide-upload-descriptor")
+let uploadSuccessAlert = document.getElementById("upload-success-alert");
 let batchSlideFileInput = document.getElementById("batch-slide-file-input")
 batchSlideFileInput.addEventListener("change", batchFileInputChanged) // todo make this function less specific to slide uploads.
 let batchSlideUploadBtn = document.getElementById("batch-slide-upload-btn") // todo Make this function less specific as well. Verify files based on extension.
@@ -1435,7 +1455,11 @@ function uploadCustomSlideClicked() {
 
   // After all files are done uploading re-enable upload button.
   Promise.all(uploads).then(() => {
+    batchSlideFileInput.value = "";
+    uploadDescriptor.innerHTML = "Click browse to look for files to upload.";
     batchSlideUploadBtn.disabled = false;
+    clearFormInput();
+    alertDisplay(uploadSuccessAlert);
     FetchAllUploadedMediaAndUpdateDash();
     FetchAssignedHoldingSlidesAndUpdatePreviews();
   })
@@ -1498,7 +1522,7 @@ volumeRangeVideo.addEventListener("input", function() {
 
 videoProgress.addEventListener("change", function () {
   let str = videoProgress.value;
-  videoPlaybackTime.innerHTML = videoProgress.value;
+  videoPlaybackTime.innerHTML = convertSecondsToTimestamp(videoProgress.value);
   clearInterval(videoTimerIntervalId);
   videoTimerIntervalId = 0;
   sendStringSubmitEvent(myVideoPlayer, OperatorControls._SeekVideoButton, str);
