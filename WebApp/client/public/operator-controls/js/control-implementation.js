@@ -496,6 +496,9 @@ let joinMeetingBtn = document.getElementById("join-meeting-btn")
 joinMeetingBtn.addEventListener('click', onJoinClick)
 let leaveMeetingBtn = document.getElementById("leave-meeting-btn")
 leaveMeetingBtn.addEventListener("click", onLeaveClicked)
+let leaveVoipBtn = document.getElementById("leave-voip-btn")
+leaveVoipBtn.addEventListener("click", onLeaveVoipClicked)
+let leaveVoipResult = document.getElementById("leave-voip-result")
 
 /* ZOOM CONTROL IMPLEMENTATION */
 function onJoinClick() {
@@ -519,6 +522,17 @@ function onLeaveClicked() {
       }else{
         console.log(response.statusText)
       }
+    })
+}
+
+function onLeaveVoipClicked() {
+  unityFetch(`/leaveVoip`, { method : "PUT"})
+    .then(response => {
+      leaveVoipResult.style.color = response.ok ? "var(--bs-white)" : "var(--bs-warning)"
+      leaveVoipResult.innerHTML = response.ok ? "Left Voip" : response.statusText
+      setTimeout(() => {
+        leaveVoipResult.innerHTML = ""
+      }, 3000);
     })
 }
 
