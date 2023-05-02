@@ -81,7 +81,7 @@ function Play() {
   elementPreviewVideo.style.display = "flex";
   elementPreviewVideo.id = 'preview-video';
   elementPreviewVideo.autoplay = true;
-  elementPreviewVideo.muted = true;
+  elementPreviewVideo.muted = false; // audio tracks are disabled by default in ee-video-player.js
   previewDiv.appendChild(elementPreviewVideo);
 
   // add video player (output)
@@ -114,14 +114,32 @@ function Play() {
   elementMuteButton.style.left = '1.5em';
   elementMuteButton.innerHTML = 'Preview Audio <i class="bi bi-volume-mute"></i>';
   elementMuteButton.addEventListener('click', function () {
-    elementPreviewVideo.muted = !elementPreviewVideo.muted;
-    if (elementPreviewVideo.muted) {
-      elementMuteButton.innerHTML = 'Preview Audio <i class="bi bi-volume-mute"></i>';
-    } else {
-      elementMuteButton.innerHTML = 'Preview Audio <i class="bi bi-volume-up"></i>';
-    }
+    let audioTracks = myVideoPlayer.videoAudioTracks;
+    if (audioTracks.length !== 2) return;
+    // Toggle first audio track.
+    audioTracks[0].enabled = !audioTracks[0].enabled;
+    elementMuteButton.innerHTML = audioTracks[0].enabled ? 'Preview Audio <i class="bi bi-volume-up"></i>' : 'Preview Audio <i class="bi bi-volume-mute"></i>';
   });
   playerDiv.appendChild(elementMuteButton);
+  // add second mute button (mutes zoom call audio)
+  const elementMuteButton2 = document.createElement('button');
+  elementMuteButton2.id = 'mute-zoom-btn';
+  elementMuteButton2.classList.add('btn');
+  elementMuteButton2.classList.add('btn-secondary');
+  elementMuteButton2.classList.add('btn-sm');
+  // Make the button position relative to the bottom left of the playerDiv.
+  elementMuteButton2.style.position = 'absolute';
+  elementMuteButton2.style.bottom = '0.5em';
+  elementMuteButton2.style.left = '11em';
+  elementMuteButton2.innerHTML = 'Zoom Audio <i class="bi bi-volume-mute"></i>';
+  elementMuteButton2.addEventListener('click', function () {
+    let audioTracks = myVideoPlayer.videoAudioTracks;
+    if (audioTracks.length !== 2) return;
+    // Toggle second audio track.
+    audioTracks[1].enabled = !audioTracks[1].enabled;
+    elementMuteButton2.innerHTML = audioTracks[1].enabled ? 'Zoom Audio <i class="bi bi-volume-up"></i>' : 'Zoom Audio <i class="bi bi-volume-mute"></i>';
+  });
+  playerDiv.appendChild(elementMuteButton2);
 
   /* NOTE: to reenable fullscreen. Uncomment this section.
   // add fullscreen button
