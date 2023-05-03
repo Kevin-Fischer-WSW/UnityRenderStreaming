@@ -17,6 +17,7 @@ mainNotifications.addEventListener('setup', function () {
   myVideoPlayer.onStyleSchemaReceived = onReceiveStyleSchema;
   myVideoPlayer.onStyleValuesReceived = onReceiveStyleValues;
   myVideoPlayer.onLogMessageNotification = onLogMessageNotification;
+  myVideoPlayer.onNewMediaNotification = onNewMediaNotification;
 });
 
 function onLogMessageNotification () {
@@ -35,6 +36,16 @@ function fetchLogs(){
       data = data.replaceAll("\t", "&nbsp;&nbsp;&nbsp;&nbsp;")
       log.innerHTML = data;
     });
+}
+
+function onNewMediaNotification () {
+  if (navSlideTabBtn.classList.contains("active")) {
+    onSlideTabClicked();
+  } else if (navMusicTabBtn.classList.contains("active")) {
+    onMusicTabClicked();
+  } else if (navVideoTabBtn.classList.contains("active")) {
+    onVideoTabClicked();
+  }
 }
 
 /* SIGN OUT MODAL ELEMENTS */
@@ -1087,6 +1098,16 @@ let tracksInLibrary = [];
 
 trackInLibrary.classList.add("d-none");
 
+function onMusicTabClicked() {
+  fetch("/all_holding_music")
+    .then(value => value.json())
+    .then(music => {
+      UpdateOptionGroupWithValues(holdMusicOptionGroup, music);
+      UpdateHoldMusicBrowsePreviewElement();
+      validateTracksInLibrary(music);
+    })
+}
+
 function validateTracksInLibrary(tracks) {
   let setupBtn = function (clone) {
     clone.classList.remove("d-none");
@@ -1209,28 +1230,11 @@ function UpdateOptionGroupWithValues(optionGroup, options) {
 
 function FetchAllUploadedMediaAndUpdateDash() {
   // Fetch custom slides.
-  unityFetch("/getHoldingSlides")
-    .then(value => value.json())
-    .then(slides => {
-      validateSlideSwitchBtns(slides);
-    })
+  onSlideTabClicked()
   // Fetch holding music.
-  fetch("/all_holding_music")
-    .then(value => value.json())
-    .then(music => {
-      UpdateOptionGroupWithValues(holdMusicOptionGroup, music);
-      UpdateHoldMusicBrowsePreviewElement();
-      validateTracksInLibrary(music);
-    })
+  onMusicTabClicked();
   // Fetch videos.
-  unityFetch("/getVideos")
-    .then(value => value.json())
-    .then(videos => {
-      let videoNames = videos.map(video => video.name);
-      UpdateOptionGroupWithValues(videoOptionGroup, videoNames);
-      UpdateVideoBrowsePreviewElement();
-      validateVideoSwitchBtns(videos);
-    })
+  onVideoTabClicked();
 }
 
 // Update initially.
@@ -1522,6 +1526,18 @@ videoPlayPauseBtn.addEventListener("click", function() {
   }
 });
 
+function onVideoTabClicked() {
+  // Fetch videos.
+  unityFetch("/getVideos")
+    .then(value => value.json())
+    .then(videos => {
+      let videoNames = videos.map(video => video.name);
+      UpdateOptionGroupWithValues(videoOptionGroup, videoNames);
+      UpdateVideoBrowsePreviewElement();
+      validateVideoSwitchBtns(videos);
+    })
+}
+
 function onVideoClearClicked() {
   sendClickEvent(myVideoPlayer, OperatorControls._LiveButton);
 }
@@ -1780,10 +1796,10 @@ let navSlideTabBtn = document.getElementById("nav-slide-tab");
 navSlideTabBtn.addEventListener("click", ()=>{onSlideTabClicked(); navSlideTabBtn.scrollIntoView();});
 
 let navMusicTabBtn = document.getElementById("nav-music-tab");
-navMusicTabBtn.addEventListener("click", ()=>{navSlideTabBtn.scrollIntoView();});
+navMusicTabBtn.addEventListener("click", ()=>{onMusicTabClicked(); navSlideTabBtn.scrollIntoView();});
 
 let navVideoTabBtn = document.getElementById("nav-video-tab");
-navVideoTabBtn.addEventListener("click", ()=>{navVideoTabBtn.scrollIntoView();});
+navVideoTabBtn.addEventListener("click", ()=>{onVideoTabClicked(); navVideoTabBtn.scrollIntoView();});
 
 let navLogTabBtn = document.getElementById("nav-log-tab");
 navLogTabBtn.addEventListener("click", ()=>{navLogTabBtn.scrollIntoView(); fetchLogs();});

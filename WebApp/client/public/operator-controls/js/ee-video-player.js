@@ -176,6 +176,11 @@ export class VideoPlayer {
           if (_this.onLogMessageNotification){
             _this.onLogMessageNotification.call(_this, msgContents);
           }
+          break;
+        case MessageTypes._NewMediaNotification:
+          if (_this.onNewMediaNotification){
+            _this.onNewMediaNotification.call(_this, msgContents);
+          }
       }
     };
   }
