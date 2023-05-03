@@ -80,7 +80,7 @@ function Play() {
   elementPreviewVideo.style.display = "flex";
   elementPreviewVideo.id = 'preview-video';
   elementPreviewVideo.autoplay = true;
-  elementPreviewVideo.muted = false; // audio tracks are disabled by default in ee-video-player.js
+  elementPreviewVideo.muted = true;
   previewDiv.appendChild(elementPreviewVideo);
 
   // add video player (output)
@@ -113,6 +113,7 @@ function Play() {
   elementMuteButton.style.left = '1.5em';
   elementMuteButton.innerHTML = 'Preview Audio <i class="bi bi-volume-mute"></i>';
   elementMuteButton.addEventListener('click', function () {
+    elementPreviewVideo.muted = false;
     let audioTracks = myVideoPlayer.videoAudioTracks;
     if (audioTracks.length !== 2) return;
     // Toggle first audio track.
@@ -120,6 +121,7 @@ function Play() {
     elementMuteButton.innerHTML = audioTracks[0].enabled ? 'Preview Audio <i class="bi bi-volume-up"></i>' : 'Preview Audio <i class="bi bi-volume-mute"></i>';
   });
   playerDiv.appendChild(elementMuteButton);
+
   // add second mute button (mutes zoom call audio)
   const elementMuteButton2 = document.createElement('button');
   elementMuteButton2.id = 'mute-zoom-btn';
@@ -132,6 +134,7 @@ function Play() {
   elementMuteButton2.style.left = '11em';
   elementMuteButton2.innerHTML = 'Zoom Audio <i class="bi bi-volume-mute"></i>';
   elementMuteButton2.addEventListener('click', function () {
+    elementPreviewVideo.muted = false;
     let audioTracks = myVideoPlayer.videoAudioTracks;
     if (audioTracks.length !== 2) return;
     // Toggle second audio track.
