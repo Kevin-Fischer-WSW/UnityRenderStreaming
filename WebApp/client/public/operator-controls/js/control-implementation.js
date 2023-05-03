@@ -400,7 +400,6 @@ function appStatusReceived(json) {
       if (videoTimerIntervalId === 0) {
         videoTimerIntervalId = setInterval ( function() {
           videoTimer++;
-          time = convertSecondsToTimestamp(videoTimer);
           videoPlaybackTime.innerHTML = convertSecondsToTimestamp(videoTimer);
           videoProgress.value = videoTimer > videoProgress.max ? videoProgress.max : videoTimer;
         }, 1000);
@@ -675,11 +674,11 @@ function validateParticipantInputGroups() {
   }
   let validateGroup = function (clone, data){
     let visibilityBtn = document.querySelector(`#${clone.id} .visibility-btn`);
-    let muteBtn = document.querySelector(`#${clone.id} .mute-btn`);
+    let audibilityBtn = document.querySelector(`#${clone.id} .audibility-btn`);
     let nameSpan = document.querySelector(`#${clone.id} .name-span`);
 
     visibilityBtn.firstChild.className = data.visible ? "bi bi-eye" : "bi bi-eye-slash";
-    muteBtn.firstChild.className = data.muted ? "bi bi-mic-mute" : "bi bi-mic";
+    audibilityBtn.firstChild.className = data.audible ? "bi bi-ear" : "bi bi-ear-fill";
     if (data.title === ""){
       nameSpan.innerHTML = `<b>${data.name}</b>`;
     }else{
@@ -704,7 +703,7 @@ function ClearSelectParticipantsOnDrag() {
 function setupParticipantInputGroup(node, idx) {
   let renameBtn = document.querySelector("div#" + node.id + " .rename-btn")
   let visibilityBtn = document.querySelector("div#" + node.id + " .visibility-btn")
-  let muteBtn = document.querySelector("div#" + node.id + " .mute-btn")
+  let audibilityBtn = document.querySelector("div#" + node.id + " .audibility-btn")
   let lowerThirdBtn = document.querySelector("div#" + node.id + " .show-lower-third-btn")
 
   node.ondragstart = (ev) => {
@@ -742,10 +741,14 @@ function setupParticipantInputGroup(node, idx) {
     sendStringSubmitEvent(myVideoPlayer, OperatorControls._ToggleParticipantVisibilityButton, str)
   })
 
-  muteBtn.addEventListener("click", function () {
+  audibilityBtn.addEventListener("click", function () {
     let p = participantJsonParsed[idx]
-    let str = p.id + "," + !p.muted
-    sendStringSubmitEvent(myVideoPlayer, OperatorControls._MuteParticipantButton, str)
+    unityFetch(`/toggleParticipantAudibility?participantId=${p.id}&enable=${!p.audible}`, {method: "PUT"})
+    .then(resp => {
+      if (resp.ok) {
+        console.log("audibility toggled")
+      }
+    })
   })
 
   lowerThirdBtn.addEventListener("click", function () {
@@ -1467,14 +1470,16 @@ function uploadCustomSlideClicked() {
   let uploads = formInput.map((input) => { return upload(input) });
 
   // After all files are done uploading re-enable upload button.
-  Promise.all(uploads).then(() => {
-    batchSlideFileInput.value = "";
-    uploadDescriptor.innerHTML = "Click browse to look for files to upload.";
+  Promise.allSettled(uploads).then(() => {
     batchSlideUploadBtn.disabled = false;
-    clearFormInput();
-    alertDisplay(uploadSuccessAlert);
-    FetchAllUploadedMediaAndUpdateDash();
-    FetchAssignedHoldingSlidesAndUpdatePreviews();
+    if (uploads.length > 0) {
+      batchSlideFileInput.value = "";
+      uploadDescriptor.innerHTML = "Click browse to look for files to upload.";
+      clearFormInput();
+      alertDisplay(uploadSuccessAlert);
+      FetchAllUploadedMediaAndUpdateDash();
+      FetchAssignedHoldingSlidesAndUpdatePreviews();
+    }
   })
 
 }
@@ -1557,11 +1562,25 @@ videoSwitchBtn.style.display = "none";
 
 function validateVideoSwitchBtns(videos) {
   let setupVideoSwitchBtn = function (videoBtn) {
-    videoBtn.style.display = "flex"
-    let label = document.querySelector(`#${videoBtn.id} span`)
+    videoBtn.style.display = "flex";
+    let label = document.querySelector(`#${videoBtn.id} span`);
     let img = document.querySelector(`#${videoBtn.id} img`);
+    let mute = document.querySelector(`#${videoBtn.id} .media-right-btn`)
+    let unmute = document.querySelector(`#${videoBtn.id} .media-left-btn`);
     setupSlideSetAsOptionsButton(videoBtn);
     setupDeleteButton(videoBtn, "/uapp/deleteVideo?url={0}", label, FetchAllUploadedMediaAndUpdateDash);
+    mute.addEventListener("click", () => {unityFetch("/muteZoomAudio", {method: "PUT"})
+    .then(response => {
+      if (response.ok) {
+        console.log("Zoom Audio Muted.");
+      }
+    })});
+    unmute.addEventListener("click", () => {unityFetch("/unmuteZoomAudio", {method: "PUT"})
+    .then(response => {
+      if (response.ok) {
+        console.log("Zoom Audio Unmuted.");
+      }
+    })});
     img.addEventListener("click", function () {
       unityFetch("/setHoldingSlide?url=" + img.alt, {method: "PUT"})
         .then(response => {
