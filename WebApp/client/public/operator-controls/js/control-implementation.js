@@ -1475,9 +1475,9 @@ function uploadCustomSlideClicked() {
   let uploads = formInput.map((input) => { return upload(input) });
 
   // After all files are done uploading re-enable upload button.
-  Promise.allSettled(uploads).then(() => {
+  Promise.allSettled(uploads).then((resp) => {
     batchSlideUploadBtn.disabled = false;
-    if (uploads.length > 0) {
+    if (resp.ok && uploads.length > 0) {
       batchSlideFileInput.value = "";
       uploadDescriptor.innerHTML = "Click browse to look for files to upload.";
       clearFormInput();
@@ -1486,7 +1486,6 @@ function uploadCustomSlideClicked() {
       FetchAssignedHoldingSlidesAndUpdatePreviews();
     }
   })
-
 }
 
 /* CONFIGURATION UPLOAD CONTROLS */
@@ -1495,16 +1494,38 @@ let configUploadBtn = document.getElementById("config-upload-btn");
 let configDownloadBtn = document.getElementById("config-download-btn");
 
 configUploadBtn.addEventListener("click", function() {
+
+  if (configFileInput.value === "") return;
+  configUploadBtn.disabled = true;
+  let parentTracker = document.getElementById("configTrackerContainer");
+  
   let file = configFileInput.files[0];
   let formData = new FormData();
   formData.append("config", file);
-  unityFetch("/setConfig", {method: "PUT", body: formData})
-    .then((resp) => {
-      if (resp.ok) {
-        console.log("Config uploaded.");
-        FetchAllUploadedMediaAndUpdateDash();
-      }
-    })
+
+  let request = new XMLHttpRequest();
+  createUploadProgressTracker(parentTracker, request, "config");
+  request.onload = function() {
+    if (request.status >= 200 && request.status < 300) {
+      console.log("Config File Uploading")
+    } else {
+      console.log(request.response);
+    }
+  }
+
+  request.onloadend = function() {
+    if (request.status >= 200 && request.status < 300) {
+      console.log("Config File Uploaded.")
+      FetchAllUploadedMediaAndUpdateDash();
+    } else {
+      console.log("Config Upload Failed.")
+    }
+    configFileInput.value = "";
+    configUploadBtn.disabled = false;
+  }
+
+  request.open("PUT", `uapp/setConfig`);
+  request.send(formData);
 })
 
 configDownloadBtn.addEventListener("click", function() {
