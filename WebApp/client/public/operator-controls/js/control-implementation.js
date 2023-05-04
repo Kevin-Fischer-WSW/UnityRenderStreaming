@@ -908,6 +908,7 @@ function onSlideTabClicked() {
     .then(json => {
       validateSlideSwitchBtns(json);
     })
+  FetchAssignedHoldingSlidesAndUpdatePreviews();
 }
 
 function onSlideClearClicked() {
