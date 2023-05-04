@@ -46,7 +46,6 @@ async function setup() {
   showWarningIfNeeded(res.startupMode);
   //showPlayButton();
   Play();
-  showStatsMessage();
 }
 
 function showWarningIfNeeded(startupMode) {
@@ -208,38 +207,4 @@ async function onDisconnect(message) {
   document.getElementById("join-meeting-btn").disabled = false;
   document.getElementById("general-status-bar").innerHTML = "Connection State: Disconnected"
   Play();
-}
-
-/** @type {RTCStatsReport} */
-let lastStats;
-/** @type {number} */
-let intervalId;
-
-function showStatsMessage() {
-  intervalId = setInterval(async () => {
-    if (myVideoPlayer == null) {
-      return;
-    }
-
-    const stats = await myVideoPlayer.getStats();
-    if (stats == null) {
-      return;
-    }
-
-    const array = createDisplayStringArray(stats, lastStats);
-    if (array.length) {
-      messageDiv.style.display = 'block';
-      messageDiv.innerHTML = array.join('<br>');
-    }
-    lastStats = stats;
-  }, 1000);
-}
-function clearStatsMessage() {
-  if (intervalId) {
-    clearInterval(intervalId);
-  }
-  lastStats = null;
-  intervalId = null;
-  messageDiv.style.display = 'none';
-  messageDiv.innerHTML = '';
 }
