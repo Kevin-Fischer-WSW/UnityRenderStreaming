@@ -87,12 +87,14 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <fieldset class="input-group">
-              <input id="participant-rename" type="text" class="form-control">
-              <button id="rename-btn" class="btn btn-secondary" type="button" data-bs-dismiss="modal">Rename</button>
-            </fieldset>
+            <label for="participant-rename-name">Name</label>
+            <input id="participant-rename-name" type="text" class="form-control">
+            <label for="participant-rename-title">Title</label>
+            <input id="participant-rename-title" type="text" class="form-control">
           </div>
           <div class="modal-footer">
+            <button id="rename-btn" class="btn btn-secondary" type="button" data-bs-dismiss="modal">Rename</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           </div>
         </div>
       </div>
@@ -249,7 +251,7 @@
 
   <!-- Stream control buttons -->
   <div class="container d-flex btn-group w-100 mt-2">
-    <button id="pending-btn" class="btn btn-lg btn-outline-primary text-black">Start Stream - Intro Slide</button>
+    <button id="pending-btn" class="btn btn-lg btn-outline-primary text-black">Start Stream</button>
     <button id="live-btn" class="btn btn-lg btn-outline-primary text-black">Live</button>
     <button id="technical-diff-btn" class="btn btn-lg btn-outline-primary text-black">Technical Difficulty</button>
     <button id="archive-btn" class="btn btn-lg btn-outline-primary text-black">Conclusion Slide</button>
@@ -284,7 +286,10 @@
           role="tab" aria-controls="nav-upload" aria-selected="false">Upload
         </button>
         <button class="nav-link" id="nav-recording-tab" data-bs-toggle="tab" data-bs-target="#nav-recording"
-          type="button" role="tab" aria-controls="nav-reording" aria-selected="false">Recording(s)
+          type="button" role="tab" aria-controls="nav-recording" aria-selected="false">Recording(s)
+        </button>
+        <button class="nav-link" id="nav-config-tab" data-bs-toggle="tab" data-bs-target="#nav-config"
+                type="button" role="tab" aria-controls="nav-config" aria-selected="false">Configuration
         </button>
       </div>
     </nav>
@@ -299,6 +304,11 @@
             </fieldset>
             <button id="join-meeting-btn" class="btn btn-primary" type="button">Join</button>
             <button id="leave-meeting-btn" class="btn btn-primary" type="button">Leave</button>
+          <legend class="title text-white mt-2">Zoom Controls</legend>
+          <fieldset>
+            <button id="leave-voip-btn" class="btn btn-primary" type="button">Leave VOIP</button>
+            <div id="leave-voip-result" class="bg-secondary"></div>
+          </fieldset>
         </fieldset>
       </div>
       <!-- Participant controls -->
@@ -319,6 +329,8 @@
             <button id="check-uncheck-all-ppt-btn" type="button" class="btn btn-secondary">Select All</button>
             <button id="show-select-ppt-btn" type="button" class="btn btn-secondary">Show Participants</button>
             <button id="hide-select-ppt-btn" type="button" class="btn btn-secondary">Hide Participants</button>
+            <button id="mute-select-ppt-btn" type="button" class="btn btn-secondary">Mute Participants</button>
+            <button id="unmute-select-ppt-btn" type="button" class="btn btn-secondary">Unmute Participants</button>
           </div>
           <!-- Single participant control element. Will be cloned for each participant -->
           <div id="participant-input-group" class="input-group">
@@ -328,10 +340,10 @@
             </div>
 
             <span class="input-group-text" draggable="true"><i class="bi bi-grip-vertical"></i></span>
-            <input type="text" class="form-control name-input" placeholder="Participant's name"
-              aria-label="Participant's name">
+            <span class="input-group-text name-span" style="flex-grow: 1">Name & Title</span>
+            <button class="btn btn-secondary rename-btn" aria-label="Participant's name" data-bs-toggle="modal" data-bs-target="#rename-modal"><i class="bi bi-pencil"></i></button>
             <button class="btn btn-secondary visibility-btn" type="button"><i class="bi bi-eye"></i></button>
-            <button class="btn btn-secondary mute-btn" type="button"><i class="bi bi-mic"></i></button>
+            <button class="btn btn-secondary audibility-btn" type="button"><i class="bi bi-ear"></i></button>
             <button class="btn btn-secondary show-lower-third-btn" type="button"><i class="bi bi-type"></i></button>
           </div>
         </fieldset>
@@ -434,7 +446,13 @@
           <!-- Play/stop button and volume control -->
           <div class="d-flex w-100 gap-5 mb-3">
             <button id="music-play-stop-btn" type="button" class="btn btn-secondary m-1"><i class="bi bi-play"></i></button>
-            <div class="w-75"></div>
+            <div class="input-group w-75">
+              <div class="input-group-prepend">
+                <label class="text-white" for="music-progress">Progress</label>
+              </div>
+              <input type="range" class="custom-range w-100" min="0" id="music-progress">
+              <span id="music-playback-time" class="text-white">00:00:00</span>
+            </div>
             <div class="input-group w-25">
               <div class="input-group-prepend">
                 <label class="text-white" for="volume-range-music">Volume</label>
@@ -510,7 +528,7 @@
                   <label class="text-white" for="video-progress">Progress</label>
                 </div>
                 <input type="range" class="custom-range w-100" min="0" id="video-progress">
-                <span id="video-playback-time" class="text-white">00:00</span>
+                <span id="video-playback-time" class="text-white">00:00:00</span>
               </div>
 
               <div class="input-group w-25">
@@ -541,8 +559,8 @@
               </ul>
               <button class="media-delete-btn btn btn-danger rounded-pill" type="button"><i
                   class="bi bi-trash"></i></button>
-              <button class="media-left-btn btn btn-secondary"><i class="bi bi-volume-up"></i></button>
-              <button class="media-right-btn btn btn-secondary"><i class="bi bi-volume-mute"></i></button>
+              <button class="media-left-btn btn btn-secondary" type="button"><i class="bi bi-volume-up"></i></button>
+              <button class="media-right-btn btn btn-secondary" type="button"><i class="bi bi-volume-mute"></i></button>
             </div>
 
           </div>
@@ -562,7 +580,6 @@
 
         </fieldset>
       </div>
-
       <!-- Log controls -->
       <div class="tab-pane fade" id="nav-log" role="tabpanel" aria-labelledby="nav-log-tab">
         <fieldset>
@@ -588,6 +605,14 @@
       <div class="tab-pane fade" id="nav-upload" role="tabpanel" aria-labelledby="nav-upload-tab">
         <fieldset>
           <legend class="title text-white mt-2">Upload</legend>
+          <div id="upload-success-alert" class="alert alert-success d-none fade show align-items-center w-50 mx-auto" role="alert">
+            <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img">
+              <use xlink:href="#check-circle-fill" />
+            </svg>
+            <div>
+              <strong>Upload Complete!</strong>
+            </div>
+          </div>
           <!-- Descriptor of action performed on files -->
           <div id="slide-upload-descriptor" class="text-white">Click browse to look for files to upload.</div>
           <button id="edit-slide-btn" class="btn btn-primary mb-2" type="button" data-bs-toggle="modal"
@@ -662,6 +687,20 @@
             </select>
             <button id="recording-download" class="btn btn-secondary" type="button">Download</button>
           </div>
+        </fieldset>
+      </div>
+      <!-- Configuration upload controls -->
+      <div class="tab-pane fade" id="nav-config" role="tabpanel" aria-labelledby="nav-config-tab">
+        <fieldset>
+          <legend class="title text-white mt-2">Configuration</legend>
+          <!-- Input for uploading configuration -->
+          <div class="input-group">
+            <input id="config-file-input" type="file" class="form-control" aria-label="Browse" value="Browse">
+            <button id="config-upload-btn" class="btn btn-secondary" type="button">Upload</button>
+          </div>
+          <!-- Button to download configuration -->
+          <button id="config-download-btn" class="btn btn-primary mt-2" type="button">Download</button>
+          <div id="configTrackerContainer" class="container overflow-auto overflow-div"></div>
         </fieldset>
       </div>
     </div>

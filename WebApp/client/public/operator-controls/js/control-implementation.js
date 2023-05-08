@@ -11,13 +11,13 @@ import { getVideoThumb } from "../../js/video-thumbnail.js";
 import { createUploadProgressTracker } from "../../js/progresstracker.js";
 import { onEnableAdvancedSettings } from "./advancedSettings.js";
 
-
 mainNotifications.addEventListener('setup', function () {
   myVideoPlayer.onParticipantDataReceived = participantDataReceived;
   myVideoPlayer.onAppStatusReceived = appStatusReceived;
   myVideoPlayer.onStyleSchemaReceived = onReceiveStyleSchema;
   myVideoPlayer.onStyleValuesReceived = onReceiveStyleValues;
   myVideoPlayer.onLogMessageNotification = onLogMessageNotification;
+  myVideoPlayer.onNewMediaNotification = onNewMediaNotification;
 });
 
 function onLogMessageNotification () {
@@ -36,6 +36,16 @@ function fetchLogs(){
       data = data.replaceAll("\t", "&nbsp;&nbsp;&nbsp;&nbsp;")
       log.innerHTML = data;
     });
+}
+
+function onNewMediaNotification () {
+  if (navSlideTabBtn.classList.contains("active")) {
+    onSlideTabClicked();
+  } else if (navMusicTabBtn.classList.contains("active")) {
+    onMusicTabClicked();
+  } else if (navVideoTabBtn.classList.contains("active")) {
+    onVideoTabClicked();
+  }
 }
 
 /* SIGN OUT MODAL ELEMENTS */
@@ -79,14 +89,16 @@ function validateParticipantOnVidCtrls() {
 
 /* RENAME MODAL ELEMENTS */
 let renameModal = document.getElementById("rename-modal")
-let participantName = document.getElementById("participant-rename")
+let participantName = document.getElementById("participant-rename-name")
+let participantTitle = document.getElementById("participant-rename-title")
 let renameButton = document.getElementById("rename-btn")
 let participantToRename;
 //TODO ALERT IF ANY ERRORS
 renameButton.addEventListener("click", function() {
   let p = participantJsonParsed[participantToRename];
-  let str = p.id + "," + participantName.value;
-  sendStringSubmitEvent(myVideoPlayer, OperatorControls._SetParticipantDisplayName, str);
+  let name = encodeURIComponent(participantName.value)
+  let title = encodeURIComponent(participantTitle.value)
+  unityFetch(`/setParticipantDisplayName?participantId=${p.id}&name=${name}&title=${title}`, {method: "PUT"})
 })
 renameModal.addEventListener('shown.bs.modal', function () {
   renameModal.focus()
@@ -153,7 +165,8 @@ function setupParticipantOnVidCtrl(node, idx) {
 
   renameEl.addEventListener("click", function() {
     let p = participantJsonParsed[idx];
-    participantName.value = p.username;
+    participantName.value = p.name;
+    participantTitle.value = p.title;
     participantToRename = idx;
   })
 
@@ -223,7 +236,6 @@ pwd.addEventListener("input", flagStreamPrefChange);
 /* -> Feedback Alerts */
 let streamUrl = document.getElementById("url-span");
 let successAlert = document.getElementById("success-alert");
-let successAlertRename = document.getElementById("success-alert-rename");
 let errorMsg = document.getElementById("err-span");
 let errorAlert = document.getElementById("error-alert");
 let errorAlertFile = document.getElementById("error-alert-file");
@@ -349,6 +361,13 @@ let musicTimerIntervalId = 0;
 let videoTimer = 0;
 let videoTimerIntervalId = 0;
 
+function convertSecondsToTimestamp(sec) {
+  let hh = Math.floor(sec / 3600);
+  let mm = Math.floor(sec / 60);
+  let ss = sec % 60;
+  return `${hh < 10 ? "0" + hh : hh}:${mm < 10 ? "0" + mm : mm}:${ss < 10 ? "0" + ss : ss}`
+}
+
 function appStatusReceived(json) {
 
   let jsonParsed = JSON.parse(json)
@@ -361,11 +380,12 @@ function appStatusReceived(json) {
   addParticipantSelectCheckEventListener(); // adds event listeners to each select checkbox
 
   generalStatBar.innerHTML =
-  `Stream: ${jsonParsed.streaming ? "Yes": "No"} |
-  Recording: ${jsonParsed.recording ? "Yes": "No"} |
+  `Stream: ${jsonParsed.streaming ? "Yes" : "No"} |
+  Recording Stream: ${jsonParsed.recording ? "Yes" : "No"} |
+  Zoom Local Recording: ${jsonParsed.canRecordLocalFiles ? "Allowed" : "Not Allowed"} |
   Holding Slide: ${jsonParsed.holdingSlide} |
   Holding Music: ${jsonParsed.playingHoldingMusic ? "Playing" : "Not Playing"} |
-  Holding Video: ${jsonParsed. playingVideo ? "Playing" : "Not Playing"}.`
+  Holding Video: ${jsonParsed. playingVideo ? "Playing" : "Not Playing"}`
 
   if (jsonParsed.inMeeting || jsonParsed.meetingSimulated) {
     validateTracksInPlaylist(jsonParsed.playlist, jsonParsed.currentlyPlayingIndex)
@@ -375,41 +395,47 @@ function appStatusReceived(json) {
     holdMusicFieldset.disabled = false;
     musicPlayStopBtn.innerHTML = jsonParsed.playingHoldingMusic ? '<i class="bi bi-pause"></i>' : '<i class="bi bi-play"></i>';
     currentlyPlayingSpan.innerHTML = jsonParsed.currentlyPlayingTrack;
+    volumeRangeMusic.value = jsonParsed.holdingMusicVolume;
+    volumeLevelMusic.innerHTML = getVolumeLevel(volumeRangeMusic.value);
     if (jsonParsed.playingHoldingMusic) {
       holdingMusicTimer = Math.round(jsonParsed.currentTrackTimeLeft);
+      musicPlaybackTime.innerHTML = convertSecondsToTimestamp(holdingMusicTimer);
       currentlyPlayingTrackTime.innerHTML = `-${holdingMusicTimer}`;
-      volumeRangeMusic.value = jsonParsed.holdingMusicVolume;
       if (musicTimerIntervalId === 0) {
         musicTimerIntervalId = setInterval(function () {
           // Decrease the time left by 1 second
           holdingMusicTimer--;
+          musicPlaybackTime.innerHTML = convertSecondsToTimestamp(holdingMusicTimer);
           currentlyPlayingTrackTime.innerHTML = `-${holdingMusicTimer}`;
         }, 1000);
       }
     } else {
       clearInterval(musicTimerIntervalId);
       musicTimerIntervalId = 0;
+      musicPlaybackTime.innerHTML = "00:00:00";
       currentlyPlayingTrackTime.innerHTML = "";
     }
 
-    videoFieldsetBar.disabled = !jsonParsed.videoIsShowing;
+    //videoFieldsetBar.disabled = !jsonParsed.videoIsShowing;
+    volumeRangeVideo.value = jsonParsed.currentVideoVolume;
+    volumeLevelVideo.innerHTML = getVolumeLevel(volumeRangeVideo.value);
     if (jsonParsed.playingVideo) {
-
       videoTimer = Math.round(jsonParsed.currentVideoPlaybackTime);
-      videoPlaybackTime.innerHTML = videoProgress.value = videoTimer;
-      videoVolume.value = jsonParsed.currentVideoVolume;
+      videoPlaybackTime.innerHTML = convertSecondsToTimestamp(videoTimer);
+      videoProgress.value = videoTimer > videoProgress.max ? videoProgress.max : videoTimer;
       if (videoTimerIntervalId === 0) {
         videoTimerIntervalId = setInterval ( function() {
           videoTimer++;
-          videoPlaybackTime.innerHTML = videoProgress.value = videoTimer;
+          videoPlaybackTime.innerHTML = convertSecondsToTimestamp(videoTimer);
+          videoProgress.value = videoTimer > videoProgress.max ? videoProgress.max : videoTimer;
         }, 1000);
       }
     } else {
       clearInterval(videoTimerIntervalId);
       videoTimerIntervalId = 0;
-      videoPlaybackTime.innerHTML = "00:00";
+      //videoPlaybackTime.innerHTML = "00:00:00";
     }
-    videoProgress.max = jsonParsed.currentVideoDuration;
+    videoProgress.max = Math.round(jsonParsed.currentVideoDuration);
     videoPlayPauseBtn.innerHTML = jsonParsed.playingVideo ? '<i class="bi bi-pause"></i>' : '<i class="bi bi-play"></i>';
 
     if (jsonParsed.streaming) {
@@ -425,7 +451,7 @@ function appStatusReceived(json) {
         ActivateButtonHelper(archiveBtn, true)
       }
     } else {
-      pendingBtn.innerHTML = "Start stream"
+      pendingBtn.innerHTML = "Start Stream"
       streamSettingsFieldset.disabled = false;
       // todo: This causes a custom slide named "conclusion" to immediately be dismissed.
       // if (jsonParsed.holdingSlide === "endOfStream" || jsonParsed.holdingSlide === "conclusion") {
@@ -436,7 +462,7 @@ function appStatusReceived(json) {
     if (jsonParsed.secondClickEndsStream) {
       archiveBtn.innerHTML = "End Stream"
     } else {
-      archiveBtn.innerHTML = "Archive"
+      archiveBtn.innerHTML = "Conclusion Slide"
     }
 
   } else {
@@ -445,7 +471,7 @@ function appStatusReceived(json) {
     joinMeetingBtn.disabled = false;
     leaveMeetingBtn.disabled = true;
     holdMusicFieldset.disabled = true;
-    videoFieldsetBar.disabled = true;
+    //videoFieldsetBar.disabled = true;
   }
 
   function ActivateButtonHelper(btn, active) {
@@ -472,7 +498,7 @@ archiveBtn.addEventListener("click", onArchiveClick);
 
 /* STREAM BUTTON IMPLEMENTATION */
 function onPendingClick() {
-  sendClickEvent(myVideoPlayer, OperatorControls._PendingButton)
+  unityFetch("/startStreamAndDisplayIntroSlide", { method : "PUT"})
 }
 
 function onLiveClick() {
@@ -484,7 +510,7 @@ function onTechnicalDiff() {
 }
 
 function onArchiveClick() {
-  sendClickEvent(myVideoPlayer, OperatorControls._ArchiveButton)
+  unityFetch("/stopStreamAndDisplayConclusionSlide", { method : "PUT"})
 }
 
 /* ZOOM CONTROLS */
@@ -494,16 +520,44 @@ let joinMeetingBtn = document.getElementById("join-meeting-btn")
 joinMeetingBtn.addEventListener('click', onJoinClick)
 let leaveMeetingBtn = document.getElementById("leave-meeting-btn")
 leaveMeetingBtn.addEventListener("click", onLeaveClicked)
+let leaveVoipBtn = document.getElementById("leave-voip-btn")
+leaveVoipBtn.addEventListener("click", onLeaveVoipClicked)
+let leaveVoipResult = document.getElementById("leave-voip-result")
 
 /* ZOOM CONTROL IMPLEMENTATION */
 function onJoinClick() {
-  let str = meetingNumberInput.value + "," + meetingPasswordInput.value;
-  sendStringSubmitEvent(myVideoPlayer, OperatorControls._JoinMeetingButton, str);
+  // Meeting number can also be entered as a URI. This is helpful since query parameters can be passed along with the meeting number.
+  let meetingNumberUri = encodeURIComponent(meetingNumberInput.value)
+  unityFetch(`/joinMeeting?meetingId=${meetingNumberUri}&password=${meetingPasswordInput.value}`, { method : "PUT"})
+    .then(response => {
+      if (response.ok) {
+        console.log("Joined meeting")
+      }else{
+        console.log(response.statusText)
+      }
+    })
 }
 
 function onLeaveClicked() {
+  unityFetch(`/leaveMeeting`, { method : "PUT"})
+    .then(response => {
+      if (response.ok) {
+        console.log("Left meeting")
+      }else{
+        console.log(response.statusText)
+      }
+    })
+}
 
-  sendClickEvent(myVideoPlayer, OperatorControls._LeaveMeetingButton);
+function onLeaveVoipClicked() {
+  unityFetch(`/leaveVoip`, { method : "PUT"})
+    .then(response => {
+      leaveVoipResult.style.color = response.ok ? "var(--bs-white)" : "var(--bs-warning)"
+      leaveVoipResult.innerHTML = response.ok ? "Left Voip" : response.statusText
+      setTimeout(() => {
+        leaveVoipResult.innerHTML = ""
+      }, 3000);
+    })
 }
 
 /* PARTICIPANT CONTROLS */
@@ -522,6 +576,8 @@ disableAutoShowOnJoin.addEventListener("click", onDisableAutoShowOnJoin);
 let selectAllParticipantBtn = document.getElementById("check-uncheck-all-ppt-btn");
 let showSelectParticipantBtn = document.getElementById("show-select-ppt-btn");
 let hideSelectParticipantBtn = document.getElementById("hide-select-ppt-btn");
+let muteSelectParticipantBtn = document.getElementById("mute-select-ppt-btn");
+let unmuteSelectParticipantBtn = document.getElementById("unmute-select-ppt-btn");
 
 function addParticipantSelectCheckEventListener() {
   let cbs = document.getElementsByName('checked-participant');
@@ -585,6 +641,18 @@ showSelectParticipantBtn.addEventListener("click", () => {
   }
 })
 
+muteSelectParticipantBtn.addEventListener("click", () => {
+  let selectedParticipants = participantInputGroups.map(group => {
+    return group.querySelector(".check");
+  });
+  for (let i = 0; i <  selectedParticipants.length; i++) {
+    if (selectedParticipants[i].checked) {
+      let p = participantJsonParsed[i]
+      unityFetch(`/toggleParticipantAudibility?enable=false&participantId=${p.id}`, {method:"PUT"})
+    }
+  }
+})
+
 hideSelectParticipantBtn.addEventListener("click", () => {
   let selectedParticipants = mapSelectParticiapntsToInputGroups();
   for (let i = 0; i <  selectedParticipants.length; i++) {
@@ -592,6 +660,16 @@ hideSelectParticipantBtn.addEventListener("click", () => {
       let p = participantJsonParsed[i]
       let str = p.id + ",false"
       sendStringSubmitEvent(myVideoPlayer, OperatorControls._ToggleParticipantVisibilityButton, str)
+    }
+  }
+})
+
+unmuteSelectParticipantBtn.addEventListener("click", () => {
+  let selectedParticipants = mapSelectParticiapntsToInputGroups();
+  for (let i = 0; i <  selectedParticipants.length; i++) {
+    if (selectedParticipants[i].checked) {
+      let p = participantJsonParsed[i]
+      unityFetch(`/toggleParticipantAudibility?enable=true&participantId=${p.id}`, {method:"PUT"})
     }
   }
 })
@@ -622,13 +700,15 @@ function validateParticipantInputGroups() {
   }
   let validateGroup = function (clone, data){
     let visibilityBtn = document.querySelector(`#${clone.id} .visibility-btn`);
-    let muteBtn = document.querySelector(`#${clone.id} .mute-btn`);
-    let nameInput = document.querySelector(`#${clone.id} .name-input`);
+    let audibilityBtn = document.querySelector(`#${clone.id} .audibility-btn`);
+    let nameSpan = document.querySelector(`#${clone.id} .name-span`);
 
     visibilityBtn.firstChild.className = data.visible ? "bi bi-eye" : "bi bi-eye-slash";
-    muteBtn.firstChild.className = data.muted ? "bi bi-mic-mute" : "bi bi-mic";
-    if (nameInput !== document.activeElement) {
-      nameInput.value = data.username;
+    audibilityBtn.firstChild.className = data.audible ? "bi bi-ear" : "bi bi-ear-fill";
+    if (data.title === ""){
+      nameSpan.innerHTML = `<b>${data.name}</b>`;
+    }else{
+      nameSpan.innerHTML = `<b>${data.name}</b>&nbsp-&nbsp<i>${data.title}</i>`;
     }
   }
   ValidateClonesWithJsonArray(participantInputGroupOg, participantFieldset, participantInputGroups, setupGroup, participantJsonParsed, validateGroup);
@@ -647,9 +727,9 @@ function ClearSelectParticipantsOnDrag() {
 }
 
 function setupParticipantInputGroup(node, idx) {
-  let nameInput = document.querySelector("div#" + node.id + " .name-input")
+  let renameBtn = document.querySelector("div#" + node.id + " .rename-btn")
   let visibilityBtn = document.querySelector("div#" + node.id + " .visibility-btn")
-  let muteBtn = document.querySelector("div#" + node.id + " .mute-btn")
+  let audibilityBtn = document.querySelector("div#" + node.id + " .audibility-btn")
   let lowerThirdBtn = document.querySelector("div#" + node.id + " .show-lower-third-btn")
 
   node.ondragstart = (ev) => {
@@ -687,10 +767,14 @@ function setupParticipantInputGroup(node, idx) {
     sendStringSubmitEvent(myVideoPlayer, OperatorControls._ToggleParticipantVisibilityButton, str)
   })
 
-  muteBtn.addEventListener("click", function () {
+  audibilityBtn.addEventListener("click", function () {
     let p = participantJsonParsed[idx]
-    let str = p.id + "," + !p.muted
-    sendStringSubmitEvent(myVideoPlayer, OperatorControls._MuteParticipantButton, str)
+    unityFetch(`/toggleParticipantAudibility?participantId=${p.id}&enable=${!p.audible}`, {method: "PUT"})
+    .then(resp => {
+      if (resp.ok) {
+        console.log("audibility toggled")
+      }
+    })
   })
 
   lowerThirdBtn.addEventListener("click", function () {
@@ -699,10 +783,11 @@ function setupParticipantInputGroup(node, idx) {
     sendStringSubmitEvent(myVideoPlayer, OperatorControls._ToggleParticipantLowerThird, str);
   })
 
-  nameInput.addEventListener("change", function () {
-    let str = participantJsonParsed[idx].id + "," + nameInput.value;
-
-    sendStringSubmitEvent(myVideoPlayer, OperatorControls._SetParticipantDisplayName, str)
+  renameBtn.addEventListener("click", function () {
+    let p = participantJsonParsed[idx];
+    participantName.value = p.name;
+    participantTitle.value = p.title;
+    participantToRename = idx;
   })
 }
 
@@ -838,6 +923,7 @@ function onSlideTabClicked() {
     .then(json => {
       validateSlideSwitchBtns(json);
     })
+  FetchAssignedHoldingSlidesAndUpdatePreviews();
 }
 
 function onSlideClearClicked() {
@@ -904,11 +990,13 @@ function FetchAssignedHoldingSlidesAndUpdatePreviews() {
         }
 
         function setBackgroundImageHelper(url) {
-          if (slideInfo.type === "intro") {
+          if (slideInfo.assignedTo.includes("intro")) {
             intro_preview.style.backgroundImage = `url("${url}")`;
-          } else if (slideInfo.type === "technicalDifficulties") {
+          }
+          if (slideInfo.assignedTo.includes("technicalDifficulties")) {
             techdiff_preview.style.backgroundImage = `url("${url}")`;
-          } else if (slideInfo.type === "outro") {
+          }
+          if (slideInfo.assignedTo.includes("outro")) {
             conc_preview.style.backgroundImage = `url("${url}")`;
           }
         }
@@ -988,6 +1076,13 @@ let holdMusicFieldset = document.getElementById("music-fieldset");
 let volumeRangeMusic = document.getElementById("volume-range-music");
 let volumeLevelMusic  = document.getElementById("music-volume-level");
 volumeLevelMusic.innerHTML = getVolumeLevel(volumeRangeMusic.value);
+let musicProgress = document.getElementById("music-progress");
+let musicPlaybackTime = document.getElementById("music-playback-time");
+
+musicProgress.addEventListener("change", function () {
+  let str = musicProgress.value;
+  musicPlaybackTime.innerHTML = convertSecondsToTimestamp(musicProgress.value);;
+});
 
 volumeRangeMusic.addEventListener("input", function () {
   let str = volumeRangeMusic.value;
@@ -1018,6 +1113,16 @@ let trackInLibrary = document.getElementById("track-in-library");
 let tracksInLibrary = [];
 
 trackInLibrary.classList.add("d-none");
+
+function onMusicTabClicked() {
+  fetch("/all_holding_music")
+    .then(value => value.json())
+    .then(music => {
+      UpdateOptionGroupWithValues(holdMusicOptionGroup, music);
+      UpdateHoldMusicBrowsePreviewElement();
+      validateTracksInLibrary(music);
+    })
+}
 
 function validateTracksInLibrary(tracks) {
   let setupBtn = function (clone) {
@@ -1090,6 +1195,7 @@ function validateTracksInPlaylist(playlistData, currentlyPlayingIndex){
 
 /* UPLOAD CONTROLS */
 let uploadDescriptor = document.getElementById("slide-upload-descriptor")
+let uploadSuccessAlert = document.getElementById("upload-success-alert");
 let batchSlideFileInput = document.getElementById("batch-slide-file-input")
 batchSlideFileInput.addEventListener("change", batchFileInputChanged) // todo make this function less specific to slide uploads.
 let batchSlideUploadBtn = document.getElementById("batch-slide-upload-btn") // todo Make this function less specific as well. Verify files based on extension.
@@ -1140,28 +1246,11 @@ function UpdateOptionGroupWithValues(optionGroup, options) {
 
 function FetchAllUploadedMediaAndUpdateDash() {
   // Fetch custom slides.
-  unityFetch("/getHoldingSlides")
-    .then(value => value.json())
-    .then(slides => {
-      validateSlideSwitchBtns(slides);
-    })
+  onSlideTabClicked()
   // Fetch holding music.
-  fetch("/all_holding_music")
-    .then(value => value.json())
-    .then(music => {
-      UpdateOptionGroupWithValues(holdMusicOptionGroup, music);
-      UpdateHoldMusicBrowsePreviewElement();
-      validateTracksInLibrary(music);
-    })
+  onMusicTabClicked();
   // Fetch videos.
-  unityFetch("/getVideos")
-    .then(value => value.json())
-    .then(videos => {
-      let videoNames = videos.map(video => video.name);
-      UpdateOptionGroupWithValues(videoOptionGroup, videoNames);
-      UpdateVideoBrowsePreviewElement();
-      validateVideoSwitchBtns(videos);
-    })
+  onVideoTabClicked();
 }
 
 // Update initially.
@@ -1401,15 +1490,74 @@ function uploadCustomSlideClicked() {
   let uploads = formInput.map((input) => { return upload(input) });
 
   // After all files are done uploading re-enable upload button.
-  Promise.all(uploads).then(() => {
+  Promise.allSettled(uploads).then((resp) => {
     batchSlideUploadBtn.disabled = false;
-    FetchAllUploadedMediaAndUpdateDash();
-    FetchAssignedHoldingSlidesAndUpdatePreviews();
+    if (resp.ok && uploads.length > 0) {
+      batchSlideFileInput.value = "";
+      uploadDescriptor.innerHTML = "Click browse to look for files to upload.";
+      clearFormInput();
+      alertDisplay(uploadSuccessAlert);
+      FetchAllUploadedMediaAndUpdateDash();
+      FetchAssignedHoldingSlidesAndUpdatePreviews();
+    }
   })
-
 }
 
+/* CONFIGURATION UPLOAD CONTROLS */
+let configFileInput = document.getElementById("config-file-input");
+let configUploadBtn = document.getElementById("config-upload-btn");
+let configDownloadBtn = document.getElementById("config-download-btn");
 
+configUploadBtn.addEventListener("click", function() {
+
+  if (configFileInput.value === "") return;
+  configUploadBtn.disabled = true;
+  let parentTracker = document.getElementById("configTrackerContainer");
+
+  let file = configFileInput.files[0];
+  let formData = new FormData();
+  formData.append("config", file);
+
+  let request = new XMLHttpRequest();
+  createUploadProgressTracker(parentTracker, request, "config");
+  request.onload = function() {
+    if (request.status >= 200 && request.status < 300) {
+      console.log("Config File Uploading")
+    } else {
+      console.log(request.response);
+    }
+  }
+
+  request.onloadend = function() {
+    if (request.status >= 200 && request.status < 300) {
+      console.log("Config File Uploaded.")
+      FetchAllUploadedMediaAndUpdateDash();
+    } else {
+      console.log("Config Upload Failed.")
+    }
+    configFileInput.value = "";
+    configUploadBtn.disabled = false;
+  }
+
+  request.open("PUT", `uapp/setConfig`);
+  request.send(formData);
+})
+
+configDownloadBtn.addEventListener("click", function() {
+  unityFetch("/getConfig", {method: "GET"})
+    .then((resp) => {
+      if (resp.ok) {
+        resp.blob().then((blob) => {
+          let url = window.URL.createObjectURL(blob);
+          let a = document.createElement('a');
+          a.href = url;
+          a.download = "config.zip";
+          a.click();
+          a.remove();
+        })
+      }
+    })
+})
 
 /* VIDEO CONTROLS */
 let videoFieldsetBar  = document.getElementById("video-fieldset-bar");
@@ -1420,20 +1568,20 @@ let videoSwitchBtns = [];
 let videoClearBtn = document.getElementById("video-clear-btn");
 let videoProgress = document.getElementById("video-progress");
 let videoPlaybackTime = document.getElementById("video-playback-time");
-let videoVolume  = document.getElementById("volume-range-video");
-let videoVolumeLevel  = document.getElementById("video-volume-level");
-videoVolumeLevel.innerHTML = getVolumeLevel(videoVolume.value);
+let volumeRangeVideo  = document.getElementById("volume-range-video");
+let volumeLevelVideo  = document.getElementById("video-volume-level");
+volumeLevelVideo.innerHTML = getVolumeLevel(volumeRangeVideo.value);
 videoClearBtn.addEventListener("click", onVideoClearClicked);
 
-videoVolume.addEventListener("input", function() {
-  let str = videoVolume.value;
-  videoVolumeLevel.innerHTML = getVolumeLevel(videoVolume.value);
+volumeRangeVideo.addEventListener("input", function() {
+  let str = volumeRangeVideo.value;
+  volumeLevelVideo.innerHTML = getVolumeLevel(volumeRangeVideo.value);
   sendStringSubmitEvent(myVideoPlayer, OperatorControls._VolumeVideo, str);
 });
 
 videoProgress.addEventListener("change", function () {
   let str = videoProgress.value;
-  videoPlaybackTime.innerHTML = videoProgress.value;
+  videoPlaybackTime.innerHTML = convertSecondsToTimestamp(videoProgress.value);
   clearInterval(videoTimerIntervalId);
   videoTimerIntervalId = 0;
   sendStringSubmitEvent(myVideoPlayer, OperatorControls._SeekVideoButton, str);
@@ -1447,6 +1595,18 @@ videoPlayPauseBtn.addEventListener("click", function() {
   }
 });
 
+function onVideoTabClicked() {
+  // Fetch videos.
+  unityFetch("/getVideos")
+    .then(value => value.json())
+    .then(videos => {
+      let videoNames = videos.map(video => video.name);
+      UpdateOptionGroupWithValues(videoOptionGroup, videoNames);
+      UpdateVideoBrowsePreviewElement();
+      validateVideoSwitchBtns(videos);
+    })
+}
+
 function onVideoClearClicked() {
   sendClickEvent(myVideoPlayer, OperatorControls._LiveButton);
 }
@@ -1455,11 +1615,25 @@ videoSwitchBtn.style.display = "none";
 
 function validateVideoSwitchBtns(videos) {
   let setupVideoSwitchBtn = function (videoBtn) {
-    videoBtn.style.display = "flex"
-    let label = document.querySelector(`#${videoBtn.id} span`)
+    videoBtn.style.display = "flex";
+    let label = document.querySelector(`#${videoBtn.id} span`);
     let img = document.querySelector(`#${videoBtn.id} img`);
+    let mute = document.querySelector(`#${videoBtn.id} .media-right-btn`)
+    let unmute = document.querySelector(`#${videoBtn.id} .media-left-btn`);
     setupSlideSetAsOptionsButton(videoBtn);
     setupDeleteButton(videoBtn, "/uapp/deleteVideo?url={0}", label, FetchAllUploadedMediaAndUpdateDash);
+    mute.addEventListener("click", () => {unityFetch("/muteZoomAudio", {method: "PUT"})
+    .then(response => {
+      if (response.ok) {
+        console.log("Zoom Audio Muted.");
+      }
+    })});
+    unmute.addEventListener("click", () => {unityFetch("/unmuteZoomAudio", {method: "PUT"})
+    .then(response => {
+      if (response.ok) {
+        console.log("Zoom Audio Unmuted.");
+      }
+    })});
     img.addEventListener("click", function () {
       unityFetch("/setHoldingSlide?url=" + img.alt, {method: "PUT"})
         .then(response => {
@@ -1691,10 +1865,10 @@ let navSlideTabBtn = document.getElementById("nav-slide-tab");
 navSlideTabBtn.addEventListener("click", ()=>{onSlideTabClicked(); navSlideTabBtn.scrollIntoView();});
 
 let navMusicTabBtn = document.getElementById("nav-music-tab");
-navMusicTabBtn.addEventListener("click", ()=>{navSlideTabBtn.scrollIntoView();});
+navMusicTabBtn.addEventListener("click", ()=>{onMusicTabClicked(); navSlideTabBtn.scrollIntoView();});
 
 let navVideoTabBtn = document.getElementById("nav-video-tab");
-navVideoTabBtn.addEventListener("click", ()=>{navVideoTabBtn.scrollIntoView();});
+navVideoTabBtn.addEventListener("click", ()=>{onVideoTabClicked(); navVideoTabBtn.scrollIntoView();});
 
 let navLogTabBtn = document.getElementById("nav-log-tab");
 navLogTabBtn.addEventListener("click", ()=>{navLogTabBtn.scrollIntoView(); fetchLogs();});
