@@ -398,15 +398,15 @@ function appStatusReceived(json) {
     volumeRangeMusic.value = jsonParsed.holdingMusicVolume;
     volumeLevelMusic.innerHTML = getVolumeLevel(volumeRangeMusic.value);
     if (jsonParsed.playingHoldingMusic) {
-      holdingMusicTimer = Math.round(jsonParsed.currentTrackTimeLeft);
-      musicPlaybackTime.innerHTML = convertSecondsToTimestamp(holdingMusicTimer);
-      currentlyPlayingTrackTime.innerHTML = `-${holdingMusicTimer}`;
+      holdingMusicTimer = Math.round(jsonParsed.currentTrackPlaybackTime);
+      currentlyPlayingTrackTime.innerHTML = musicPlaybackTime.innerHTML = convertSecondsToTimestamp(holdingMusicTimer);
+      musicProgress.value = holdingMusicTimer > musicProgress.max ? musicProgress.max : holdingMusicTimer;
       if (musicTimerIntervalId === 0) {
         musicTimerIntervalId = setInterval(function () {
           // Decrease the time left by 1 second
-          holdingMusicTimer--;
-          musicPlaybackTime.innerHTML = convertSecondsToTimestamp(holdingMusicTimer);
-          currentlyPlayingTrackTime.innerHTML = `-${holdingMusicTimer}`;
+          holdingMusicTimer++;
+          currentlyPlayingTrackTime.innerHTML = musicPlaybackTime.innerHTML = convertSecondsToTimestamp(holdingMusicTimer);
+          musicProgress.value = holdingMusicTimer > musicProgress.max ? musicProgress.max : holdingMusicTimer;
         }, 1000);
       }
     } else {
@@ -435,6 +435,7 @@ function appStatusReceived(json) {
       videoTimerIntervalId = 0;
       //videoPlaybackTime.innerHTML = "00:00:00";
     }
+    musicProgress.max = Math.round(jsonParsed.currentTrackDuration);
     videoProgress.max = Math.round(jsonParsed.currentVideoDuration);
     videoPlayPauseBtn.innerHTML = jsonParsed.playingVideo ? '<i class="bi bi-pause"></i>' : '<i class="bi bi-play"></i>';
 
@@ -1081,7 +1082,10 @@ let musicPlaybackTime = document.getElementById("music-playback-time");
 
 musicProgress.addEventListener("change", function () {
   let str = musicProgress.value;
-  musicPlaybackTime.innerHTML = convertSecondsToTimestamp(musicProgress.value);;
+  currentlyPlayingTrackTime.innerHTML = musicPlaybackTime.innerHTML = convertSecondsToTimestamp(musicProgress.value);
+  clearInterval(musicTimerIntervalId);
+  musicTimerIntervalId = 0;
+  sendStringSubmitEvent(myVideoPlayer, OperatorControls._SeekMusicButton, str);
 });
 
 volumeRangeMusic.addEventListener("input", function () {

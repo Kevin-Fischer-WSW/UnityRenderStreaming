@@ -31,14 +31,6 @@ $body-bg: #616161;
   border: 3px solid #3D3D3D;
 }
 
-#video-progress {
-  height: 20px;
-  display: flex;
-  opacity: 1;
-  width: 50%;
-  max-width: 100%;
-}
-
 .centered {
   position: absolute;
   top: 50%;
@@ -939,3 +931,44 @@ button, input, optgroup, select, textarea {
 #layout-schema-editor div h3 label {
   color: white;
 }
+
+input[type=range] {
+  cursor: pointer;
+  height: .2rem;
+  --bs-bg-opacity: 1;
+  accent-color: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity)) !important;;
+  border-radius: 0;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  border-radius: 50%;
+  border: 0;
+  transition: .2s ease-in-out;
+}
+
+input[type="range"]::-moz-range-thumb {
+  border-radius: 50%;
+  border: 0;
+  transition: .2s ease-in-out;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 0 10px rgba(0, 0, 0, 0.1)
+}
+input[type="range"]:active::-webkit-slider-thumb {
+  box-shadow: 0 0 0 13px rgba(0, 0, 0, 0.2);
+}
+input[type="range"]:focus::-webkit-slider-thumb {
+  box-shadow: 0 0 0 13px rgba(0, 0, 0, 0.2)
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+  box-shadow: 0 0 0 10px rgba(0, 0, 0, 0.1)
+}
+input[type="range"]:active::-moz-range-thumb {
+  box-shadow: 0 0 0 13px rgba(0, 0, 0, 0.2);
+}
+input[type="range"]:focus::-moz-range-thumb {
+  box-shadow: 0 0 0 13px rgba(0, 0, 0, 0.2) 
+}
+
