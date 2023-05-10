@@ -1,4 +1,5 @@
 ﻿import {Timeline} from "./timeline.js";
+import {unityFetch} from "../../js/unity-fetch.js";
 
 let timeline = new Timeline(30, 0.1, 2);
 document.getElementById('timeline-container').appendChild(timeline.element);
@@ -10,10 +11,10 @@ let clipDropdown = document.getElementById('clip-dropdown');
 let clips = [];
 
 async function GetClips() {
-  let resp1 = await fetch('/getStreamPref')
+  let resp1 = await unityFetch('/getStreamServiceSettings')
   let data1 = await resp1.json()
   if (resp1.ok) {
-    let resp2 = await fetch(`/listRecordings/${data1.settings.key}`)
+    let resp2 = await fetch(`/listRecordings/${data1.streamServiceSettings.key}`)
     let data2 = await resp2.json()
     if (resp2.ok) {
       clips = data2;

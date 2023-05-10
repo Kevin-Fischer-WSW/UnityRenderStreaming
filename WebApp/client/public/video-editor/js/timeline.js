@@ -140,7 +140,7 @@ export class Timeline extends EventTarget {
     let [_inpoint, _outpoint] = this.getInpointOutpointFromSelection();
     let cutSpan = {
       clipIndex: this.selectedClipIndex,
-      inpoint: _inpoint, // todo inpoint should actually be outpoint and vice versa; this better reflects the way the video is cut.
+      inpoint: _inpoint,
       outpoint: _outpoint,
       apparentStart: this.selectionStart, // Marks where the cut appears in the timeline
     };

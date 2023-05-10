@@ -450,6 +450,10 @@ export const createServer = (config: Options): express.Application => {
   app.put("/submitVideoEdits", (req, res) => {
 
     if (req.session.authorized) {
+      if (req.body.projectName === undefined || req.body.projectData === undefined){
+        res.status(400).json({message: "Invalid request"});
+        return;
+      }
       // Create directory for the project.
       let projectPath = path.join(videoEditingDir, req.body.projectName);
       if (fs.existsSync(projectPath) === false){
@@ -468,6 +472,31 @@ export const createServer = (config: Options): express.Application => {
       fs.writeFileSync(dataPath, data);
 
       //todo parse cuts and clips to output txt file for ffmpeg.
+      let clips = req.body.projectData.clips;
+      let cutSpans = req.body.projectData.cutSpans; // note: this list is sorted by apparentStart.
+
+      let ffmpegInput = "";
+      let currentClipIndex = -1;
+      let currentClip = null;
+      let clipPath = "";
+      for (let i = 0; i < cutSpans.length; i++) {
+        // Check if we need to switch to a new clip.
+        if (cutSpans[i].clipIndex !== currentClipIndex) {
+          currentClipIndex = cutSpans[i].clipIndex;
+          currentClip = clips[currentClipIndex];
+          clipPath = path.join(config.recordingsDir, currentClip.name);
+          ffmpegInput += `file '${clipPath}'\n`;
+        }
+        // Concatenate the cut span's start and end times.
+        ffmpegInput += `outpoint ${cutSpans[i].inpoint}\n`;
+        ffmpegInput += `inpoint ${cutSpans[i].outpoint}\n`;
+      }
+      // Write the ffmpeg input file.
+      let ffmpegInputPath = path.join(projectPath, "input.txt");
+      fs.writeFileSync(ffmpegInputPath, ffmpegInput);
+      // Run ffmpeg to generate the preview.
+      let ffmpegOutputPath = path.join(projectPath, "preview.mp4");
+        execSync(`ffmpeg -f concat -safe 0 -i ${ffmpegInputPath} -c copy ${ffmpegOutputPath}`)
       // Note: We will run into issues if two people try to request at the same time.
       // send a json back containing the src for the rendered preview.
       res.status(200).json({message: "success"});
