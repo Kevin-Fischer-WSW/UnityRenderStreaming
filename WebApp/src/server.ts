@@ -13,6 +13,7 @@ import * as nocache from "nocache";
 import { rejects } from 'assert';
 import * as Ffmpeg  from 'fluent-ffmpeg';
 import {FfprobeData} from "fluent-ffmpeg";
+import {execSync} from "child_process";
 
 declare module 'express-session' {
   export interface SessionData {
@@ -476,27 +477,28 @@ export const createServer = (config: Options): express.Application => {
       let cutSpans = req.body.projectData.cutSpans; // note: this list is sorted by apparentStart.
 
       let ffmpegInput = "";
-      let currentClipIndex = -1;
-      let currentClip = null;
+      let lastCutSpanIdx = 0;
       let clipPath = "";
-      for (let i = 0; i < cutSpans.length; i++) {
-        // Check if we need to switch to a new clip.
-        if (cutSpans[i].clipIndex !== currentClipIndex) {
-          currentClipIndex = cutSpans[i].clipIndex;
-          currentClip = clips[currentClipIndex];
-          clipPath = path.join(config.recordingsDir, currentClip.name);
+      // Iterate through clips.
+      for (let i = 0; i < clips.length; i++) {
+        // Get the clip's path.
+        clipPath = path.join(config.recordingsDir, clips[i].name);
+        ffmpegInput += `file '${clipPath}'\n`;
+        // Iterate through cut spans while the current clip is the same as the cut span's clip.
+        for (let j = lastCutSpanIdx; j < cutSpans.length && cutSpans[j].clipIndex === i; j++) {
+          // Concatenate the cut span's start and end times.
+          ffmpegInput += `outpoint ${cutSpans[j].inpoint}\n`;
           ffmpegInput += `file '${clipPath}'\n`;
+          ffmpegInput += `inpoint ${cutSpans[j].outpoint}\n`;
+          lastCutSpanIdx++;
         }
-        // Concatenate the cut span's start and end times.
-        ffmpegInput += `outpoint ${cutSpans[i].inpoint}\n`;
-        ffmpegInput += `inpoint ${cutSpans[i].outpoint}\n`;
       }
       // Write the ffmpeg input file.
       let ffmpegInputPath = path.join(projectPath, "input.txt");
       fs.writeFileSync(ffmpegInputPath, ffmpegInput);
       // Run ffmpeg to generate the preview.
       let ffmpegOutputPath = path.join(projectPath, "preview.mp4");
-        execSync(`ffmpeg -f concat -safe 0 -i ${ffmpegInputPath} -c copy ${ffmpegOutputPath}`)
+      execSync(`ffmpeg -f concat -safe 0 -i "${ffmpegInputPath}" -c copy "${ffmpegOutputPath}" -y`)
       // Note: We will run into issues if two people try to request at the same time.
       // send a json back containing the src for the rendered preview.
       res.status(200).json({message: "success"});
