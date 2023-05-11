@@ -7,11 +7,8 @@ import signaling from './signaling';
 import { log, LogLevel } from './log';
 import Options from './class/options';
 import { reset as resetHandler }from './class/httphandler';
-import { exec, execFile, execSync } from "child_process";
+import { execSync } from "child_process";
 import * as session from 'express-session';
-import * as pdf2img from 'pdf-img-convert';
-
-//var pdf2img = require('pdf-img-convert');
 
 declare module 'express-session' {
   export interface SessionData {
@@ -225,10 +222,9 @@ export const createServer = (config: Options): express.Application => {
     res.status(status).json({messages : _messages});
   }
 
-  async function convertPDF (res, files, ppt = false) {
+  function convertPDF (res, files, ppt = false) {
   
-    const options = { width: 1920, height: 1080};
-    let pptfname, filename, filepath, pdfArray;
+    let pptfname, filename, filepath, command;
 
     Object.keys(files).map((fKey) => {
       pptfname = files[fKey].newFilename;
@@ -238,18 +234,13 @@ export const createServer = (config: Options): express.Application => {
 
     // if ppt is true, then converts it to pdf, then to img.
     if (ppt) {
-      let command = `"${path.normalize(process.env.PROGRAMFILES)}\\LibreOffice\\program\\soffice.exe" --headless --convert-to pdf --outdir "${holdingSlidePath}" "${filepath}"`
+      command = `"${path.normalize(process.env.PROGRAMFILES)}\\LibreOffice\\program\\soffice.exe" --headless --convert-to pdf --outdir "${holdingSlidePath}" "${filepath}"`
       execSync(command);
-      pdfArray = await pdf2img.convert(path.join(holdingSlidePath, `${pptfname}.pdf`), options);
-    } else {
-      pdfArray = await pdf2img.convert(filepath, options);
-    }
+    } 
 
-    for (let i = 0; i < pdfArray.length; i++) {
-      fs.writeFile(path.join(holdingSlidePath, `${filename}_${i+1}.png`), pdfArray[i], function (error) {
-        if (error) { console.error("Conversion Error: " + error); }
-      });
-    }
+    let dir = ppt ? holdingSlidePath + "\\" + pptfname + ".pdf" : filepath;
+    command = `"${path.normalize(process.env.PROGRAMFILES)}\\ImageMagick-7.1.1-Q16\\convert.exe" -resize 1920x1080 -quality 100 "${dir}" "${holdingSlidePath}\\output-%03d.jpg"`;
+    execSync(command);
 
     // delete pdfs.
     if (ppt) { DeleteFile(undefined, path.join(holdingSlidePath, `${pptfname}.pdf`)); }
@@ -279,10 +270,10 @@ export const createServer = (config: Options): express.Application => {
       } else if (fields.type === 'video') {
         uploadPath = holdingSlidePath;
       } else if (fields.type === 'pdf') {
-        convertPDF(res, files).catch( (err) => { console.log(err); } );
+        convertPDF(res, files)
         return;
       } else if (fields.type === 'ppt') {
-        convertPDF(res, files, true).catch( (err) => { console.log(err); } );
+        convertPDF(res, files, true)
         return;
       } else {
         res.status(400).json({messages: ['Invalid upload type']});
