@@ -7,10 +7,8 @@ import signaling from './signaling';
 import { log, LogLevel } from './log';
 import Options from './class/options';
 import { reset as resetHandler }from './class/httphandler';
-import { env } from "process";
+import { execSync } from "child_process";
 import * as session from 'express-session';
-import * as nocache from "nocache";
-import { rejects } from 'assert';
 import * as Ffmpeg  from 'fluent-ffmpeg';
 import {FfprobeData} from "fluent-ffmpeg";
 import {execSync} from "child_process";
@@ -236,6 +234,33 @@ export const createServer = (config: Options): express.Application => {
     res.status(status).json({messages : _messages});
   }
 
+  function convertPDF (res, files, ppt = false) {
+
+    let pptfname, filename, filepath, command;
+
+    Object.keys(files).map((fKey) => {
+      pptfname = files[fKey].newFilename;
+      filepath = files[fKey].filepath;
+      filename = fKey;
+    });
+
+    // if ppt is true, then converts it to pdf, then to img.
+    if (ppt) {
+      command = `"${path.normalize(process.env.PROGRAMFILES)}\\LibreOffice\\program\\soffice.exe" --headless --convert-to pdf --outdir "${holdingSlidePath}" "${filepath}"`
+      execSync(command);
+    }
+
+    let dir = ppt ? holdingSlidePath + "\\" + pptfname + ".pdf" : filepath;
+    command = `"${path.normalize(process.env.PROGRAMFILES)}\\ImageMagick-7.1.1-Q16\\convert.exe" -resize 1920x1080 -quality 100 "${dir}" "${holdingSlidePath}\\output-%03d.jpg"`;
+    execSync(command);
+
+    // delete pdfs.
+    if (ppt) { DeleteFile(undefined, path.join(holdingSlidePath, `${pptfname}.pdf`)); }
+    DeleteFile(undefined, filepath);
+
+    res.status(201).json({messages : "Uploaded and Converted"});
+  };
+
   app.post('/slide_upload', (req, res, next) => {
     const options = {
       multiples: true,
@@ -256,6 +281,12 @@ export const createServer = (config: Options): express.Application => {
         uploadPath = holdingMusicDir;
       } else if (fields.type === 'video') {
         uploadPath = holdingSlidePath;
+      } else if (fields.type === 'pdf') {
+        convertPDF(res, files)
+        return;
+      } else if (fields.type === 'ppt') {
+        convertPDF(res, files, true)
+        return;
       } else {
         res.status(400).json({messages: ['Invalid upload type']});
         return;
@@ -267,6 +298,7 @@ export const createServer = (config: Options): express.Application => {
 
   function DeleteFile(res, _path) {
     if (ValidatePathExists(res, _path) === false) return;
+    if (!res) { fs.unlinkSync(_path); return;}
     try {
       fs.unlinkSync(_path);
       res.status(200).json({message: ['File deleted successfully']});

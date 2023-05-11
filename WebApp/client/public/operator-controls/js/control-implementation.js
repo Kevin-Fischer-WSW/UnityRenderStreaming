@@ -520,9 +520,6 @@ let joinMeetingBtn = document.getElementById("join-meeting-btn")
 joinMeetingBtn.addEventListener('click', onJoinClick)
 let leaveMeetingBtn = document.getElementById("leave-meeting-btn")
 leaveMeetingBtn.addEventListener("click", onLeaveClicked)
-let leaveVoipBtn = document.getElementById("leave-voip-btn")
-leaveVoipBtn.addEventListener("click", onLeaveVoipClicked)
-let leaveVoipResult = document.getElementById("leave-voip-result")
 
 /* ZOOM CONTROL IMPLEMENTATION */
 function onJoinClick() {
@@ -546,17 +543,6 @@ function onLeaveClicked() {
       }else{
         console.log(response.statusText)
       }
-    })
-}
-
-function onLeaveVoipClicked() {
-  unityFetch(`/leaveVoip`, { method : "PUT"})
-    .then(response => {
-      leaveVoipResult.style.color = response.ok ? "var(--bs-white)" : "var(--bs-warning)"
-      leaveVoipResult.innerHTML = response.ok ? "Left Voip" : response.statusText
-      setTimeout(() => {
-        leaveVoipResult.innerHTML = ""
-      }, 3000);
     })
 }
 
@@ -1278,13 +1264,17 @@ let typeToKeyWords = {
 let extensionToMethod = {
   "slide" : ["png", "jpg", "jpeg"],
   "music" : ["mp3", "ogg", "wav"],
-  "video" : ["mp4", "mov"]
+  "video" : ["mp4", "mov"],
+  "pdf" : ["pdf"],
+  "ppt" : ["ppt", "pptm", "pptx"]
 }
 
 function SortFilesByExtension(files){
   let slideFiles = []
   let musicFiles = []
   let videoFiles = []
+  let pdfFiles = []
+  let pptFiles = []
   for (let i = 0; i < files.length; i++) {
     let file = files[i]
     let extension = file.name.split(".").pop().toLowerCase()
@@ -1294,11 +1284,15 @@ function SortFilesByExtension(files){
       musicFiles.push(file)
     } else if (extensionToMethod["video"].includes(extension)) {
       videoFiles.push(file)
+    } else if (extensionToMethod["pdf"].includes(extension)) {
+      pdfFiles.push(file)
+    } else if (extensionToMethod["ppt"].includes(extension)) {
+      pptFiles.push(file)
     } else {
       uploadDescriptor.innerHTML += `Unknown file type: ${file.name}<br>`
     }
   }
-  return [slideFiles, musicFiles, videoFiles]
+  return [slideFiles, musicFiles, videoFiles, pdfFiles, pptFiles]
 }
 
 let formInput = []
@@ -1320,18 +1314,28 @@ function batchFileInputChanged(){
   // Clear upload descriptor.
   uploadDescriptor.innerHTML = ""
   // Sort files into categories.
-  let [slideFiles, musicFiles, videoFiles] = SortFilesByExtension(batchSlideFileInput.files)
+  let [slideFiles, musicFiles, videoFiles, pdfFiles, pptFiles] = SortFilesByExtension(batchSlideFileInput.files)
   // Categorize slides by keywords upload.
   CategorizeSlideFilesByKeywordForUpload(slideFiles)
   // Simply push music and videos.
   for (let musicFile of musicFiles) {
     pushFormInput(musicFile, "music")
   }
-  uploadDescriptor.innerHTML  += `${musicFiles.length} music file(s),`
+  uploadDescriptor.innerHTML  += `${musicFiles.length} music file(s), `
   for (let videoFile of videoFiles) {
     pushFormInput(videoFile, "slide")
   }
+  uploadDescriptor.innerHTML  += `${pdfFiles.length} pdf file(s), `
+  for (let pdfFile of pdfFiles) {
+    pushFormInput(pdfFile, "pdf")
+  }
+  uploadDescriptor.innerHTML  += `${pptFiles.length} ppt file(s), `
+  for (let pptFile of pptFiles) {
+    pushFormInput(pptFile, "ppt")
+  }
   uploadDescriptor.innerHTML  += ` and ${videoFiles.length} video file(s).`
+  uploadDescriptor.innerHTML  += `${ pdfFiles.length > 0 || pptFiles.length > 0 ?
+    "<br><strong>Note: PDF/PPT files will be converted into slides, and will take longer to process.</strong>" : ""}`
   // Show edit button.
   editSlideBtn.style.display = "block";
 }
@@ -1493,9 +1497,9 @@ function uploadCustomSlideClicked() {
   let uploads = formInput.map((input) => { return upload(input) });
 
   // After all files are done uploading re-enable upload button.
-  Promise.allSettled(uploads).then((resp) => {
+  Promise.allSettled(uploads).then(() => {
     batchSlideUploadBtn.disabled = false;
-    if (resp.ok && uploads.length > 0) {
+    if (uploads.length > 0) {
       batchSlideFileInput.value = "";
       uploadDescriptor.innerHTML = "Click browse to look for files to upload.";
       clearFormInput();
