@@ -7,10 +7,11 @@ import signaling from './signaling';
 import { log, LogLevel } from './log';
 import Options from './class/options';
 import { reset as resetHandler }from './class/httphandler';
-import { env } from "process";
+import { exec, execFile, execSync } from "child_process";
 import * as session from 'express-session';
-import * as nocache from "nocache";
-import { rejects } from 'assert';
+import * as pdf2img from 'pdf-img-convert';
+
+//var pdf2img = require('pdf-img-convert');
 
 declare module 'express-session' {
   export interface SessionData {
@@ -224,6 +225,39 @@ export const createServer = (config: Options): express.Application => {
     res.status(status).json({messages : _messages});
   }
 
+  async function convertPDF (res, files, ppt = false) {
+  
+    const options = { width: 1920, height: 1080};
+    let pptfname, filename, filepath, pdfArray;
+
+    Object.keys(files).map((fKey) => {
+      pptfname = files[fKey].newFilename;
+      filepath = files[fKey].filepath;
+      filename = fKey;
+    });
+
+    // if ppt is true, then converts it to pdf, then to img.
+    if (ppt) {
+      let command = `"${path.normalize(process.env.PROGRAMFILES)}\\LibreOffice\\program\\soffice.exe" --headless --convert-to pdf --outdir "${holdingSlidePath}" "${filepath}"`
+      execSync(command);
+      pdfArray = await pdf2img.convert(path.join(holdingSlidePath, `${pptfname}.pdf`), options);
+    } else {
+      pdfArray = await pdf2img.convert(filepath, options);
+    }
+
+    for (let i = 0; i < pdfArray.length; i++) {
+      fs.writeFile(path.join(holdingSlidePath, `${filename}_${i+1}.png`), pdfArray[i], function (error) {
+        if (error) { console.error("Conversion Error: " + error); }
+      });
+    }
+
+    // delete pdfs.
+    if (ppt) { DeleteFile(undefined, path.join(holdingSlidePath, `${pptfname}.pdf`)); }
+    DeleteFile(undefined, filepath);
+
+    res.status(201).json({messages : "Uploaded and Converted"});
+  };
+
   app.post('/slide_upload', (req, res, next) => {
     const options = {
       multiples: true,
@@ -244,6 +278,12 @@ export const createServer = (config: Options): express.Application => {
         uploadPath = holdingMusicDir;
       } else if (fields.type === 'video') {
         uploadPath = holdingSlidePath;
+      } else if (fields.type === 'pdf') {
+        convertPDF(res, files).catch( (err) => { console.log(err); } );
+        return;
+      } else if (fields.type === 'ppt') {
+        convertPDF(res, files, true).catch( (err) => { console.log(err); } );
+        return;
       } else {
         res.status(400).json({messages: ['Invalid upload type']});
         return;
@@ -255,6 +295,7 @@ export const createServer = (config: Options): express.Application => {
 
   function DeleteFile(res, _path) {
     if (ValidatePathExists(res, _path) === false) return;
+    if (!res) { fs.unlinkSync(_path); return;}
     try {
       fs.unlinkSync(_path);
       res.status(200).json({message: ['File deleted successfully']});
