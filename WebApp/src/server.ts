@@ -7,7 +7,6 @@ import signaling from './signaling';
 import { log, LogLevel } from './log';
 import Options from './class/options';
 import { reset as resetHandler }from './class/httphandler';
-import { execSync } from "child_process";
 import * as session from 'express-session';
 import * as Ffmpeg  from 'fluent-ffmpeg';
 import {FfprobeData} from "fluent-ffmpeg";
