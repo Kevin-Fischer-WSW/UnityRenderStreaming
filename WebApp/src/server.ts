@@ -448,6 +448,15 @@ export const createServer = (config: Options): express.Application => {
     res.status(200).json(data);
   })
 
+  app.get("/videoEditingProjectPreview/:project", (req, res)=>{
+    // Get the preview.mp4 file for the project.
+    let projectPath = path.join(videoEditingDir, req.params.project);
+    if (ValidatePathExists(res, projectPath) === false) return;
+    let previewPath = path.join(projectPath, "preview.mp4");
+    if (ValidatePathExists(res, previewPath) === false) return;
+    res.status(200).sendFile(previewPath);
+  })
+
   app.put("/submitVideoEdits", (req, res) => {
 
     if (req.session.authorized) {
@@ -485,11 +494,16 @@ export const createServer = (config: Options): express.Application => {
         clipPath = path.join(config.recordingsDir, clips[i].name);
         ffmpegInput += `file '${clipPath}'\n`;
         // Iterate through cut spans while the current clip is the same as the cut span's clip.
+        let firstCutSpanIdx = lastCutSpanIdx;
         for (let j = lastCutSpanIdx; j < cutSpans.length && cutSpans[j].clipIndex === i; j++) {
           // Concatenate the cut span's start and end times.
-          ffmpegInput += `outpoint ${cutSpans[j].inpoint}\n`;
-          ffmpegInput += `file '${clipPath}'\n`;
-          ffmpegInput += `inpoint ${cutSpans[j].outpoint}\n`;
+          if (cutSpans[j].inpoint !== 0){
+            ffmpegInput += `outpoint ${cutSpans[j].inpoint}\n`;
+          }
+          if (cutSpans[j].outpoint !== clips[i].duration){
+            if (j !== firstCutSpanIdx) ffmpegInput += `file '${clipPath}'\n`;
+            ffmpegInput += `inpoint ${cutSpans[j].outpoint}\n`;
+          }
           lastCutSpanIdx++;
         }
       }

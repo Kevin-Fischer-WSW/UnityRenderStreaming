@@ -7,6 +7,11 @@ document.getElementById('timeline-container').appendChild(timeline.element);
 
 let clipDropdown = document.getElementById('clip-dropdown');
 
+let videoPlayer = document.getElementById('video');
+videoPlayer.addEventListener('timeupdate', () => {
+  timeline.setPlayHeadTime(videoPlayer.currentTime);
+});
+
 // Get a list of the recorded video files
 let clips = [];
 
@@ -61,6 +66,7 @@ async function loadProject(projectName) {
   if (resp.ok) {
     timeline.setJson(data)
     projectNameInput.value = projectName;
+    updateVideoPreview();
   }
 }
 
@@ -83,10 +89,12 @@ saveProjectButton.addEventListener('click', () => {
     body: JSON.stringify(data)
   }).then((response) => {
     if (response.ok) {
-      alert('Project saved');
+      updateVideoPreview();
     } else {
       alert('Error saving project');
     }
+  }).catch((error) => {
+    console.error('Error:', error);
   });
 });
 
@@ -138,14 +146,21 @@ timeSlider.addEventListener('input', () => {
 
 timeline.addEventListener('duration-changed', () => {
   updateTimeSlider()
+  saveProjectButton.click();
 });
 
 function updateTimeSlider(){
   let c = timeline.getDurationOfClipsMinusCuts() - timeline.getZoomedTimeSpan();
   if (c > 0){
     timeSlider.value = timeline.timeSpanStart;
+    timeSlider.style.display = 'block';
     timeSlider.max = c;
   }else{
+    timeSlider.style.display = 'none';
     timeSlider.max = 0;
   }
+}
+
+function updateVideoPreview(){
+  videoPlayer.src = '/videoEditingProjectPreview/' + projectNameInput.value + '?t=' + Date.now();
 }

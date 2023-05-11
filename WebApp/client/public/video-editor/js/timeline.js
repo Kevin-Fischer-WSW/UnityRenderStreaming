@@ -78,6 +78,8 @@ export class Timeline extends EventTarget {
     this.timeSpanEnd = 0;
     this.timeSpanAtNormalZoom = timeSpanAtNormalZoom;
 
+    this.playHeadTime = 0;
+
     this.zoom = 1;
     this.zoomMin = zoomMin;
     this.zoomMax = zoomMax;
@@ -104,7 +106,7 @@ export class Timeline extends EventTarget {
     this.selectionStart = 0;
     this.selectionEnd = 0;
     this.selectingState = SelectionState.notSelecting;
-    this.updateSelectionStyle(0, 0);
+    this.updateSelectionElementStyle(0, 0);
     this.showSelection(false);
   }
 
@@ -168,9 +170,18 @@ export class Timeline extends EventTarget {
   }
 
   deleteCut(clipIndex) {
-    // Remove the cut from the list of cuts
+    // Remove the cut from the list of cuts.
     let cutSpan = this.cutSpans[clipIndex];
     this.updateApparentStartsOfCutsAfterDeletingCut(cutSpan);
+    // Set the selection to the cut.
+    this.selectedClipIndex = cutSpan.clipIndex;
+    this.selectionStart = cutSpan.inpoint;
+    this.selectionEnd = cutSpan.outpoint;
+    this.selectingState = SelectionState.selectionMade;
+    // Ensure selection is visible.
+    this.showSelection(true);
+    this.updateSelectionStartEndElementInnerText();
+    // Update the timeline.
     this.updateWholeTimeline();
     this.invokeWholeDurationChanged();
   }
@@ -464,7 +475,7 @@ export class Timeline extends EventTarget {
     }
   }
 
-  updateSelectionStyle(start, end) {
+  updateSelectionElementStyle(start, end) {
     // Clamp the start and end to the range 0-1
     start = Math.max(0, Math.min(1, start));
     end = Math.max(0, Math.min(1, end));
@@ -472,6 +483,11 @@ export class Timeline extends EventTarget {
     this.selectionElement.style.left = (start * 100) + '%';
     // Set the width of box2 to the normalized width of the selection
     this.selectionElement.style.width = ((end - start) * 100) + '%';
+  }
+
+  updateSelectionStartEndElementInnerText() {
+    this.selectionStartElement.innerText = this.selectionStart.toFixed(2);
+    this.selectionEndElement.innerText = this.selectionEnd.toFixed(2);
   }
 
   updateOngoingSelection() {
@@ -487,13 +503,12 @@ export class Timeline extends EventTarget {
     // Clamp the start and end to the range upperLimit-lowerLimit, not to exceed 0-1
     start = Math.max(0, this.lowerLimit, Math.min(1, start));
     end = Math.max(0, Math.min(1, this.upperLimit, end));
-    this.updateSelectionStyle(start, end);
+    this.updateSelectionElementStyle(start, end);
 
     // Update the selection start and end.
     this.selectionStart = this.timeSpanStart + (start * this.getZoomedTimeSpan());
     this.selectionEnd = this.timeSpanStart + (end * this.getZoomedTimeSpan());
-    this.selectionStartElement.innerText = this.selectionStart.toFixed(2);
-    this.selectionEndElement.innerText = this.selectionEnd.toFixed(2);
+    this.updateSelectionStartEndElementInnerText();
   }
 
   updateTimelineTicks() {
@@ -531,10 +546,10 @@ export class Timeline extends EventTarget {
       tickElement.style.height = (height * 10) + 'px';
       this.timeLineTicksElement.appendChild(tickElement);
     }
-
+    // Add a tall red tick for each cut.
     for (let i = 0; i < this.cutSpans.length; i++) {
       let tickNorm = this.timeToNorm(this.cutSpans[i].apparentStart)
-      if (tickNorm > 0 && tickNorm < 1) {
+      if (tickNorm >= 0 && tickNorm <= 1) {
         let timelineTickCutElement = document.createElement('div');
         let timelineTickUncutElement = document.createElement('button');
 
@@ -551,6 +566,14 @@ export class Timeline extends EventTarget {
         timelineTickCutElement.appendChild(timelineTickUncutElement);
       }
     }
+    // Add a tall green tick for the current play head position.
+    let tickNorm = this.timeToNorm(this.playHeadTime);
+    if (tickNorm > 0 && tickNorm < 1) {
+      let timelineTickPlayHeadElement = document.createElement('div');
+      timelineTickPlayHeadElement.classList.add("timeline-tick-playhead");
+      timelineTickPlayHeadElement.style.left = (tickNorm * 100) + '%';
+      this.timeLineTicksElement.appendChild(timelineTickPlayHeadElement);
+    }
   }
 
   updateWholeTimeline() {
@@ -559,7 +582,7 @@ export class Timeline extends EventTarget {
     // Update selection by normalizing the selection start and end to the range 0-1
     let start = (this.selectionStart - this.timeSpanStart) / this.getZoomedTimeSpan();
     let end = (this.selectionEnd - this.timeSpanStart) / this.getZoomedTimeSpan();
-    this.updateSelectionStyle(start, end);
+    this.updateSelectionElementStyle(start, end);
     this.updateClips();
     this.updateTimelineTicks();
   }
@@ -582,6 +605,13 @@ export class Timeline extends EventTarget {
       this.timeSpanStart = value * (this.getDurationOfClipsMinusCuts() - this.getZoomedTimeSpan());
     }
     this.timeSpanEnd = this.timeSpanStart + this.getZoomedTimeSpan();
+    this.updateWholeTimeline();
+  }
+
+  setPlayHeadTime(value) {
+    // Clamp value between 0 and whole timeline duration
+    value = Math.max(0, Math.min(this.getDurationOfClipsMinusCuts(), value));
+    this.playHeadTime = value;
     this.updateWholeTimeline();
   }
 }

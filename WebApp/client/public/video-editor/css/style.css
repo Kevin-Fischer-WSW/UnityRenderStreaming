@@ -128,6 +128,15 @@
     /* left will be set through code */
 }
 
+.timeline-tick-playhead{
+    position: absolute;
+    bottom: 0;
+    height: 100%;
+    /* Make a 1px wide line */
+    border-left: 1px solid green;
+    /* left will be set through code */
+}
+
 .uncut-btn{
     /* Translate the element above the box */
     position: absolute;
