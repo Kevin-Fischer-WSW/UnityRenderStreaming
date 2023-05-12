@@ -235,7 +235,7 @@ export const createServer = (config: Options): express.Application => {
 
   function convertPDF (res, files, ppt = false) {
 
-    let pptfname, filename, filepath, command;
+    let pptfname, filename, filepath, command, cflags, appPath;
 
     Object.keys(files).map((fKey) => {
       pptfname = files[fKey].newFilename;
@@ -245,7 +245,9 @@ export const createServer = (config: Options): express.Application => {
 
     // if ppt is true, then converts it to pdf, then to img.
     if (ppt) {
-      command = `"${path.normalize(process.env.PROGRAMFILES)}\\LibreOffice\\program\\soffice.exe" --headless --convert-to pdf --outdir "${holdingSlidePath}" "${filepath}"`
+      appPath = "\\LibreOffice\\program\\soffice.exe";
+      cflags = "--headless --convert-to pdf --outdir";
+      command = `"${path.normalize(process.env.PROGRAMFILES)}${appPath}" ${cflags} "${holdingSlidePath}" "${filepath}"`;
       try {
         execSync(command);
       } catch (err) {
@@ -255,7 +257,9 @@ export const createServer = (config: Options): express.Application => {
     }
 
     let input = ppt ? holdingSlidePath + "\\" + pptfname + ".pdf" : filepath;
-    command = `"${path.normalize(process.env.PROGRAMFILES)}\\ImageMagick-7.1.1-Q16\\convert.exe" -resize 1920x1080 -quality 100 "${input}" "${holdingSlidePath}\\${filename}-%03d.jpg"`;
+    appPath = "\\ImageMagick-7.1.1-Q16\\convert.exe";
+    cflags = "-resize 1920x1080 -quality 100";
+    command = `"${path.normalize(process.env.PROGRAMFILES)}${appPath}" ${cflags} "${input}" "${holdingSlidePath}\\${filename}-%03d.jpg"`;
     try {
       execSync(command);
     } catch (err) {
