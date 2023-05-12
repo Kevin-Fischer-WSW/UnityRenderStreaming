@@ -240,24 +240,33 @@ export const createServer = (config: Options): express.Application => {
     Object.keys(files).map((fKey) => {
       pptfname = files[fKey].newFilename;
       filepath = files[fKey].filepath;
-      filename = fKey;
+      filename = path.parse(fKey).name;
     });
 
     // if ppt is true, then converts it to pdf, then to img.
     if (ppt) {
       command = `"${path.normalize(process.env.PROGRAMFILES)}\\LibreOffice\\program\\soffice.exe" --headless --convert-to pdf --outdir "${holdingSlidePath}" "${filepath}"`
-      execSync(command);
+      try {
+        execSync(command);
+      } catch (err) {
+        console.log(err.stdout.toString());
+        res.status(500).json({messages : `PPT not uploaded. Error: ${err.stdout.toString()}`});
+      }
     }
 
-    let dir = ppt ? holdingSlidePath + "\\" + pptfname + ".pdf" : filepath;
-    command = `"${path.normalize(process.env.PROGRAMFILES)}\\ImageMagick-7.1.1-Q16\\convert.exe" -resize 1920x1080 -quality 100 "${dir}" "${holdingSlidePath}\\output-%03d.jpg"`;
-    execSync(command);
+    let input = ppt ? holdingSlidePath + "\\" + pptfname + ".pdf" : filepath;
+    command = `"${path.normalize(process.env.PROGRAMFILES)}\\ImageMagick-7.1.1-Q16\\convert.exe" -resize 1920x1080 -quality 100 "${input}" "${holdingSlidePath}\\${filename}-%03d.jpg"`;
+    try {
+      execSync(command);
+    } catch (err) {
+      console.log(err.stdout.toString());
+      res.status(500).json({messages : `PDF not uploaded. Error: ${err.stdout.toString()}`});
+    }
 
     // delete pdfs.
     if (ppt) { DeleteFile(undefined, path.join(holdingSlidePath, `${pptfname}.pdf`)); }
     DeleteFile(undefined, filepath);
-
-    res.status(201).json({messages : "Uploaded and Converted"});
+    res.status(201).json({messages :`Uploaded and Converted`});
   };
 
   app.post('/slide_upload', (req, res, next) => {
