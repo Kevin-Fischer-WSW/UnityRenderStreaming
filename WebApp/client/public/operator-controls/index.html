@@ -111,7 +111,7 @@
 
           <!-- Modal Body -->
           <div class="modal-body">
-            <fieldset id="stream-settings-fieldset" class="d-none">
+            <fieldset id="stream-settings-fieldset">
 
               <div id="success-alert" class="alert alert-success d-none fade show align-items-center" role="alert">
                 <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img">
@@ -160,19 +160,20 @@
                 <input type="text" class="form-control streamInput" id="stream-key-input" placeholder="Stream Key">
                 <label for="stream-key-input">Stream Key</label>
               </div>
-
-              <h6>Authentication Info</h6>
-              <!-- stream username -->
-              <div class="form-floating">
-                <input type="text" class="form-control streamInput" id="username-input" placeholder="Username"
+              <fieldset id="stream-auth-settings" class="d-none">
+                <h6>Authentication Info</h6>
+                <!-- stream username -->
+                <div class="form-floating">
+                  <input type="text" class="form-control streamInput" id="username-input" placeholder="Username"
                   value="encoder_eagleeye">
-                <label for="username-input">Username</label>
-              </div>
-              <!-- stream user password -->
-              <div class="form-floating">
-                <input type="password" class="form-control streamInput" id="password-input" placeholder="Password">
-                <label for="password-input">Password</label>
-              </div>
+                  <label for="username-input">Username</label>
+                </div>
+                <!-- stream user password -->
+                <div class="form-floating">
+                  <input type="password" class="form-control streamInput" id="password-input" placeholder="Password">
+                  <label for="password-input">Password</label>
+                </div>
+              </fieldset>
             </fieldset>
 
             <!-- clipboard to copy url -->

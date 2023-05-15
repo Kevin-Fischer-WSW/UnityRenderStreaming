@@ -206,6 +206,7 @@ function onClickResetAppSettings() {
 let streamPrefModal = document.getElementById("stream-pref-modal")
 let serverAddressSelect = document.getElementById('serverAddressSelect')
 let streamSettingsFieldset = document.getElementById("stream-settings-fieldset")
+let streamAuthSettings = document.getElementById("stream-auth-settings")
 
 let streamSettingsBtn = document.getElementById("stream-settings")
 streamSettingsBtn.addEventListener("click", updateStreamPref)
@@ -1902,4 +1903,4 @@ navRecordingTabBtn.addEventListener("click", ()=>{navRecordingTabBtn.scrollIntoV
 let advancedSettingsToggle = document.getElementById("advancedSettingsToggle");
 let participantAutoShowBtnGrp = document.getElementById("participant-autoshow-btn-grp");
 advancedSettingsToggle.addEventListener("change",
-() => {onEnableAdvancedSettings(advancedSettingsToggle, navZoomTabBtn, streamSettingsFieldset, participantAutoShowBtnGrp, navLayoutTabBtn, navLogTabBtn)});
+() => {onEnableAdvancedSettings(advancedSettingsToggle, navZoomTabBtn, streamAuthSettings, participantAutoShowBtnGrp, navLayoutTabBtn, navLogTabBtn)});
