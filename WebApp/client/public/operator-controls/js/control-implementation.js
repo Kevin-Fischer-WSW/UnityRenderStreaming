@@ -440,7 +440,12 @@ function appStatusReceived(json) {
 
     if (jsonParsed.streaming) {
       streamSettingsFieldset.disabled = true;
-      pendingBtn.innerHTML = "Intro Slide"
+      pendingBtn.innerHTML = "Intro Slide";
+      streamBtnGrp.classList.add("w-100");
+      pendingBtn.classList.remove("rounded");
+      liveBtn.classList.remove("d-none");
+      technicalDiffBtn.classList.remove("d-none");
+      archiveBtn.classList.remove("d-none");
       if (jsonParsed.holdingSlide === "pending") {
         ActivateButtonHelper(pendingBtn, true)
       } else if (jsonParsed.holdingSlide === "technicalDifficulties") {
@@ -453,6 +458,11 @@ function appStatusReceived(json) {
     } else {
       pendingBtn.innerHTML = "Start Stream"
       streamSettingsFieldset.disabled = false;
+      streamBtnGrp.classList.remove("w-100");
+      pendingBtn.classList.add("rounded");
+      liveBtn.classList.add("d-none");
+      technicalDiffBtn.classList.add("d-none");
+      archiveBtn.classList.add("d-none");
       // todo: This causes a custom slide named "conclusion" to immediately be dismissed.
       // if (jsonParsed.holdingSlide === "endOfStream" || jsonParsed.holdingSlide === "conclusion") {
       //   sendClickEvent(myVideoPlayer, OperatorControls._LiveButton);
@@ -487,6 +497,7 @@ function appStatusReceived(json) {
 
 
 /* STREAM BUTTONS */
+let streamBtnGrp = document.getElementById("stream-btn-grp");
 let pendingBtn = document.getElementById("pending-btn");
 pendingBtn.addEventListener("click", onPendingClick);
 let liveBtn = document.getElementById("live-btn");

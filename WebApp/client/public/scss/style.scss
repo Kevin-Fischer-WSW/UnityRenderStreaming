@@ -94,10 +94,6 @@ $body-bg: #616161;
   width: 150px;
   font-size: 20px;
   cursor: pointer;
-  border-right: 2px solid #3D3D3D;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 #pending-btn:hover {
@@ -108,11 +104,9 @@ $body-bg: #616161;
   background-color: #7FDB6A;
   border: 2px solid #3D3D3D;
   height: 70px;
-  width: 250px;
+  width: 150px;
   font-size: 20px;
   cursor: pointer;
-  border-right: none;
-  border-left: 1px solid #3D3D3D;
 }
 
 #live-btn:hover {
@@ -126,8 +120,6 @@ $body-bg: #616161;
   width: 150px;
   font-size: 20px;
   cursor: pointer;
-  border-left: none;
-  border-right: 2px solid #3D3D3D;
 }
 
 #technical-diff-btn:hover {
@@ -141,7 +133,6 @@ $body-bg: #616161;
   width: 150px;
   font-size: 20px;
   cursor: pointer;
-  border-left: 1px solid #3D3D3D;
 }
 
 // avoid button text from overflowing.
@@ -149,6 +140,7 @@ $body-bg: #616161;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  //max-width: 150px;
 }
 
 #archive-btn:hover {

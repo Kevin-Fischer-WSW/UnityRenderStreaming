@@ -24,13 +24,6 @@
 #slide-btn-container, #video-btn-container {
   border: 3px solid #3D3D3D; }
 
-#video-progress {
-  height: 20px;
-  display: flex;
-  opacity: 1;
-  width: 50%;
-  max-width: 100%; }
-
 .centered {
   position: absolute;
   top: 50%;
@@ -82,11 +75,7 @@
   height: 70px;
   width: 150px;
   font-size: 20px;
-  cursor: pointer;
-  border-right: 2px solid #3D3D3D;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap; }
+  cursor: pointer; }
 
 #pending-btn:hover {
   background-color: #c5b559; }
@@ -95,11 +84,9 @@
   background-color: #7FDB6A;
   border: 2px solid #3D3D3D;
   height: 70px;
-  width: 250px;
+  width: 150px;
   font-size: 20px;
-  cursor: pointer;
-  border-right: none;
-  border-left: 1px solid #3D3D3D; }
+  cursor: pointer; }
 
 #live-btn:hover {
   background-color: #60d146; }
@@ -110,9 +97,7 @@
   height: 70px;
   width: 150px;
   font-size: 20px;
-  cursor: pointer;
-  border-left: none;
-  border-right: 2px solid #3D3D3D; }
+  cursor: pointer; }
 
 #technical-diff-btn:hover {
   background-color: #db6d31; }
@@ -123,8 +108,7 @@
   height: 70px;
   width: 150px;
   font-size: 20px;
-  cursor: pointer;
-  border-left: 1px solid #3D3D3D; }
+  cursor: pointer; }
 
 #pending-btn, #live-btn, #technical-diff-btn, #archive-btn {
   overflow: hidden;
@@ -9148,8 +9132,46 @@ button, input, optgroup, select, textarea {
 #layout-schema-editor div h3 label, #layout-schema-editor div .h3 label {
   color: white; }
 
+input[type=range] {
+  cursor: pointer;
+  height: .2rem;
+  --bs-bg-opacity: 1;
+  accent-color: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity)) !important;
+  border-radius: 0; }
+
+input[type="range"]::-webkit-slider-thumb {
+  border-radius: 50%;
+  border: 0;
+  transition: .2s ease-in-out; }
+
+input[type="range"]::-moz-range-thumb {
+  border-radius: 50%;
+  border: 0;
+  transition: .2s ease-in-out; }
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 0 10px rgba(0, 0, 0, 0.1); }
+
+input[type="range"]:active::-webkit-slider-thumb {
+  box-shadow: 0 0 0 13px rgba(0, 0, 0, 0.2); }
+
+input[type="range"]:focus::-webkit-slider-thumb {
+  box-shadow: 0 0 0 13px rgba(0, 0, 0, 0.2); }
+
+input[type="range"]::-moz-range-thumb:hover {
+  box-shadow: 0 0 0 10px rgba(0, 0, 0, 0.1); }
+
+input[type="range"]:active::-moz-range-thumb {
+  box-shadow: 0 0 0 13px rgba(0, 0, 0, 0.2); }
+
+input[type="range"]:focus::-moz-range-thumb {
+  box-shadow: 0 0 0 13px rgba(0, 0, 0, 0.2); }
+
 #timeline-controls {
   overflow-x: scroll; }
+
+#add {
+  height: 100%; }
 
 #timeline-box {
   flex: 0 0 500px; }
