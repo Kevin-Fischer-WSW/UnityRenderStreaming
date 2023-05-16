@@ -536,20 +536,17 @@ export const createServer = (config: Options): express.Application => {
       for (let i = 0; i < clips.length; i++) {
         // Get the clip's path.
         clipPath = path.join(config.recordingsDir, clips[i].name);
-        ffmpegInput += `file '${clipPath}'\n`;
-        // Iterate through cut spans while the current clip is the same as the cut span's clip.
-        let firstCutSpanIdx = lastCutSpanIdx;
-        for (let j = lastCutSpanIdx; j < cutSpans.length && cutSpans[j].clipIndex === i; j++) {
-          // Concatenate the cut span's start and end times.
-          if (cutSpans[j].inpoint !== 0){
-            ffmpegInput += `outpoint ${cutSpans[j].inpoint}\n`;
+        // Get the cuts for this clip.
+        let cuts = [];
+        for (let j = lastCutSpanIdx; j < cutSpans.length; j++) {
+          if (cutSpans[j].clipIndex === i) {
+            cuts.push(cutSpans[j]);
+            lastCutSpanIdx ++;
+          } else {
+            break;
           }
-          if (cutSpans[j].outpoint !== clips[i].duration){
-            if (j !== firstCutSpanIdx) ffmpegInput += `file '${clipPath}'\n`;
-            ffmpegInput += `inpoint ${cutSpans[j].outpoint}\n`;
-          }
-          lastCutSpanIdx++;
         }
+        ffmpegInput += ffmpegInputHelper(clipPath, cuts, clips[i].duration);
       }
       // Write the ffmpeg input file.
       let ffmpegInputPath = path.join(projectPath, "input.txt");
@@ -557,11 +554,36 @@ export const createServer = (config: Options): express.Application => {
       // Run ffmpeg to generate the preview.
       let ffmpegOutputPath = path.join(projectPath, "preview.mp4");
       execSync(`ffmpeg -f concat -safe 0 -i "${ffmpegInputPath}" -c copy "${ffmpegOutputPath}" -y`)
-      // Note: We will run into issues if two people try to request at the same time.
+      // todo Test if we will run into issues if two people try to request at the same time.
       // send a json back containing the src for the rendered preview.
       res.status(200).json({message: "success"});
     }
 
+    function ffmpegInputHelper(clip, cuts, duration) : string{
+      // Guard against no cuts.
+      if (cuts.length === 0){
+        return `file '${clip}'\n`;
+      }
+      let ins = [];
+      let outs = [];
+      // Determine if the natural in should be included.
+      if (cuts[0].inpoint > 0) ins.push(0);
+      // Iterate through cuts.
+      cuts.forEach((cut, _) => {
+        if (cut.inpoint > 0) outs.push(cut.inpoint);
+        if (cut.outpoint < duration) ins.push(cut.outpoint);
+      });
+      // Determine if the natural out should be included.
+      if (cuts[cuts.length - 1].outpoint < duration) outs.push(duration);
+      // Write input string.
+      let input = "";
+      while (ins.length > 0){
+        input += `file '${clip}'\n`;
+        input += `inpoint ${ins.shift()}\n`;
+        input += `outpoint ${outs.shift()}\n`;
+      }
+      return input;
+    }
   });
 
   function validateVideoEditingProjectData(data){
@@ -579,8 +601,8 @@ export const createServer = (config: Options): express.Application => {
       if (span.inpoint < 0) return false;
       if (span.clipIndex < 0) return false;
       if (span.clipIndex >= data.clips.length) return false;
-      if (span.outpoint > data.clips[span.clipIndex].duration) return false;
-      if (i > 0){
+      if (Math.floor(span.outpoint) > data.clips[span.clipIndex].duration) return false;
+      if (i > 0 && span.clipIndex === data.cutSpans[i-1].clipIndex){
         if (span.inpoint < data.cutSpans[i-1].outpoint) return false;
       }
     }
