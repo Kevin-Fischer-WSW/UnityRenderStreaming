@@ -901,6 +901,10 @@ let intro_preview = document.getElementById("intro-preview");
 let techdiff_preview = document.getElementById("techdiff-preview");
 let conc_preview = document.getElementById("conc-preview");
 
+intro_preview.addEventListener("click", onPendingClick);
+techdiff_preview.addEventListener("click", onTechnicalDiff);
+conc_preview.addEventListener("click", onArchiveClick);
+
 function onSlideTabClicked() {
   unityFetch("/getHoldingSlides")
     .then(resp => resp.json())
