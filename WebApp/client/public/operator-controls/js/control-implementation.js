@@ -9,7 +9,10 @@ import { ValidateClonesWithJsonArray} from "/operator-controls/js/validation-hel
 import { unityFetch } from "../../js/unity-fetch.js";
 import { getVideoThumb } from "../../js/video-thumbnail.js";
 import { createUploadProgressTracker } from "../../js/progresstracker.js";
+import * as Feedback from "../../js/user-input-feedback-alert.js";
 import { onEnableAdvancedSettings } from "./advancedSettings.js";
+
+Feedback.setDefaultParentElement(document.getElementById("alert-container"));
 
 mainNotifications.addEventListener('setup', function () {
   myVideoPlayer.onParticipantDataReceived = participantDataReceived;
@@ -206,7 +209,9 @@ function onClickResetAppSettings() {
 let streamPrefModal = document.getElementById("stream-pref-modal")
 let serverAddressSelect = document.getElementById('serverAddressSelect')
 let streamSettingsFieldset = document.getElementById("stream-settings-fieldset")
+
 let streamAuthSettings = document.getElementById("stream-auth-settings")
+let streamPrefAlerts = document.getElementById("stream-pref-alerts")
 
 let streamSettingsBtn = document.getElementById("stream-settings")
 streamSettingsBtn.addEventListener("click", updateStreamPref)
@@ -235,11 +240,6 @@ let pwd = document.getElementById("password-input");
 pwd.addEventListener("input", flagStreamPrefChange);
 
 /* -> Feedback Alerts */
-let streamUrl = document.getElementById("url-span");
-let successAlert = document.getElementById("success-alert");
-let errorMsg = document.getElementById("err-span");
-let errorAlert = document.getElementById("error-alert");
-let errorAlertFile = document.getElementById("error-alert-file");
 let boardData = document.getElementById('kt_clipboard_4');
 
 /* GENERAL STATUS BAR */
@@ -265,9 +265,7 @@ async function updateStreamPref() {
   let resp = await unityFetch("/getStreamServiceSettings")
   let data = await resp.json();
   if (!resp.ok) {
-    console.error("Error " + resp.status + ": " + data.message)
-    errorMsg.innerHTML = data.message;
-    alertDisplay(errorAlert);
+    Feedback.alertDanger("Could not get stream service settings.", streamPrefAlerts);
   } else {
     let reg = new RegExp("[:/.]");
     let url = data.streamServiceSettings.server.split(reg);
@@ -276,7 +274,6 @@ async function updateStreamPref() {
     streamKey.value = data.streamServiceSettings.key;
     uname.value = data.streamServiceSettings.username;
     pwd.value = data.streamServiceSettings.password;
-    streamUrl.innerHTML = data.streamServiceSettings.server;
     boardData.innerHTML = url[3] === "none" ? "" : data.streamServiceSettings.server + data.streamServiceSettings.key;
   }
 }
@@ -290,11 +287,10 @@ async function saveStreamPref() {
     "&password=" + pwd.value,
     { method: "PUT" })
   if (!resp.ok) {
-    errorMsg.innerHTML = resp.statusText;
-    alertDisplay(errorAlert, 1000);
+    Feedback.alertDanger(resp.statusText, streamPrefAlerts);
   } else {
     await updateStreamPref();
-    alertDisplay(successAlert);
+    Feedback.alertSuccess("Stream settings saved successfully!", streamPrefAlerts);
   }
 }
 
@@ -329,16 +325,6 @@ clipboard.on('success', function (e) {
     copyData.classList.remove('text-success');
   }, 3000)
 });
-
-function alertDisplay(alertType, timeout = 3000) {
-  alertType.classList.remove("d-none")
-  alertType.classList.add("d-flex")
-  setTimeout(() => {
-    alertType.classList.remove("d-flex")
-    alertType.classList.add("d-none")
-  }, timeout)
-}
-
 
 function setupDropdown(dropdown, func) {
   for (let i = 0; i < dropdown.children.length; i++) {
@@ -1196,7 +1182,6 @@ function validateTracksInPlaylist(playlistData, currentlyPlayingIndex){
 
 /* UPLOAD CONTROLS */
 let uploadDescriptor = document.getElementById("slide-upload-descriptor")
-let uploadSuccessAlert = document.getElementById("upload-success-alert");
 let batchSlideFileInput = document.getElementById("batch-slide-file-input")
 batchSlideFileInput.addEventListener("change", batchFileInputChanged) // todo make this function less specific to slide uploads.
 let batchSlideUploadBtn = document.getElementById("batch-slide-upload-btn") // todo Make this function less specific as well. Verify files based on extension.
@@ -1515,7 +1500,7 @@ function uploadCustomSlideClicked() {
       batchSlideFileInput.value = "";
       uploadDescriptor.innerHTML = "Click browse to look for files to upload.";
       clearFormInput();
-      alertDisplay(uploadSuccessAlert);
+      Feedback.alertSuccess("Upload complete!");
       FetchAllUploadedMediaAndUpdateDash();
       FetchAssignedHoldingSlidesAndUpdatePreviews();
     }
@@ -1529,7 +1514,10 @@ let configDownloadBtn = document.getElementById("config-download-btn");
 
 configUploadBtn.addEventListener("click", function() {
 
-  if (configFileInput.value === "") return;
+  if (configFileInput.value === ""){
+    Feedback.alertDanger("No file selected.");
+    return;
+  }
   configUploadBtn.disabled = true;
   let parentTracker = document.getElementById("configTrackerContainer");
 
@@ -1687,7 +1675,7 @@ listLogFileOptions.addEventListener("click", listAvailableLogs);
 
 function onLogDownloadClicked() {
   if (listLogFileOptions.value === "none") {
-    alertDisplay(errorAlertLogFile);
+    Feedback.alertDanger("Please select a log file to download.");
   } else {
     downloadLog();
   }
@@ -1755,6 +1743,7 @@ async function listAvailableLogs() {
 }
 
 /* RECORDING CONTROLS */
+let recordingFieldset = document.getElementById("recording-fieldset");
 let listFileOptions = document.getElementById("list-all-files")
 listFileOptions.addEventListener("click", listAvailableRecordings);
 
@@ -1863,9 +1852,8 @@ async function listAvailableRecordings() {
 }
 
 function handleRecordingDownload() {
-
   if (listFileOptions.value === "none") {
-    alertDisplay(errorAlertFile);
+    Feedback.alertDanger("Please select a file from the options below.");
   } else {
     downloadFile();
   }
