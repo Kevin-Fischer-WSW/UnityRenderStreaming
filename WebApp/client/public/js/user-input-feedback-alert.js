@@ -1,9 +1,18 @@
 ﻿let counter = 0;
+let activeAlerts = [];
 let defaultParentElement = document.querySelector("body");
 
 function createUserInputFeedbackAlert(parent, message, type) {
+  // Check if there is already an alert with the same message.
+  for (let i = 0; i < activeAlerts.length; i++) {
+    if (activeAlerts[i].innerText.trim() === message) {
+      return;
+    }
+  }
+  // Create alert.
   counter += 1;
   let alert = document.createElement("div");
+  activeAlerts.push(alert);
   alert.classList.add("alert");
   alert.classList.add("alert-" + type);
   alert.classList.add("alert-dismissible");
@@ -50,6 +59,13 @@ function createUserInputFeedbackAlert(parent, message, type) {
     // Remove alert from the DOM by pressing dismiss button.
     alert.querySelector(".btn-close").click();
   }, 5000);
+  // Remove alert from the active alerts list.
+  alert.addEventListener("closed.bs.alert", function () {
+    let index = activeAlerts.indexOf(alert);
+    if (index > -1) {
+      activeAlerts.splice(index, 1);
+    }
+  });
 }
 
 export function alertDanger(message, parent = null) {
