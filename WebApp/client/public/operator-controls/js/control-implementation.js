@@ -354,9 +354,37 @@ function convertSecondsToTimestamp(sec) {
   return `${hh < 10 ? "0" + hh : hh}:${mm < 10 ? "0" + mm : mm}:${ss < 10 ? "0" + ss : ss}`
 }
 
+function resetStreamButtonsOnLeaveOrEnd() {
+  if (pendingBtn.innerHTML === "Intro Slide") pendingBtn.innerHTML = "Start Stream"
+  if (streamSettingsFieldset.disabled) streamSettingsFieldset.disabled = false;
+  if (streamBtnGrp.classList.contains("w-100")) streamBtnGrp.classList.remove("w-100");
+  if (!pendingBtn.classList.contains("rounded")) pendingBtn.classList.add("rounded");
+  if (!liveBtn.classList.contains("d-none")) liveBtn.classList.add("d-none");
+  if (!technicalDiffBtn.classList.contains("d-none")) technicalDiffBtn.classList.add("d-none");
+  if (!archiveBtn.classList.contains("d-none")) archiveBtn.classList.add("d-none");
+  if (!pendingBtn.hasAttribute("data-bs-toggle")) pendingBtn.setAttribute("data-bs-toggle", "modal");
+  if (!intro_preview.hasAttribute("data-bs-toggle")) intro_preview.setAttribute("data-bs-toggle", "modal");
+  pendingBtn.removeEventListener("click", onPendingClick);
+  intro_preview.removeEventListener("click", onPendingClick);
+}
+
+function updateStreamButtons() {
+  streamSettingsFieldset.disabled = true;
+  pendingBtn.innerHTML = "Intro Slide";
+  streamBtnGrp.classList.add("w-100");
+  pendingBtn.classList.remove("rounded");
+  liveBtn.classList.remove("d-none");
+  technicalDiffBtn.classList.remove("d-none");
+  archiveBtn.classList.remove("d-none");
+  pendingBtn.removeAttribute("data-bs-toggle");
+  pendingBtn.addEventListener("click", onPendingClick);
+  intro_preview.removeAttribute("data-bs-toggle");
+  intro_preview.addEventListener("click", onPendingClick);
+}
+
 function appStatusReceived(json) {
 
-  let jsonParsed = JSON.parse(json)
+  let appStatus = JSON.parse(json)
 
   ActivateButtonHelper(pendingBtn, false)
   ActivateButtonHelper(technicalDiffBtn, false)
@@ -366,25 +394,25 @@ function appStatusReceived(json) {
   addParticipantSelectCheckEventListener(); // adds event listeners to each select checkbox
 
   generalStatBar.innerHTML =
-  `Stream: ${jsonParsed.streaming ? "Yes" : "No"} |
-  Recording Stream: ${jsonParsed.recording ? "Yes" : "No"} |
-  Zoom Local Recording: ${jsonParsed.canRecordLocalFiles ? "Allowed" : "Not Allowed"} |
-  Holding Slide: ${jsonParsed.holdingSlide} |
-  Holding Music: ${jsonParsed.playingHoldingMusic ? "Playing" : "Not Playing"} |
-  Holding Video: ${jsonParsed. playingVideo ? "Playing" : "Not Playing"}`
+  `Stream: ${appStatus.streaming ? "Yes" : "No"} |
+  Recording Stream: ${appStatus.recording ? "Yes" : "No"} |
+  Zoom Local Recording: ${appStatus.canRecordLocalFiles ? "Allowed" : "Not Allowed"} |
+  Holding Slide: ${appStatus.holdingSlide} |
+  Holding Music: ${appStatus.playingHoldingMusic ? "Playing" : "Not Playing"} |
+  Holding Video: ${appStatus. playingVideo ? "Playing" : "Not Playing"}`
 
-  if (jsonParsed.inMeeting || jsonParsed.meetingSimulated) {
-    validateTracksInPlaylist(jsonParsed.playlist, jsonParsed.currentlyPlayingIndex)
+  if (appStatus.inMeeting || appStatus.meetingSimulated) {
+    validateTracksInPlaylist(appStatus.playlist, appStatus.currentlyPlayingIndex)
     meetingNoInputField.disabled = true;
     joinMeetingBtn.disabled = true;
     leaveMeetingBtn.disabled = false;
     holdMusicFieldset.disabled = false;
-    musicPlayStopBtn.innerHTML = jsonParsed.playingHoldingMusic ? '<i class="bi bi-pause"></i>' : '<i class="bi bi-play"></i>';
-    currentlyPlayingSpan.innerHTML = jsonParsed.currentlyPlayingTrack;
-    volumeRangeMusic.value = jsonParsed.holdingMusicVolume;
+    musicPlayStopBtn.innerHTML = appStatus.playingHoldingMusic ? '<i class="bi bi-pause"></i>' : '<i class="bi bi-play"></i>';
+    currentlyPlayingSpan.innerHTML = appStatus.currentlyPlayingTrack;
+    volumeRangeMusic.value = appStatus.holdingMusicVolume;
     volumeLevelMusic.innerHTML = getVolumeLevel(volumeRangeMusic.value);
-    if (jsonParsed.playingHoldingMusic) {
-      holdingMusicTimer = Math.round(jsonParsed.currentTrackPlaybackTime);
+    if (appStatus.playingHoldingMusic) {
+      holdingMusicTimer = Math.round(appStatus.currentTrackPlaybackTime);
       currentlyPlayingTrackTime.innerHTML = musicPlaybackTime.innerHTML = convertSecondsToTimestamp(holdingMusicTimer);
       musicProgress.value = holdingMusicTimer > musicProgress.max ? musicProgress.max : holdingMusicTimer;
       if (musicTimerIntervalId === 0) {
@@ -403,10 +431,10 @@ function appStatusReceived(json) {
     }
 
     //videoFieldsetBar.disabled = !jsonParsed.videoIsShowing;
-    volumeRangeVideo.value = jsonParsed.currentVideoVolume;
+    volumeRangeVideo.value = appStatus.currentVideoVolume;
     volumeLevelVideo.innerHTML = getVolumeLevel(volumeRangeVideo.value);
-    if (jsonParsed.playingVideo) {
-      videoTimer = Math.round(jsonParsed.currentVideoPlaybackTime);
+    if (appStatus.playingVideo) {
+      videoTimer = Math.round(appStatus.currentVideoPlaybackTime);
       videoPlaybackTime.innerHTML = convertSecondsToTimestamp(videoTimer);
       videoProgress.value = videoTimer > videoProgress.max ? videoProgress.max : videoTimer;
       if (videoTimerIntervalId === 0) {
@@ -421,48 +449,40 @@ function appStatusReceived(json) {
       videoTimerIntervalId = 0;
       //videoPlaybackTime.innerHTML = "00:00:00";
     }
-    musicProgress.max = Math.round(jsonParsed.currentTrackDuration);
-    videoProgress.max = Math.round(jsonParsed.currentVideoDuration);
-    videoPlayPauseBtn.innerHTML = jsonParsed.playingVideo ? '<i class="bi bi-pause"></i>' : '<i class="bi bi-play"></i>';
+    musicProgress.max = Math.round(appStatus.currentTrackDuration);
+    videoProgress.max = Math.round(appStatus.currentVideoDuration);
+    videoPlayPauseBtn.innerHTML = appStatus.playingVideo ? '<i class="bi bi-pause"></i>' : '<i class="bi bi-play"></i>';
 
-    if (jsonParsed.streaming) {
-      streamSettingsFieldset.disabled = true;
-      pendingBtn.innerHTML = "Intro Slide";
-      streamBtnGrp.classList.add("w-100");
-      pendingBtn.classList.remove("rounded");
-      liveBtn.classList.remove("d-none");
-      technicalDiffBtn.classList.remove("d-none");
-      archiveBtn.classList.remove("d-none");
-      if (jsonParsed.holdingSlide === "pending") {
+    if (appStatus.streaming) {
+
+      updateStreamButtons();
+
+      if (appStatus.holdingSlide === "pending") {
         ActivateButtonHelper(pendingBtn, true)
-      } else if (jsonParsed.holdingSlide === "technicalDifficulties") {
+      } else if (appStatus.holdingSlide === "technicalDifficulties") {
         ActivateButtonHelper(technicalDiffBtn, true)
-      } else if (jsonParsed.holdingSlide === "none" || jsonParsed.isCustomSlide) {
+      } else if (appStatus.holdingSlide === "none" || appStatus.isCustomSlide) {
         ActivateButtonHelper(liveBtn, true)
-      } else if (jsonParsed.holdingSlide === "endOfStream") {
+      } else if (appStatus.holdingSlide === "endOfStream") {
         ActivateButtonHelper(archiveBtn, true)
       }
     } else {
-      pendingBtn.innerHTML = "Start Stream"
-      streamSettingsFieldset.disabled = false;
-      streamBtnGrp.classList.remove("w-100");
-      pendingBtn.classList.add("rounded");
-      liveBtn.classList.add("d-none");
-      technicalDiffBtn.classList.add("d-none");
-      archiveBtn.classList.add("d-none");
+      resetStreamButtonsOnLeaveOrEnd()
       // todo: This causes a custom slide named "conclusion" to immediately be dismissed.
       // if (jsonParsed.holdingSlide === "endOfStream" || jsonParsed.holdingSlide === "conclusion") {
       //   sendClickEvent(myVideoPlayer, OperatorControls._LiveButton);
       // }
     }
 
-    if (jsonParsed.secondClickEndsStream) {
+    if (appStatus.secondClickEndsStream) {
       archiveBtn.innerHTML = "End Stream"
     } else {
       archiveBtn.innerHTML = "Conclusion Slide"
     }
 
   } else {
+
+    resetStreamButtonsOnLeaveOrEnd();
     generalStatBar.innerHTML = "Connection State: Connected";
     meetingNoInputField.disabled = false;
     joinMeetingBtn.disabled = false;
@@ -486,13 +506,17 @@ function appStatusReceived(json) {
 /* STREAM BUTTONS */
 let streamBtnGrp = document.getElementById("stream-btn-grp");
 let pendingBtn = document.getElementById("pending-btn");
-pendingBtn.addEventListener("click", onPendingClick);
 let liveBtn = document.getElementById("live-btn");
 liveBtn.addEventListener("click", onLiveClick);
 let technicalDiffBtn = document.getElementById("technical-diff-btn")
 technicalDiffBtn.addEventListener("click", onTechnicalDiff);
 let archiveBtn = document.getElementById("archive-btn")
 archiveBtn.addEventListener("click", onArchiveClick);
+
+let previewIntroImg = document.getElementById("modal-img-preview")
+let previewIntroImgCaption = document.getElementById("modal-img-caption")
+let streamConfBtn = document.getElementById("stream-confirmation-btn")
+streamConfBtn.addEventListener("click", onPendingClick);
 
 /* STREAM BUTTON IMPLEMENTATION */
 function onPendingClick() {
@@ -545,7 +569,7 @@ function onJoinClick() {
     .then(response => {
       if (response.ok) {
         console.log("Joined meeting")
-      }else{
+      } else {
         console.log(response.statusText)
       }
     })
@@ -556,7 +580,7 @@ function onLeaveClicked() {
     .then(response => {
       if (response.ok) {
         console.log("Left meeting")
-      }else{
+      } else {
         console.log(response.statusText)
       }
     })
@@ -919,7 +943,6 @@ let intro_preview = document.getElementById("intro-preview");
 let techdiff_preview = document.getElementById("techdiff-preview");
 let conc_preview = document.getElementById("conc-preview");
 
-intro_preview.addEventListener("click", onPendingClick);
 techdiff_preview.addEventListener("click", onTechnicalDiff);
 conc_preview.addEventListener("click", onArchiveClick);
 
@@ -948,7 +971,6 @@ function setupSlideSetAsOptionsButton(owner) {
     unityFetch(`/assignIntroSlide?url=${img.alt}`, {method:"PUT"})
       .then( resp => {
         if (resp.ok) {
-          intro_preview.style.backgroundImage = `url("${img.src}")`;
           FetchAssignedHoldingSlidesAndUpdatePreviews();
         }
       });
@@ -958,7 +980,6 @@ function setupSlideSetAsOptionsButton(owner) {
     unityFetch(`/assignTechnicalDifficultySlide?url=${img.alt}`, {method:"PUT"})
       .then( resp => {
         if (resp.ok) {
-          techdiff_preview.style.backgroundImage = `url("${img.src}")`;
           FetchAssignedHoldingSlidesAndUpdatePreviews();
         }
       });
@@ -968,7 +989,6 @@ function setupSlideSetAsOptionsButton(owner) {
     unityFetch(`/assignConclusionSlide?url=${img.alt}`, {method:"PUT"})
       .then( resp => {
         if (resp.ok) {
-          conc_preview.style.backgroundImage = `url("${img.src}")`;
           FetchAssignedHoldingSlidesAndUpdatePreviews();
         }
       });
@@ -984,6 +1004,9 @@ function FetchAssignedHoldingSlidesAndUpdatePreviews() {
       intro_preview.style.backgroundImage = "";
       techdiff_preview.style.backgroundImage = "";
       conc_preview.style.backgroundImage = "";
+      previewIntroImg.src = "...";
+      previewIntroImgCaption.innerHTML = "No slide assigned. Placeholder slide will be used.";
+      previewIntroImg.classList.add("d-none");
 
       for (let i = 0; i < json.length; i++) {
         let slideInfo = json[i];
@@ -998,6 +1021,9 @@ function FetchAssignedHoldingSlidesAndUpdatePreviews() {
         function setBackgroundImageHelper(url) {
           if (slideInfo.assignedTo.includes("intro")) {
             intro_preview.style.backgroundImage = `url("${url}")`;
+            previewIntroImg.src = url;
+            previewIntroImg.classList.remove("d-none");
+            previewIntroImgCaption.innerHTML = "This will be used as your Intro Slide."
           }
           if (slideInfo.assignedTo.includes("technicalDifficulties")) {
             techdiff_preview.style.backgroundImage = `url("${url}")`;

@@ -77,6 +77,28 @@
       </div>
     </div>
 
+    <!-- stream confirmation prompt -->
+    <div class="modal fade" id="stream-confirmation-modal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Go Live</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p>Please confirm below to start the stream.</p>
+            <figure class="figure">
+              <figcaption id="modal-img-caption"class="figure-caption">No slide assigned. Placeholder slide will be used.</figcaption>
+              <img id="modal-img-preview" src="..." class="img-fluid d-none" alt="...">
+            </figure>
+          </div>
+          <div class="modal-footer">
+            <button id="stream-confirmation-btn" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Confirm</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- rename modal -->
     <div class="modal fade" id="rename-modal" tabindex="-1">
       <div class="modal-dialog modal-dialog-centered">
@@ -234,7 +256,7 @@
 
   <!-- Stream control buttons -->
   <div id="stream-btn-grp" class="container btn-group d-flex w-25 mt-2">
-    <button id="pending-btn" class="btn btn-lg btn-outline-primary text-black rounded">Start Stream</button>
+    <button id="pending-btn" class="btn btn-lg btn-outline-primary text-black rounded" data-bs-toggle="modal" data-bs-target="#stream-confirmation-modal">Start Stream</button>
     <button id="live-btn" class="btn btn-lg btn-outline-primary text-black d-none">Live</button>
     <button id="technical-diff-btn" class="btn btn-lg btn-outline-primary text-black d-none">Technical Difficulty</button>
     <button id="archive-btn" class="btn btn-lg btn-outline-primary text-black d-none">Conclusion Slide</button>
@@ -388,7 +410,7 @@
           <legend class="title text-white mt-2">Slide controls</legend>
 
           <div class="btn-group d-flex w-100 mt-2">
-            <button id= "intro-preview" type="button" class="btn btn-primary"><span class="bg-dark text-light p-1">Intro</span></button>
+            <button id= "intro-preview" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#stream-confirmation-modal"><span class="bg-dark text-light p-1">Intro</span></button>
             <button id= "techdiff-preview" type="button" class="btn btn-primary"><span class="bg-dark text-light p-1">Technical Difficulty</span></button>
             <button id= "conc-preview" type="button" class="btn btn-primary"><span class="bg-dark text-light p-1">Conclusion</span></button>
             <button id="slide-clear-btn" type="button" class="btn btn-primary">Live</button>
