@@ -792,6 +792,9 @@ setupDropdown(lowerThirdStyleDropdown, onLowerThirdStyleSelected)
 cropScreenShareBtn.addEventListener("click", onCropScreenShareBtnClicked);
 cropScreenShareApplyBtn.addEventListener("click", onCropScreenShareApplyBtnClicked);
 editStyleSelect.addEventListener("change", editStyleSelectionChanged)
+cropScreenSharePreview.onload = function () {
+  cropWidget.reset();
+}
 
 
 /* LAYOUT CONTROLS IMPLEMENTATION */
@@ -814,11 +817,11 @@ function onLowerThirdStyleSelected(idx) {
   }
 }
 
+let cropWidget = new CropWidget(cropScreenSharePreview);
+cropScreenSharePreview.parentElement.appendChild(cropWidget.mainElement);
+cropWidget.initResizers();
 function onCropScreenShareBtnClicked() {
   cropScreenSharePreview.src = "uapp/getScreenShareImage?t=" + Date.now();
-  let cropWidget = new CropWidget(cropScreenSharePreview);
-  cropScreenSharePreview.parentElement.appendChild(cropWidget.mainElement);
-  cropWidget.reset();
 }
 
 function onCropScreenShareApplyBtnClicked() {

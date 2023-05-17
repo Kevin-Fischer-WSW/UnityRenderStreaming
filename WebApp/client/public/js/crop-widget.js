@@ -2,7 +2,7 @@
 
 export class CropWidget {
   constructor(bindingElement) {
-    // The binding element is the element that the crop widget's position ans size are bound to.
+    // The binding element is the element that the crop widget's position and size are bound to.
     this.bindingElement = bindingElement;
     this.mainElement = document.createElement("div");
     this.mainElement.classList.add("story-widget");
@@ -18,9 +18,6 @@ export class CropWidget {
                 <div class='resizer bottom-left'></div>
                 <div class='resizer bottom-right'></div>
             </div>`;
-
-    this._initResizers();
-
     // Make the main element draggable
     this.sX = 0;
     this.sY = 0;
@@ -44,20 +41,20 @@ export class CropWidget {
       e.preventDefault();
       this.mainElement.style.top = (e.clientY + this.bY) + 'px';
       this.mainElement.style.left = (e.clientX + this.bX) + 'px';
-      this.boundCropPosition(this.bindingElement);
+      this.boundCropPosition();
     }
 
     this.mainElement.addEventListener('mousedown', downHandler, false);
     window.addEventListener('mouseup', upHandler, false);
   }
 
-  boundCropPosition(bindingElement) {
+  boundCropPosition() {
     let currentX = parseInt(this.mainElement.style.left);
     let currentY = parseInt(this.mainElement.style.top);
     let currentWidth = parseInt(this.mainElement.style.width);
     let currentHeight = parseInt(this.mainElement.style.height);
-    let parentBoundingRect = bindingElement.parentElement.getBoundingClientRect();
-    let boundingRect = bindingElement.getBoundingClientRect();
+    let parentBoundingRect = this.bindingElement.parentElement.getBoundingClientRect();
+    let boundingRect = this.bindingElement.getBoundingClientRect();
     let minX = boundingRect.left - parentBoundingRect.left;
     let minY = boundingRect.top - parentBoundingRect.top;
     let maxX = minX + boundingRect.width - currentWidth;
@@ -70,8 +67,8 @@ export class CropWidget {
     this.mainElement.style.top = currentY + 'px';
   }
 
-  boundCropSize(bindingElement) {
-    let boundingRect = bindingElement.getBoundingClientRect();
+  boundCropSize() {
+    let boundingRect = this.bindingElement.getBoundingClientRect();
     let mainBoundingRect = this.mainElement.getBoundingClientRect();
     let newRight = Math.min(mainBoundingRect.right, boundingRect.right);
     let newBottom = Math.min(mainBoundingRect.bottom, boundingRect.bottom);
@@ -79,21 +76,30 @@ export class CropWidget {
     let newTop = Math.max(mainBoundingRect.top, boundingRect.top);
     this.mainElement.style.width = (newRight - newLeft) + 'px';
     this.mainElement.style.height = (newBottom - newTop) + 'px';
+    this.mainElement.style.left = newLeft + 'px';
+    this.mainElement.style.top = newTop + 'px';
   }
 
-  _initResizers() {
+  initResizers() {
     makeResizableDiv(this.mainElement, this.mainElement.querySelectorAll('.resizer'));
     let resizers = document.querySelectorAll('.resizer');
     for (let i = 0; i < resizers.length; i++) {
       let currentResizer = resizers[i];
       currentResizer.addEventListener('mouseup', function (e) {
-        this.boundCropSize(this.bindingElement);
-        this.boundCropPosition(this.bindingElement);
+        this.boundCropSize();
+        this.boundCropPosition();
       }.bind(this));
     }
   }
 
   reset() {
-    // todo make the widget cover the whole image.
+    let boundingRect = this.bindingElement.getBoundingClientRect();
+    let parentBoundingRect = this.bindingElement.parentElement.getBoundingClientRect();
+    let minX = boundingRect.left - parentBoundingRect.left;
+    let minY = boundingRect.top - parentBoundingRect.top;
+    this.mainElement.style.width = boundingRect.width + 'px';
+    this.mainElement.style.height = boundingRect.height + 'px';
+    this.mainElement.style.left = minX + 'px';
+    this.mainElement.style.top = minY + 'px';
   }
 }
