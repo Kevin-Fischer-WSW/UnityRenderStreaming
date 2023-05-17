@@ -15,18 +15,13 @@
   <!-- Bootstrap Icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
 </head>
-
 <body>
   <!-- Title -->
-  <div class="container mb-1">
-    <h1 class="display-5 border-bottom text-white p-2">Operator Dashboard
-      <button id="logout" class="btn border-0 ms-2" data-bs-toggle="modal" data-bs-target="#signout-modal">
-        <i class="bi bi-box-arrow-right"></i>
-      </button>
-
-      <button id="stream-settings" class="btn border-0" data-bs-toggle="modal" data-bs-target="#stream-pref-modal">
-        <i class="bi bi-gear-fill"></i>
-      </button>
+  <div class="container mb-2">
+    <h1 class="display-5 border-bottom text-white d-inline-block w-100">Operator Dashboard
+      <button id="logout" class="btn border-0 m-0" data-bs-toggle="modal" data-bs-target="#signout-modal"><i class="bi bi-box-arrow-right"></i></button>
+      <button id="stream-settings" class="btn border-0 m-0" data-bs-toggle="modal" data-bs-target="#stream-pref-modal"><i class="bi bi-gear-fill"></i></button>
+      <button id="reset-to-default" class="btn border-0 m-0" data-bs-toggle="modal" data-bs-target="#reset-modal"><i class="bi bi-bootstrap-reboot"></i></i></button>
     </h1>
 
     <!-- Alert svgs -->
@@ -66,6 +61,24 @@
       </div>
     </div>
 
+    <!-- Reset settings to default -->
+    <div class="modal fade" id="reset-modal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Reset Settings</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p>Are you sure you want to reset settings? <b>Note:</b> This will erase all uploaded media.</p>
+          </div>
+          <div class="modal-footer">
+            <button id="resetAppSettings" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Reset</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- rename modal -->
     <div class="modal fade" id="rename-modal" tabindex="-1">
       <div class="modal-dialog modal-dialog-centered">
@@ -75,12 +88,14 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <fieldset class="input-group">
-              <input id="participant-rename" type="text" class="form-control">
-              <button id="rename-btn" class="btn btn-secondary" type="button" data-bs-dismiss="modal">Rename</button>
-            </fieldset>
+            <label for="participant-rename-name">Name</label>
+            <input id="participant-rename-name" type="text" class="form-control">
+            <label for="participant-rename-title">Title</label>
+            <input id="participant-rename-title" type="text" class="form-control">
           </div>
           <div class="modal-footer">
+            <button id="rename-btn" class="btn btn-secondary" type="button" data-bs-dismiss="modal">Rename</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           </div>
         </div>
       </div>
@@ -91,31 +106,13 @@
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="stream-pref-label">Stream Preferences</h5>
+            <h5 class="modal-title" id="stream-pref-label">Settings</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
 
           <!-- Modal Body -->
           <div class="modal-body">
-            <fieldset id="view-modal">
-
-              <div id="success-alert" class="alert alert-success d-none fade show align-items-center" role="alert">
-                <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img">
-                  <use xlink:href="#check-circle-fill" />
-                </svg>
-                <div>
-                  <strong>Success!</strong> Streaming Url: <span id="url-span"></span>
-                </div>
-              </div>
-              <div id="error-alert" class="alert alert-warning d-none align-items-center" role="alert">
-                <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Warning:">
-                  <use xlink:href="#exclamation-triangle-fill" />
-                </svg>
-                <div>
-                  <strong>Failed!</strong> Error: <span id="err-span"></span>
-                </div>
-              </div>
-
+            <fieldset id="stream-settings-fieldset" class="d-none">
               <h6>Stream Info</h6>
               <!-- stream server dropdown -->
               <div class="form-floating">
@@ -146,19 +143,20 @@
                 <input type="text" class="form-control streamInput" id="stream-key-input" placeholder="Stream Key">
                 <label for="stream-key-input">Stream Key</label>
               </div>
-
-              <h6>Authentication Info</h6>
-              <!-- stream username -->
-              <div class="form-floating">
-                <input type="text" class="form-control streamInput" id="username-input" placeholder="Username"
+              <fieldset id="stream-auth-settings" class="d-none">
+                <h6>Authentication Info</h6>
+                <!-- stream username -->
+                <div class="form-floating">
+                  <input type="text" class="form-control streamInput" id="username-input" placeholder="Username"
                   value="encoder_eagleeye">
-                <label for="username-input">Username</label>
-              </div>
-              <!-- stream user password -->
-              <div class="form-floating">
-                <input type="password" class="form-control streamInput" id="password-input" placeholder="Password">
-                <label for="password-input">Password</label>
-              </div>
+                  <label for="username-input">Username</label>
+                </div>
+                <!-- stream user password -->
+                <div class="form-floating">
+                  <input type="password" class="form-control streamInput" id="password-input" placeholder="Password">
+                  <label for="password-input">Password</label>
+                </div>
+              </fieldset>
             </fieldset>
 
             <!-- clipboard to copy url -->
@@ -181,11 +179,16 @@
                 </div>
               </div>
             </div>
-
+            <!-- stream pref alert container -->
+            <div id="stream-pref-alerts" class="sticky-lg-bottom"></div>
           </div>
-          <div class="modal-footer">
-            <button type="button" id="save-btn" class="btn btn-secondary">Save changes</button>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <div class="modal-footer d-inline-block">
+            <div class="form-check form-switch mt-2" style="float: left;">
+              <input class="form-check-input" type="checkbox" role="switch" id="advancedSettingsToggle">
+              <label class="form-check-label" for="advancedSettingsToggle">Advanced Settings</label>
+            </div>
+            <button type="button" class="btn btn-secondary float-end" data-bs-dismiss="modal">Close</button>
+            <button type="button" id="save-btn" class="btn btn-secondary float-end">Save changes</button>
           </div>
         </div>
       </div>
@@ -194,8 +197,6 @@
     <div id="general-status-bar">
       Status Unknown.
     </div>
-
-
   </div>
 
   <!-- Video Players for Unity Render Streaming -->
@@ -234,11 +235,11 @@
   </div>
 
   <!-- Stream control buttons -->
-  <div class="container d-flex btn-group w-100 mt-2">
-    <button id="pending-btn" class="btn btn-lg btn-outline-primary text-black">Start Stream - Intro Slide</button>
-    <button id="live-btn" class="btn btn-lg btn-outline-primary text-black">Live</button>
-    <button id="technical-diff-btn" class="btn btn-lg btn-outline-primary text-black">Technical Difficulty</button>
-    <button id="archive-btn" class="btn btn-lg btn-outline-primary text-black">Conclusion Slide</button>
+  <div id="stream-btn-grp" class="container btn-group d-flex w-25 mt-2">
+    <button id="pending-btn" class="btn btn-lg btn-outline-primary text-black rounded">Start Stream</button>
+    <button id="live-btn" class="btn btn-lg btn-outline-primary text-black d-none">Live</button>
+    <button id="technical-diff-btn" class="btn btn-lg btn-outline-primary text-black d-none">Technical Difficulty</button>
+    <button id="archive-btn" class="btn btn-lg btn-outline-primary text-black d-none">Conclusion Slide</button>
   </div>
 
   <!-- Operator Control Tabs -->
@@ -251,7 +252,7 @@
         <button class="nav-link" id="nav-participants-tab" data-bs-toggle="tab" data-bs-target="#nav-participants"
           type="button" role="tab" aria-controls="nav-participants" aria-selected="false">Participants
         </button>
-        <button class="nav-link" id="nav-layout-tab" data-bs-toggle="tab" data-bs-target="#nav-layout" type="button"
+        <button class="nav-link d-none" id="nav-layout-tab" data-bs-toggle="tab" data-bs-target="#nav-layout" type="button"
           role="tab" aria-controls="nav-layout" aria-selected="false">Layout
         </button>
         <button class="nav-link" id="nav-slide-tab" data-bs-toggle="tab" data-bs-target="#nav-slide" type="button"
@@ -263,18 +264,22 @@
         <button class="nav-link" id="nav-video-tab" data-bs-toggle="tab" data-bs-target="#nav-video" type="button"
           role="tab" aria-controls="nav-video" aria-selected="false">Video
         </button>
-        <button class="nav-link" id="nav-log-tab" data-bs-toggle="tab" data-bs-target="#nav-log" type="button"
+        <button class="nav-link d-none" id="nav-log-tab" data-bs-toggle="tab" data-bs-target="#nav-log" type="button"
           role="tab" aria-controls="nav-log" aria-selected="false">Log
         </button>
         <button class="nav-link" id="nav-upload-tab" data-bs-toggle="tab" data-bs-target="#nav-upload" type="button"
           role="tab" aria-controls="nav-upload" aria-selected="false">Upload
         </button>
         <button class="nav-link" id="nav-recording-tab" data-bs-toggle="tab" data-bs-target="#nav-recording"
-          type="button" role="tab" aria-controls="nav-reording" aria-selected="false">Recording(s)
+          type="button" role="tab" aria-controls="nav-recording" aria-selected="false">Recording(s)
+        </button>
+        <button class="nav-link" id="nav-config-tab" data-bs-toggle="tab" data-bs-target="#nav-config"
+                type="button" role="tab" aria-controls="nav-config" aria-selected="false">Configuration
         </button>
       </div>
     </nav>
     <div class="tab-content" id="nav-tabContent">
+
       <!-- Zoom controls -->
       <div class="tab-pane fade show active" id="nav-zoom" role="tabpanel" aria-labelledby="nav-zoom-tab">
         <fieldset>
@@ -297,7 +302,7 @@
             <button id="hide-all-lower-thirds-btn" type="button" class="btn btn-secondary">Hide all lower
               thirds</button>
           </div>
-          <div class="btn-group w-50 mt-2" role="group" aria-label="Enable/Disable Autoshow all participants.">
+          <div id="participant-autoshow-btn-grp" class="btn-group d-none w-50 mt-2" role="group" aria-label="Enable/Disable Autoshow all participants.">
             <button id="enable-autoshow-btn" type="button" class="btn btn-secondary">Enable Auto Show</button>
             <button id="disable-autoshow-btn" type="button" class="btn btn-secondary">Disable Auto Show</button>
           </div>
@@ -305,6 +310,8 @@
             <button id="check-uncheck-all-ppt-btn" type="button" class="btn btn-secondary">Select All</button>
             <button id="show-select-ppt-btn" type="button" class="btn btn-secondary">Show Participants</button>
             <button id="hide-select-ppt-btn" type="button" class="btn btn-secondary">Hide Participants</button>
+            <button id="mute-select-ppt-btn" type="button" class="btn btn-secondary">Mute Participants</button>
+            <button id="unmute-select-ppt-btn" type="button" class="btn btn-secondary">Unmute Participants</button>
           </div>
           <!-- Single participant control element. Will be cloned for each participant -->
           <div id="participant-input-group" class="input-group">
@@ -314,10 +321,10 @@
             </div>
 
             <span class="input-group-text" draggable="true"><i class="bi bi-grip-vertical"></i></span>
-            <input type="text" class="form-control name-input" placeholder="Participant's name"
-              aria-label="Participant's name">
+            <span class="input-group-text name-span" style="flex-grow: 1">Name & Title</span>
+            <button class="btn btn-secondary rename-btn" aria-label="Participant's name" data-bs-toggle="modal" data-bs-target="#rename-modal"><i class="bi bi-pencil"></i></button>
             <button class="btn btn-secondary visibility-btn" type="button"><i class="bi bi-eye"></i></button>
-            <button class="btn btn-secondary mute-btn" type="button"><i class="bi bi-mic"></i></button>
+            <button class="btn btn-secondary audibility-btn" type="button"><i class="bi bi-ear"></i></button>
             <button class="btn btn-secondary show-lower-third-btn" type="button"><i class="bi bi-type"></i></button>
           </div>
         </fieldset>
@@ -332,12 +339,12 @@
           </button>
           <!-- Layout dropdown menu -->
           <ul id="layout-dropdown" class="dropdown-menu" aria-labelledby="layout-btn">
-            <li value="0"><a class="dropdown-item">Default</a></li>
+            <li value="0"><a class="dropdown-item">Videos Only</a></li>
             <li value="1"><a class="dropdown-item">Screen Share - Videos Left</a></li>
             <li value="2"><a class="dropdown-item">Screen Share - Videos Right</a></li>
             <li value="3"><a class="dropdown-item">Screen Share - Videos Top</a></li>
             <li value="4"><a class="dropdown-item">Screen Share - Videos Bottom</a></li>
-            <li value="5"><a class="dropdown-item">Screen Share - Full Screen</a></li>
+            <li value="5"><a class="dropdown-item">Screen Share Only</a></li>
           </ul>
           <!-- Text size dropdown menu -->
           <button id="text-size-btn" class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
@@ -403,20 +410,34 @@
       <div class="tab-pane fade" id="nav-slide" role="tabpanel" aria-labelledby="nav-slide-tab">
         <fieldset id="slide-fieldset">
           <legend class="title text-white mt-2">Slide controls</legend>
-          <div id="slide-btn-container" class="d-flex flex-wrap justify-content-center">
+
+          <div class="btn-group d-flex w-100 mt-2">
+            <button id= "intro-preview" type="button" class="btn btn-primary"><span class="bg-dark text-light p-1">Intro</span></button>
+            <button id= "techdiff-preview" type="button" class="btn btn-primary"><span class="bg-dark text-light p-1">Technical Difficulty</span></button>
+            <button id= "conc-preview" type="button" class="btn btn-primary"><span class="bg-dark text-light p-1">Conclusion</span></button>
+            <button id="slide-clear-btn" type="button" class="btn btn-primary">Live</button>
+          </div>
+
+          <legend class="title text-white border-top mt-2">Custom Slides</legend>
+          <div id="slide-btn-container" class="container overflow-auto overflow-div d-flex flex-wrap rounded w-60 mt-2">
             <!-- Single slide control element. Will be cloned for each slide -->
             <div id="slide-btn-element" class="media-btn-element flex-column m-1">
-              <span class="media-btn-label">Switch</span>
+              <span class="media-btn-label" >Switch</span>
               <img src="..." alt="..." class="media-switch-thumb rounded">
-              <button class="media-delete-btn btn btn-danger rounded-pill" type="button"><i
-                  class="bi bi-trash"></i></button>
+              <button class="media-set-as-btn btn btn-primary rounded-pill" type="button" data-bs-toggle="dropdown">
+                <i class="bi bi-three-dots"></i>
+              </button>
+              <ul class="dropdown-menu">
+                 Set As
+                <li><a target="action-set-as-intro" class="dropdown-item">Intro</a></li>
+                <li><a target="action-set-as-techdiff" class="dropdown-item">Technical Difficulty</a></li>
+                <li><a target="action-set-as-conclusion" class="dropdown-item">Conclusion</a></li>
+              </ul>
+              <button class="media-delete-btn btn btn-danger rounded-pill" type="button">
+                <i class="bi bi-trash"></i>
+              </button>
               <button class="media-left-btn btn btn-secondary"><i class="bi bi-volume-up"></i></button>
               <button class="media-right-btn btn btn-secondary"><i class="bi bi-volume-mute"></i></button>
-            </div>
-            <!-- Clear button -->
-            <div class="media-btn-element flex-column m-1">
-              <span class="media-btn-label">Transition to Live</span>
-              <button id="slide-clear-btn" type="button" class="btn btn-primary media-switch-thumb">Live</button>
             </div>
           </div>
         </fieldset>
@@ -424,12 +445,17 @@
       <!-- Hold Music controls -->
       <div class="tab-pane fade" id="nav-music" role="tabpanel" aria-labelledby="nav-music-tab">
         <fieldset id="music-fieldset">
-          <legend class="title text-white mt-2">Hold Music</legend>
+          <legend class="title text-white mt-2">Music Controls</legend>
           <!-- Play/stop button and volume control -->
           <div class="d-flex w-100 gap-5 mb-3">
             <button id="music-play-stop-btn" type="button" class="btn btn-secondary m-1"><i class="bi bi-play"></i></button>
-
-            <div class="w-75"></div>
+            <div class="input-group w-75">
+              <div class="input-group-prepend">
+                <label class="text-white" for="music-progress">Progress</label>
+              </div>
+              <input type="range" class="custom-range w-100" min="0" id="music-progress">
+              <span id="music-playback-time" class="text-white">00:00:00</span>
+            </div>
             <div class="input-group w-25">
               <div class="input-group-prepend">
                 <label class="text-white" for="volume-range-music">Volume</label>
@@ -439,33 +465,34 @@
             </div>
           </div>
           <!-- Library and Playlist -->
+          <legend class="title text-white border-top mt-2">Music</legend>
           <div class="container">
-            <div class="row">
-              <div class="col-sm">
-                <div id="library" class="bg-dark p-1 rounded">
-                  <h6 class="text-white">Library</h6>
-                  <div id="track-in-library" class="input-group flex-nowrap">
-                    <div class="input-group-text flex-grow-1 overflow-hidden bg-secondary text-white border-0">
-                      <span class="track-title">Track title goes here.</span>
+            <div class="row gap-2 ">
+              <div class="col-sm bg-dark rounded">
+                <h6 class="text-white m-0 p-1">Library</h6>
+                <div id="library" class="overflow-auto overflow-div p-1">
+                    <div id="track-in-library" class="input-group flex-nowrap mb-1">
+                      <div class="input-group-text flex-grow-1 overflow-hidden bg-secondary text-white border-0">
+                        <span class="track-title">Track title goes here.</span>
+                      </div>
+                      <button class="btn btn-secondary add-track-btn"><i class="bi bi-plus"></i></button>
+                      <button class="btn btn-danger media-delete-btn"><i class="bi bi-trash"></i></button>
                     </div>
-                    <button class="btn btn-secondary add-track-btn"><i class="bi bi-plus"></i></button>
-                    <button class="btn btn-danger media-delete-btn"><i class="bi bi-trash"></i></button>
-                  </div>
                 </div>
               </div>
-              <div class="col-sm">
-                <div id="playlist" class="bg-dark p-1 rounded">
-                  <h6 class="text-white">Currently Playing</h6>
-                  <div class="input-group flex-nowrap mb-1">
-                    <div class="input-group-text flex-grow-1 overflow-hidden bg-secondary text-info border-0">
-                      <span id="currently-playing-track">Currently playing track goes here.</span>
-                    </div>
-                    <div class="input-group-text flex-grow-1 overflow-hidden bg-secondary text-info border-0">
-                      <span id="currently-playing-track-time" class="float-end">-00:00</span>
-                    </div>
+              <div class="col-sm bg-dark rounded">
+                <h6 class="text-white m-0 mb-1 p-1">Currently Playing</h6>
+                <div class="input-group flex-nowrap mb-1">
+                  <div class="input-group-text flex-grow-1 overflow-hidden bg-secondary text-info border-0">
+                    <span id="currently-playing-track">Currently playing track goes here.</span>
                   </div>
-                  <h6 class="text-white">Playlist</h6>
-                  <div id="track-in-playlist" class="input-group flex-nowrap">
+                  <div class="input-group-text flex-grow-1 overflow-hidden bg-secondary text-info border-0">
+                    <span id="currently-playing-track-time" class="float-end">00:00:00</span>
+                  </div>
+                </div>
+                <h6 class="text-white m-0 mt-1 p-1">Playlist</h6>
+                <div id="playlist" class="bg-dark p-1 rounded overflow-auto overflow-div">
+                  <div id="track-in-playlist" class="input-group flex-nowrap mb-1">
                     <div class="input-group-text flex-grow-1 overflow-hidden bg-secondary text-white border-0">
                       <span class="track-title">Track title goes here.</span>
                     </div>
@@ -473,6 +500,19 @@
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+          <div id="preview-music"class="border-top mt-2">
+            <legend class="title text-white">Preview</legend>
+            <div class="d-flex m-0 w-100">
+              <select id="hold-music-select" class="form-select w-50" aria-label="Hold music select">
+                <!-- <option value="" selected disabled> Selected Track to Preview</option> -->
+                <optgroup id="hold-music-options-group" label="Music">
+                  <!-- Options will be generated from code -->
+                </optgroup>
+              </select>
+              <!-- Preview of audio on server -->
+              <div id="hold-music-container" class="d-flex justify-content-center w-50"><audio id="hold-music-audio" src="..." controls></audio></div>
             </div>
           </div>
         </fieldset>
@@ -484,15 +524,14 @@
           <fieldset id="video-fieldset-bar">
             <!-- Video controls bar -->
             <div class="d-flex w-100 gap-5 mb-3">
-              <button id="video-play-stop-btn" type="button" class="btn btn-secondary m-1"><i class="bi bi-play"></i>
-              </button>
+              <button id="video-play-stop-btn" type="button" class="btn btn-secondary"><i class="bi bi-play"></i></button>
 
               <div class="input-group w-75">
                 <div class="input-group-prepend">
                   <label class="text-white" for="video-progress">Progress</label>
                 </div>
                 <input type="range" class="custom-range w-100" min="0" id="video-progress">
-                <span id="video-playback-time" class="text-white">00:00</span>
+                <span id="video-playback-time" class="text-white">00:00:00</span>
               </div>
 
               <div class="input-group w-25">
@@ -502,42 +541,54 @@
                 <input type="range" class="custom-range w-100" min="0" max="1" step="0.01" id="volume-range-video">
                 <span id="video-volume-level" class="text-white"></span>
               </div>
+              <button id="video-clear-btn" type="button" class="btn" data-toggle="tooltip" data-placement="top" title="Clears Output" data-delay-show="0">Live</button> <!-- Clear button -->
             </div>
           </fieldset>
 
-          <div id="video-btn-container" class="d-flex flex-wrap justify-content-center">
-
+          <legend class="title text-white border-top mt-2">Videos</legend>
+          <div id="video-btn-container" class="container overflow-auto overflow-div d-flex flex-wrap rounded w-60 mt-2">
             <!-- Single video control element. Will be cloned for each video file -->
             <div id="video-btn-element" class="media-btn-element flex-column m-1">
               <span class="media-btn-label">Switch</span>
               <img src="..." alt="..." class="media-switch-thumb rounded">
+              <button class="media-set-as-btn btn btn-primary rounded-pill" type="button" data-bs-toggle="dropdown">
+                <i class="bi bi-three-dots"></i>
+              </button>
+              <ul class="dropdown-menu">
+                Set As
+                <li><a target="action-set-as-intro" class="dropdown-item">Intro</a></li>
+                <li><a target="action-set-as-techdiff" class="dropdown-item">Technical Difficulty</a></li>
+                <li><a target="action-set-as-conclusion" class="dropdown-item">Conclusion</a></li>
+              </ul>
               <button class="media-delete-btn btn btn-danger rounded-pill" type="button"><i
                   class="bi bi-trash"></i></button>
-              <button class="media-left-btn btn btn-secondary"><i class="bi bi-volume-up"></i></button>
-              <button class="media-right-btn btn btn-secondary"><i class="bi bi-volume-mute"></i></button>
+              <button class="media-left-btn btn btn-secondary" type="button"><i class="bi bi-volume-up"></i></button>
+              <button class="media-right-btn btn btn-secondary" type="button"><i class="bi bi-volume-mute"></i></button>
             </div>
-            <!-- Clear button -->
-            <div class="media-btn-element flex-column m-1">
-              <span class="media-btn-label">Transition to Live</span>
-              <button id="video-clear-btn" type="button" class="btn btn-primary media-switch-thumb" id="video-clear-btn">Live</button>
-            </div>
+
           </div>
+
+            <!-- Video Browsing -->
+            <div id="preview-videos" class="border-top mt-2" role="tabpanel" aria-labelledby="nav-browse-videos-tab">
+              <legend class="title text-white">Preview</legend>
+              <select id="video-select" class="form-select mb-2" aria-label="Video select">
+                <!-- <option value="" selected disabled> Selected Video to Preview</option> -->
+                <optgroup id="video-option-group" label="Videos">
+                  <!-- Options will be generated from code -->
+                </optgroup>
+              </select>
+              <!-- Preview of video on server -->
+              <div id="video-container"><video id="video" src="..." controls></video></div>
+            </div>
+
         </fieldset>
       </div>
-
       <!-- Log controls -->
       <div class="tab-pane fade" id="nav-log" role="tabpanel" aria-labelledby="nav-log-tab">
-        <fieldset>
+        <fieldset id="log-fieldset">
           <legend class="title text-white mt-2">Log</legend>
-          <div id="error-alert-log-file" class="alert alert-danger d-none" role="alert">
-            <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Warning:">
-              <use xlink:href="#exclamation-triangle-fill" />
-            </svg>
-            <strong>Please select a file from the options below.</strong>
-          </div>
           <div id="message-div" class="lead"></div>
           <div id="log-div" class="overflow-auto p-3 bg-light overflow-div rounded"></div>
-
           <div class="input-group mt-2 w-50">
             <select id="list-all-log-files" class="form-control form-select" required>
               <option selected value="none">None Selected</option>
@@ -548,7 +599,7 @@
       </div>
       <!-- Upload controls -->
       <div class="tab-pane fade" id="nav-upload" role="tabpanel" aria-labelledby="nav-upload-tab">
-        <fieldset>
+        <fieldset id="upload-fieldset">
           <legend class="title text-white mt-2">Upload</legend>
           <!-- Descriptor of action performed on files -->
           <div id="slide-upload-descriptor" class="text-white">Click browse to look for files to upload.</div>
@@ -599,80 +650,14 @@
             <input id="batch-slide-file-input" type="file" class="form-control" aria-label="Browse" value="Browse" multiple>
             <button id="batch-slide-upload-btn" class="btn btn-secondary" type="button">Upload</button>
           </div>
-          <div id="uploadTrackerContainer" class="container"></div>
-          <!-- Browse Uploaded Media Tabs -->
-          <div class="container mt-4">
-            <nav>
-              <div class="nav nav-tabs" id="nav-browse" role="tablist">
-                <button class="nav-link active" id="nav-browse-slides-tab" data-bs-toggle="tab"
-                  data-bs-target="#nav-browse-slides" type="button" role="tab" aria-controls="nav-browse-slides"
-                  aria-selected="true">Slides
-                </button>
-                <button class="nav-link" id="nav-browse-hold-music-tab" data-bs-toggle="tab"
-                  data-bs-target="#nav-browse-hold-music" type="button" role="tab" aria-controls="nav-browse-hold-music"
-                  aria-selected="false">Hold Music
-                </button>
-                <button class="nav-link" id="nav-browse-videos-tab" data-bs-toggle="tab"
-                  data-bs-target="#nav-browse-videos" type="button" role="tab" aria-controls="nav-browse-videos"
-                  aria-selected="false">Videos
-                </button>
-              </div>
-            </nav>
-          </div>
-          <div class="tab-content">
-            <!-- Slide Browsing -->
-            <div id="nav-browse-slides" class="tab-pane fade show active" role="tabpanel"
-              aria-labelledby="nav-browse-slides-tab">
-              <div class="fs-3 text-white mt-2">Browse</div>
-              <select id="slide-select" class="form-select" aria-label="Slide select">
-                <optgroup label="Slides">
-                  <option selected value="intro">Intro Slide</option>
-                  <option value="technicalDifficulty">Technical Difficulty Slide</option>
-                  <option value="conclusion">Conclusion Slide</option>
-                </optgroup>
-                <optgroup id="custom-slide-option-group" label="Custom Slides">
-                  <option value="custom1">Custom 1</option>
-                </optgroup>
-              </select>
-              <!-- Preview of image on server -->
-              <div id="slide-container"><img id="slide-img" src="..." alt="Image missing on server!"></div>
-            </div>
-            <!-- Hold Music Browsing -->
-            <div id="nav-browse-hold-music" class="tab-pane fade" role="tabpanel"
-              aria-labelledby="nav-browse-hold-music-tab">
-              <div class="fs-3 text-white mt-2">Browse</div>
-              <select id="hold-music-select" class="form-select" aria-label="Hold music select">
-                <optgroup id="hold-music-options-group" label="Hold Music">
-                  <!-- Options will be generated from code -->
-                </optgroup>
-              </select>
-              <!-- Preview of audio on server -->
-              <div id="hold-music-container"><audio id="hold-music-audio" src="..." controls></audio></div>
-            </div>
-            <!-- Video Browsing -->
-            <div id="nav-browse-videos" class="tab-pane fade" role="tabpanel" aria-labelledby="nav-browse-videos-tab">
-              <div class="fs-3 text-white mt-2">Browse</div>
-              <select id="video-select" class="form-select" aria-label="Video select">
-                <optgroup id="video-option-group" label="Videos">
-                  <!-- Options will be generated from code -->
-                </optgroup>
-              </select>
-              <!-- Preview of video on server -->
-              <div id="video-container"><video id="video" src="..." controls></video></div>
-            </div>
-          </div>
+
+          <div id="uploadTrackerContainer" class="container overflow-auto overflow-div"></div>
         </fieldset>
       </div>
       <!-- Recordings download -->
       <div id="nav-recording" class="tab-pane" role="tabpanel" aria-labelledby="nav-recording-tab">
-        <fieldset>
+        <fieldset id="recording-fieldset">
           <legend class="title text-white mt-2">Download</legend>
-          <div id="error-alert-file" class="alert alert-danger d-none" role="alert">
-            <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Warning:">
-              <use xlink:href="#exclamation-triangle-fill" />
-            </svg>
-            <strong>Please select a file from the options below.</strong>
-          </div>
           <field id="progress-field" class="d-none">
             <progress id="progress" value="0"></progress>
             <strong id="progress-text"></strong>
@@ -684,11 +669,31 @@
             </select>
             <button id="recording-download" class="btn btn-secondary" type="button">Download</button>
           </div>
+          <a class="btn btn-secondary mt-1" type="button" href="../video-editor/index.html" target="_blank" rel="noreferrer noopener">Open video editor</a>
+        </fieldset>
+      </div>
+      <!-- Configuration upload controls -->
+      <div class="tab-pane fade" id="nav-config" role="tabpanel" aria-labelledby="nav-config-tab">
+        <fieldset id="config-fieldset">
+          <legend class="title text-white mt-2">Configuration</legend>
+          <!-- Input for uploading configuration -->
+          <div class="input-group">
+            <input id="config-file-input" type="file" class="form-control" aria-label="Browse" value="Browse">
+            <button id="config-upload-btn" class="btn btn-secondary" type="button">Upload</button>
+          </div>
+          <!-- Button to download configuration -->
+          <button id="config-download-btn" class="btn btn-primary mt-2" type="button">Download</button>
+          <div id="configTrackerContainer" class="container overflow-auto overflow-div"></div>
         </fieldset>
       </div>
     </div>
   </div>
 
+  <!-- Alert container -->
+  <div id="alert-container" class="fixed-bottom container m-2"></div>
+
+  <!-- Jquery -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
   <!-- Bootstrap JS Bundle -->
   <script src="/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
   <script type="application/javascript" src="/node_modules/clipboard/dist/clipboard.min.js"></script>

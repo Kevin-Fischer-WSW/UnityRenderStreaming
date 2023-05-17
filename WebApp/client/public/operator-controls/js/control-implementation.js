@@ -7,10 +7,13 @@ import { sendClickEvent, sendStringSubmitEvent } from "/videoplayer/js/register-
 import { myVideoPlayer, mainNotifications } from "/operator-controls/js/control-main.js";
 import { ValidateClonesWithJsonArray} from "/operator-controls/js/validation-helper.js";
 import { unityFetch } from "../../js/unity-fetch.js";
-import {getVideoThumb} from "../../js/video-thumbnail.js";
+import { getVideoThumb } from "../../js/video-thumbnail.js";
 import { createUploadProgressTracker } from "../../js/progresstracker.js";
 import {CropWidget} from "../../js/crop-widget.js";
+import * as Feedback from "../../js/user-input-feedback-alert.js";
+import { onEnableAdvancedSettings } from "./advancedSettings.js";
 
+Feedback.setDefaultParentElement(document.getElementById("alert-container"));
 
 mainNotifications.addEventListener('setup', function () {
   myVideoPlayer.onParticipantDataReceived = participantDataReceived;
@@ -18,6 +21,7 @@ mainNotifications.addEventListener('setup', function () {
   myVideoPlayer.onStyleSchemaReceived = onReceiveStyleSchema;
   myVideoPlayer.onStyleValuesReceived = onReceiveStyleValues;
   myVideoPlayer.onLogMessageNotification = onLogMessageNotification;
+  myVideoPlayer.onNewMediaNotification = onNewMediaNotification;
 });
 
 function onLogMessageNotification () {
@@ -36,6 +40,16 @@ function fetchLogs(){
       data = data.replaceAll("\t", "&nbsp;&nbsp;&nbsp;&nbsp;")
       log.innerHTML = data;
     });
+}
+
+function onNewMediaNotification () {
+  if (navSlideTabBtn.classList.contains("active")) {
+    onSlideTabClicked();
+  } else if (navMusicTabBtn.classList.contains("active")) {
+    onMusicTabClicked();
+  } else if (navVideoTabBtn.classList.contains("active")) {
+    onVideoTabClicked();
+  }
 }
 
 /* SIGN OUT MODAL ELEMENTS */
@@ -79,14 +93,16 @@ function validateParticipantOnVidCtrls() {
 
 /* RENAME MODAL ELEMENTS */
 let renameModal = document.getElementById("rename-modal")
-let participantName = document.getElementById("participant-rename")
+let participantName = document.getElementById("participant-rename-name")
+let participantTitle = document.getElementById("participant-rename-title")
 let renameButton = document.getElementById("rename-btn")
 let participantToRename;
 //TODO ALERT IF ANY ERRORS
 renameButton.addEventListener("click", function() {
   let p = participantJsonParsed[participantToRename];
-  let str = p.id + "," + participantName.value;
-  sendStringSubmitEvent(myVideoPlayer, OperatorControls._SetParticipantDisplayName, str);
+  let name = encodeURIComponent(participantName.value)
+  let title = encodeURIComponent(participantTitle.value)
+  unityFetch(`/setParticipantDisplayName?participantId=${p.id}&name=${name}&title=${title}`, {method: "PUT"})
 })
 renameModal.addEventListener('shown.bs.modal', function () {
   renameModal.focus()
@@ -153,7 +169,8 @@ function setupParticipantOnVidCtrl(node, idx) {
 
   renameEl.addEventListener("click", function() {
     let p = participantJsonParsed[idx];
-    participantName.value = p.username;
+    participantName.value = p.name;
+    participantTitle.value = p.title;
     participantToRename = idx;
   })
 
@@ -174,10 +191,28 @@ meetingNoInput.addEventListener("change", () => {
 })
 meetingNoInput.value = localStorage.getItem("urlOrNumber");
 
+/* RESET APP SETTINGS */
+let resetModal = document.getElementById("reset-modal");
+let resetAppSettingsBtn = document.getElementById("resetAppSettings");
+
+resetModal.addEventListener('shown.bs.modal', function () {
+  resetModal.focus()
+});
+
+resetAppSettingsBtn.addEventListener("click", onClickResetAppSettings);
+
+function onClickResetAppSettings() {
+  unityFetch("/resetAppSettings", {method:"DELETE"});
+  FetchAllUploadedMediaAndUpdateDash();
+}
+
 /* STREAM PREFERENCES MODAL ELEMENTS */
 let streamPrefModal = document.getElementById("stream-pref-modal")
 let serverAddressSelect = document.getElementById('serverAddressSelect')
-let viewModal = document.getElementById("view-modal")
+let streamSettingsFieldset = document.getElementById("stream-settings-fieldset")
+
+let streamAuthSettings = document.getElementById("stream-auth-settings")
+let streamPrefAlerts = document.getElementById("stream-pref-alerts")
 
 let streamSettingsBtn = document.getElementById("stream-settings")
 streamSettingsBtn.addEventListener("click", updateStreamPref)
@@ -206,12 +241,6 @@ let pwd = document.getElementById("password-input");
 pwd.addEventListener("input", flagStreamPrefChange);
 
 /* -> Feedback Alerts */
-let streamUrl = document.getElementById("url-span");
-let successAlert = document.getElementById("success-alert");
-let successAlertRename = document.getElementById("success-alert-rename");
-let errorMsg = document.getElementById("err-span");
-let errorAlert = document.getElementById("error-alert");
-let errorAlertFile = document.getElementById("error-alert-file");
 let boardData = document.getElementById('kt_clipboard_4');
 
 /* GENERAL STATUS BAR */
@@ -237,9 +266,7 @@ async function updateStreamPref() {
   let resp = await unityFetch("/getStreamServiceSettings")
   let data = await resp.json();
   if (!resp.ok) {
-    console.error("Error " + resp.status + ": " + data.message)
-    errorMsg.innerHTML = data.message;
-    alertDisplay(errorAlert);
+    Feedback.alertDanger("Could not get stream service settings.", streamPrefAlerts);
   } else {
     let reg = new RegExp("[:/.]");
     let url = data.streamServiceSettings.server.split(reg);
@@ -248,10 +275,8 @@ async function updateStreamPref() {
     streamKey.value = data.streamServiceSettings.key;
     uname.value = data.streamServiceSettings.username;
     pwd.value = data.streamServiceSettings.password;
-    streamUrl.innerHTML = data.streamServiceSettings.server;
-    boardData.innerHTML = data.streamServiceSettings.server + data.streamServiceSettings.key;
+    boardData.innerHTML = url[3] === "none" ? "" : data.streamServiceSettings.server + data.streamServiceSettings.key;
   }
-
 }
 
 async function saveStreamPref() {
@@ -263,11 +288,10 @@ async function saveStreamPref() {
     "&password=" + pwd.value,
     { method: "PUT" })
   if (!resp.ok) {
-    errorMsg.innerHTML = resp.statusText;
-    alertDisplay(errorAlert, 1000);
+    Feedback.alertDanger(resp.statusText, streamPrefAlerts);
   } else {
     await updateStreamPref();
-    alertDisplay(successAlert);
+    Feedback.alertSuccess("Stream settings saved successfully!", streamPrefAlerts);
   }
 }
 
@@ -303,16 +327,6 @@ clipboard.on('success', function (e) {
   }, 3000)
 });
 
-function alertDisplay(alertType, timeout = 3000) {
-  alertType.classList.remove("d-none")
-  alertType.classList.add("d-flex")
-  setTimeout(() => {
-    alertType.classList.remove("d-flex")
-    alertType.classList.add("d-none")
-  }, timeout)
-}
-
-
 function setupDropdown(dropdown, func) {
   for (let i = 0; i < dropdown.children.length; i++) {
     let child = dropdown.children[i]
@@ -334,6 +348,13 @@ let musicTimerIntervalId = 0;
 let videoTimer = 0;
 let videoTimerIntervalId = 0;
 
+function convertSecondsToTimestamp(sec) {
+  let hh = Math.floor(sec / 3600);
+  let mm = Math.floor(sec / 60);
+  let ss = sec % 60;
+  return `${hh < 10 ? "0" + hh : hh}:${mm < 10 ? "0" + mm : mm}:${ss < 10 ? "0" + ss : ss}`
+}
+
 function appStatusReceived(json) {
 
   let jsonParsed = JSON.parse(json)
@@ -346,10 +367,12 @@ function appStatusReceived(json) {
   addParticipantSelectCheckEventListener(); // adds event listeners to each select checkbox
 
   generalStatBar.innerHTML =
-  `Stream: ${jsonParsed.streaming ? "Yes": "No"} |
-  Recording: ${jsonParsed.recording ? "Yes": "No"} |
+  `Stream: ${jsonParsed.streaming ? "Yes" : "No"} |
+  Recording Stream: ${jsonParsed.recording ? "Yes" : "No"} |
+  Zoom Local Recording: ${jsonParsed.canRecordLocalFiles ? "Allowed" : "Not Allowed"} |
   Holding Slide: ${jsonParsed.holdingSlide} |
-  Holding Music: ${jsonParsed.playingHoldingMusic ? "Playing": "Not Playing"}.`
+  Holding Music: ${jsonParsed.playingHoldingMusic ? "Playing" : "Not Playing"} |
+  Holding Video: ${jsonParsed. playingVideo ? "Playing" : "Not Playing"}`
 
   if (jsonParsed.inMeeting || jsonParsed.meetingSimulated) {
     validateTracksInPlaylist(jsonParsed.playlist, jsonParsed.currentlyPlayingIndex)
@@ -357,49 +380,60 @@ function appStatusReceived(json) {
     joinMeetingBtn.disabled = true;
     leaveMeetingBtn.disabled = false;
     holdMusicFieldset.disabled = false;
-    musicPlayStopBtn.innerHTML = jsonParsed.playingHoldingMusic ? "Stop" : "Play";
+    musicPlayStopBtn.innerHTML = jsonParsed.playingHoldingMusic ? '<i class="bi bi-pause"></i>' : '<i class="bi bi-play"></i>';
     currentlyPlayingSpan.innerHTML = jsonParsed.currentlyPlayingTrack;
+    volumeRangeMusic.value = jsonParsed.holdingMusicVolume;
+    volumeLevelMusic.innerHTML = getVolumeLevel(volumeRangeMusic.value);
     if (jsonParsed.playingHoldingMusic) {
-      holdingMusicTimer = Math.round(jsonParsed.currentTrackTimeLeft);
-      currentlyPlayingTrackTime.innerHTML = `-${holdingMusicTimer}`;
-      volumeRangeMusic.value = jsonParsed.holdingMusicVolume;
+      holdingMusicTimer = Math.round(jsonParsed.currentTrackPlaybackTime);
+      currentlyPlayingTrackTime.innerHTML = musicPlaybackTime.innerHTML = convertSecondsToTimestamp(holdingMusicTimer);
+      musicProgress.value = holdingMusicTimer > musicProgress.max ? musicProgress.max : holdingMusicTimer;
       if (musicTimerIntervalId === 0) {
         musicTimerIntervalId = setInterval(function () {
           // Decrease the time left by 1 second
-          holdingMusicTimer--;
-          currentlyPlayingTrackTime.innerHTML = `-${holdingMusicTimer}`;
+          holdingMusicTimer++;
+          currentlyPlayingTrackTime.innerHTML = musicPlaybackTime.innerHTML = convertSecondsToTimestamp(holdingMusicTimer);
+          musicProgress.value = holdingMusicTimer > musicProgress.max ? musicProgress.max : holdingMusicTimer;
         }, 1000);
       }
     } else {
       clearInterval(musicTimerIntervalId);
       musicTimerIntervalId = 0;
+      musicPlaybackTime.innerHTML = "00:00:00";
       currentlyPlayingTrackTime.innerHTML = "";
     }
 
-    videoFieldsetBar.disabled = !jsonParsed.videoIsShowing;
-
+    //videoFieldsetBar.disabled = !jsonParsed.videoIsShowing;
+    volumeRangeVideo.value = jsonParsed.currentVideoVolume;
+    volumeLevelVideo.innerHTML = getVolumeLevel(volumeRangeVideo.value);
     if (jsonParsed.playingVideo) {
-
       videoTimer = Math.round(jsonParsed.currentVideoPlaybackTime);
-      videoPlaybackTime.innerHTML = videoProgress.value = videoTimer;
-      videoVolume.value = jsonParsed.currentVideoVolume;
+      videoPlaybackTime.innerHTML = convertSecondsToTimestamp(videoTimer);
+      videoProgress.value = videoTimer > videoProgress.max ? videoProgress.max : videoTimer;
       if (videoTimerIntervalId === 0) {
         videoTimerIntervalId = setInterval ( function() {
           videoTimer++;
-          videoPlaybackTime.innerHTML = videoProgress.value = videoTimer;
+          videoPlaybackTime.innerHTML = convertSecondsToTimestamp(videoTimer);
+          videoProgress.value = videoTimer > videoProgress.max ? videoProgress.max : videoTimer;
         }, 1000);
       }
     } else {
       clearInterval(videoTimerIntervalId);
       videoTimerIntervalId = 0;
-      videoPlaybackTime.innerHTML = "00:00";
+      //videoPlaybackTime.innerHTML = "00:00:00";
     }
-    videoProgress.max = jsonParsed.currentVideoDuration;
+    musicProgress.max = Math.round(jsonParsed.currentTrackDuration);
+    videoProgress.max = Math.round(jsonParsed.currentVideoDuration);
     videoPlayPauseBtn.innerHTML = jsonParsed.playingVideo ? '<i class="bi bi-pause"></i>' : '<i class="bi bi-play"></i>';
 
     if (jsonParsed.streaming) {
-      viewModal.disabled = true;
-      pendingBtn.innerHTML = "Intro Slide"
+      streamSettingsFieldset.disabled = true;
+      pendingBtn.innerHTML = "Intro Slide";
+      streamBtnGrp.classList.add("w-100");
+      pendingBtn.classList.remove("rounded");
+      liveBtn.classList.remove("d-none");
+      technicalDiffBtn.classList.remove("d-none");
+      archiveBtn.classList.remove("d-none");
       if (jsonParsed.holdingSlide === "pending") {
         ActivateButtonHelper(pendingBtn, true)
       } else if (jsonParsed.holdingSlide === "technicalDifficulties") {
@@ -410,25 +444,32 @@ function appStatusReceived(json) {
         ActivateButtonHelper(archiveBtn, true)
       }
     } else {
-      pendingBtn.innerHTML = "Start stream"
-      viewModal.disabled = false;
-      if (jsonParsed.holdingSlide === "endOfStream" || jsonParsed.holdingSlide === "conclusion") {
-        sendClickEvent(myVideoPlayer, OperatorControls._LiveButton);
-      }
+      pendingBtn.innerHTML = "Start Stream"
+      streamSettingsFieldset.disabled = false;
+      streamBtnGrp.classList.remove("w-100");
+      pendingBtn.classList.add("rounded");
+      liveBtn.classList.add("d-none");
+      technicalDiffBtn.classList.add("d-none");
+      archiveBtn.classList.add("d-none");
+      // todo: This causes a custom slide named "conclusion" to immediately be dismissed.
+      // if (jsonParsed.holdingSlide === "endOfStream" || jsonParsed.holdingSlide === "conclusion") {
+      //   sendClickEvent(myVideoPlayer, OperatorControls._LiveButton);
+      // }
     }
 
     if (jsonParsed.secondClickEndsStream) {
       archiveBtn.innerHTML = "End Stream"
     } else {
-      archiveBtn.innerHTML = "Archive"
+      archiveBtn.innerHTML = "Conclusion Slide"
     }
 
   } else {
+    generalStatBar.innerHTML = "Connection State: Connected";
     meetingNoInputField.disabled = false;
     joinMeetingBtn.disabled = false;
     leaveMeetingBtn.disabled = true;
     holdMusicFieldset.disabled = true;
-    videoFieldsetBar.disabled = true;
+    //videoFieldsetBar.disabled = true;
   }
 
   function ActivateButtonHelper(btn, active) {
@@ -443,7 +484,8 @@ function appStatusReceived(json) {
 }
 
 
-/* HOLDING SLIDE BUTTONS */
+/* STREAM BUTTONS */
+let streamBtnGrp = document.getElementById("stream-btn-grp");
 let pendingBtn = document.getElementById("pending-btn");
 pendingBtn.addEventListener("click", onPendingClick);
 let liveBtn = document.getElementById("live-btn");
@@ -453,9 +495,9 @@ technicalDiffBtn.addEventListener("click", onTechnicalDiff);
 let archiveBtn = document.getElementById("archive-btn")
 archiveBtn.addEventListener("click", onArchiveClick);
 
-/* HOLDING SLIDE BUTTON IMPLEMENTATION */
+/* STREAM BUTTON IMPLEMENTATION */
 function onPendingClick() {
-  sendClickEvent(myVideoPlayer, OperatorControls._PendingButton)
+  unityFetch("/startStreamAndDisplayIntroSlide", { method : "PUT"})
 }
 
 function onLiveClick() {
@@ -467,7 +509,7 @@ function onTechnicalDiff() {
 }
 
 function onArchiveClick() {
-  sendClickEvent(myVideoPlayer, OperatorControls._ArchiveButton)
+  unityFetch("/stopStreamAndDisplayConclusionSlide", { method : "PUT"})
 }
 
 /* ZOOM CONTROLS */
@@ -480,12 +522,27 @@ leaveMeetingBtn.addEventListener("click", onLeaveClicked)
 
 /* ZOOM CONTROL IMPLEMENTATION */
 function onJoinClick() {
-  let str = meetingNumberInput.value + "," + meetingPasswordInput.value;
-  sendStringSubmitEvent(myVideoPlayer, OperatorControls._JoinMeetingButton, str);
+  // Meeting number can also be entered as a URI. This is helpful since query parameters can be passed along with the meeting number.
+  let meetingNumberUri = encodeURIComponent(meetingNumberInput.value)
+  unityFetch(`/joinMeeting?meetingId=${meetingNumberUri}&password=${meetingPasswordInput.value}`, { method : "PUT"})
+    .then(response => {
+      if (response.ok) {
+        console.log("Joined meeting")
+      }else{
+        console.log(response.statusText)
+      }
+    })
 }
 
 function onLeaveClicked() {
-  sendClickEvent(myVideoPlayer, OperatorControls._LeaveMeetingButton);
+  unityFetch(`/leaveMeeting`, { method : "PUT"})
+    .then(response => {
+      if (response.ok) {
+        console.log("Left meeting")
+      }else{
+        console.log(response.statusText)
+      }
+    })
 }
 
 /* PARTICIPANT CONTROLS */
@@ -504,6 +561,8 @@ disableAutoShowOnJoin.addEventListener("click", onDisableAutoShowOnJoin);
 let selectAllParticipantBtn = document.getElementById("check-uncheck-all-ppt-btn");
 let showSelectParticipantBtn = document.getElementById("show-select-ppt-btn");
 let hideSelectParticipantBtn = document.getElementById("hide-select-ppt-btn");
+let muteSelectParticipantBtn = document.getElementById("mute-select-ppt-btn");
+let unmuteSelectParticipantBtn = document.getElementById("unmute-select-ppt-btn");
 
 function addParticipantSelectCheckEventListener() {
   let cbs = document.getElementsByName('checked-participant');
@@ -567,6 +626,18 @@ showSelectParticipantBtn.addEventListener("click", () => {
   }
 })
 
+muteSelectParticipantBtn.addEventListener("click", () => {
+  let selectedParticipants = participantInputGroups.map(group => {
+    return group.querySelector(".check");
+  });
+  for (let i = 0; i <  selectedParticipants.length; i++) {
+    if (selectedParticipants[i].checked) {
+      let p = participantJsonParsed[i]
+      unityFetch(`/toggleParticipantAudibility?enable=false&participantId=${p.id}`, {method:"PUT"})
+    }
+  }
+})
+
 hideSelectParticipantBtn.addEventListener("click", () => {
   let selectedParticipants = mapSelectParticiapntsToInputGroups();
   for (let i = 0; i <  selectedParticipants.length; i++) {
@@ -574,6 +645,16 @@ hideSelectParticipantBtn.addEventListener("click", () => {
       let p = participantJsonParsed[i]
       let str = p.id + ",false"
       sendStringSubmitEvent(myVideoPlayer, OperatorControls._ToggleParticipantVisibilityButton, str)
+    }
+  }
+})
+
+unmuteSelectParticipantBtn.addEventListener("click", () => {
+  let selectedParticipants = mapSelectParticiapntsToInputGroups();
+  for (let i = 0; i <  selectedParticipants.length; i++) {
+    if (selectedParticipants[i].checked) {
+      let p = participantJsonParsed[i]
+      unityFetch(`/toggleParticipantAudibility?enable=true&participantId=${p.id}`, {method:"PUT"})
     }
   }
 })
@@ -604,13 +685,15 @@ function validateParticipantInputGroups() {
   }
   let validateGroup = function (clone, data){
     let visibilityBtn = document.querySelector(`#${clone.id} .visibility-btn`);
-    let muteBtn = document.querySelector(`#${clone.id} .mute-btn`);
-    let nameInput = document.querySelector(`#${clone.id} .name-input`);
+    let audibilityBtn = document.querySelector(`#${clone.id} .audibility-btn`);
+    let nameSpan = document.querySelector(`#${clone.id} .name-span`);
 
     visibilityBtn.firstChild.className = data.visible ? "bi bi-eye" : "bi bi-eye-slash";
-    muteBtn.firstChild.className = data.muted ? "bi bi-mic-mute" : "bi bi-mic";
-    if (nameInput !== document.activeElement) {
-      nameInput.value = data.username;
+    audibilityBtn.firstChild.className = data.audible ? "bi bi-ear" : "bi bi-ear-fill";
+    if (data.title === ""){
+      nameSpan.innerHTML = `<b>${data.name}</b>`;
+    }else{
+      nameSpan.innerHTML = `<b>${data.name}</b>&nbsp-&nbsp<i>${data.title}</i>`;
     }
   }
   ValidateClonesWithJsonArray(participantInputGroupOg, participantFieldset, participantInputGroups, setupGroup, participantJsonParsed, validateGroup);
@@ -629,9 +712,9 @@ function ClearSelectParticipantsOnDrag() {
 }
 
 function setupParticipantInputGroup(node, idx) {
-  let nameInput = document.querySelector("div#" + node.id + " .name-input")
+  let renameBtn = document.querySelector("div#" + node.id + " .rename-btn")
   let visibilityBtn = document.querySelector("div#" + node.id + " .visibility-btn")
-  let muteBtn = document.querySelector("div#" + node.id + " .mute-btn")
+  let audibilityBtn = document.querySelector("div#" + node.id + " .audibility-btn")
   let lowerThirdBtn = document.querySelector("div#" + node.id + " .show-lower-third-btn")
 
   node.ondragstart = (ev) => {
@@ -669,10 +752,14 @@ function setupParticipantInputGroup(node, idx) {
     sendStringSubmitEvent(myVideoPlayer, OperatorControls._ToggleParticipantVisibilityButton, str)
   })
 
-  muteBtn.addEventListener("click", function () {
+  audibilityBtn.addEventListener("click", function () {
     let p = participantJsonParsed[idx]
-    let str = p.id + "," + !p.muted
-    sendStringSubmitEvent(myVideoPlayer, OperatorControls._MuteParticipantButton, str)
+    unityFetch(`/toggleParticipantAudibility?participantId=${p.id}&enable=${!p.audible}`, {method: "PUT"})
+    .then(resp => {
+      if (resp.ok) {
+        console.log("audibility toggled")
+      }
+    })
   })
 
   lowerThirdBtn.addEventListener("click", function () {
@@ -681,10 +768,11 @@ function setupParticipantInputGroup(node, idx) {
     sendStringSubmitEvent(myVideoPlayer, OperatorControls._ToggleParticipantLowerThird, str);
   })
 
-  nameInput.addEventListener("change", function () {
-    let str = participantJsonParsed[idx].id + "," + nameInput.value;
-
-    sendStringSubmitEvent(myVideoPlayer, OperatorControls._SetParticipantDisplayName, str)
+  renameBtn.addEventListener("click", function () {
+    let p = participantJsonParsed[idx];
+    participantName.value = p.name;
+    participantTitle.value = p.title;
+    participantToRename = idx;
   })
 }
 
@@ -821,14 +909,117 @@ function validateSchema() {
   return true;
 }
 
+let slideFieldset = document.getElementById("slide-fieldset");
+let slideBtnContainer = document.getElementById("slide-btn-container");
+let slideSwitchBtn = document.getElementById("slide-btn-element");
+let slideSwitchBtns = [];
+let slideClearBtn = document.getElementById("slide-clear-btn");
+slideClearBtn.addEventListener("click", onSlideClearClicked);
 
+let intro_preview = document.getElementById("intro-preview");
+let techdiff_preview = document.getElementById("techdiff-preview");
+let conc_preview = document.getElementById("conc-preview");
 
-/* DELETE BUTTON */
-function setupDeleteButton(owner, route, spanWithFilename) {
+intro_preview.addEventListener("click", onPendingClick);
+techdiff_preview.addEventListener("click", onTechnicalDiff);
+conc_preview.addEventListener("click", onArchiveClick);
+
+function onSlideTabClicked() {
+  unityFetch("/getHoldingSlides")
+    .then(resp => resp.json())
+    .then(json => {
+      validateSlideSwitchBtns(json);
+    })
+  FetchAssignedHoldingSlidesAndUpdatePreviews();
+}
+
+function onSlideClearClicked() {
+  sendClickEvent(myVideoPlayer, OperatorControls._LiveButton);
+}
+
+slideSwitchBtn.style.display = "none";
+
+function setupSlideSetAsOptionsButton(owner) {
+  let slideSetAsIntro = document.querySelector(`div#${owner.id} a[target="action-set-as-intro"]`);
+  let slideSetAsTechDiff = document.querySelector(`div#${owner.id} a[target="action-set-as-techdiff"]`);
+  let slideSetAsConclusion= document.querySelector(`div#${owner.id} a[target="action-set-as-conclusion"]`);
+  let img = document.querySelector(`div#${owner.id} img`);
+
+  slideSetAsIntro.addEventListener("click", (e)=>{
+    unityFetch(`/assignIntroSlide?url=${img.alt}`, {method:"PUT"})
+      .then( resp => {
+        if (resp.ok) {
+          intro_preview.style.backgroundImage = `url("${img.src}")`;
+          FetchAssignedHoldingSlidesAndUpdatePreviews();
+        }
+      });
+  });
+
+  slideSetAsTechDiff.addEventListener("click", (e)=>{
+    unityFetch(`/assignTechnicalDifficultySlide?url=${img.alt}`, {method:"PUT"})
+      .then( resp => {
+        if (resp.ok) {
+          techdiff_preview.style.backgroundImage = `url("${img.src}")`;
+          FetchAssignedHoldingSlidesAndUpdatePreviews();
+        }
+      });
+  });
+
+  slideSetAsConclusion.addEventListener("click", (e)=>{
+    unityFetch(`/assignConclusionSlide?url=${img.alt}`, {method:"PUT"})
+      .then( resp => {
+        if (resp.ok) {
+          conc_preview.style.backgroundImage = `url("${img.src}")`;
+          FetchAssignedHoldingSlidesAndUpdatePreviews();
+        }
+      });
+  });
+
+}
+
+function FetchAssignedHoldingSlidesAndUpdatePreviews() {
+  unityFetch("/getAssignedHoldingSlides")
+    .then(resp => resp.json())
+    .then(json => {
+      // todo set to placeholder image instead of clearing.
+      intro_preview.style.backgroundImage = "";
+      techdiff_preview.style.backgroundImage = "";
+      conc_preview.style.backgroundImage = "";
+
+      for (let i = 0; i < json.length; i++) {
+        let slideInfo = json[i];
+        if (slideInfo.isVideo) {
+          getVideoThumb(slideInfo.url, 1).then(blob => {
+            setBackgroundImageHelper(URL.createObjectURL(blob))
+          });
+        }else{
+          setBackgroundImageHelper(slideInfo.url);
+        }
+
+        function setBackgroundImageHelper(url) {
+          if (slideInfo.assignedTo.includes("intro")) {
+            intro_preview.style.backgroundImage = `url("${url}")`;
+          }
+          if (slideInfo.assignedTo.includes("technicalDifficulties")) {
+            techdiff_preview.style.backgroundImage = `url("${url}")`;
+          }
+          if (slideInfo.assignedTo.includes("outro")) {
+            conc_preview.style.backgroundImage = `url("${url}")`;
+          }
+        }
+      }
+    })
+}
+// Update previews on load.
+FetchAssignedHoldingSlidesAndUpdatePreviews();
+
+// slide delete pill button.
+function setupDeleteButton(owner, route, elementWithFilename, onDeleteConfirmed) {
   let deleteBtn = document.querySelector(`#${owner.id} .media-delete-btn`);
   let ogDeleteContents = deleteBtn.innerHTML;
   let confirmDeleteContents = `Confirm delete?`;
-  deleteBtn.addEventListener("click", function () {
+  deleteBtn.addEventListener("click", function (ev) {
+    ev.stopPropagation();
     if (deleteBtn.innerHTML !== confirmDeleteContents) {
       // Confirm deletion.
       deleteBtn.innerHTML = confirmDeleteContents;
@@ -840,9 +1031,10 @@ function setupDeleteButton(owner, route, spanWithFilename) {
       owner.style.opacity = 0.5;
       deleteBtn.innerHTML = "Deleting...";
       // Delete media.
-      fetch(`${route}/${spanWithFilename.innerHTML}`, {method: "DELETE"}).then(function (response) {
+      // todo Add callback to handle response. Also make route a parameter.
+      fetch(route.replace("{0}", elementWithFilename.thingToDelete), {method: "DELETE"}).then(function (response) {
         if (response.ok) {
-          FetchAllUploadedMediaAndUpdateDash();
+          onDeleteConfirmed();
         }
       }).finally(function () {
         // Reset owner opacity.
@@ -850,62 +1042,35 @@ function setupDeleteButton(owner, route, spanWithFilename) {
         //Reset delete button.
         deleteBtn.innerHTML = ogDeleteContents;
       });
+      FetchAssignedHoldingSlidesAndUpdatePreviews();
     }
   });
 }
 
-/* SLIDE CONTROLS */
-let slideFieldset = document.getElementById("slide-fieldset");
-let slideBtnContainer = document.getElementById("slide-btn-container");
-let slideSwitchBtn = document.getElementById("slide-btn-element");
-let slideSwitchBtns = [];
-let slideClearBtn = document.getElementById("slide-clear-btn");
-slideClearBtn.addEventListener("click", onSlideClearClicked);
-
-function onSlideClearClicked() {
-  sendClickEvent(myVideoPlayer, OperatorControls._LiveButton);
-}
-
-slideSwitchBtn.style.display = "none";
-
 function validateSlideSwitchBtns(slides) {
-  // Be sure there are enough buttons for slides.
-  if (slideSwitchBtns.length < slides.length) {
-    while (slideSwitchBtns.length < slides.length) {
-      // Elements must be added.
-      let clone = slideSwitchBtn.cloneNode(true);
-      clone.id += "-" + slideSwitchBtns.length;
-      clone.style.display = "flex"
-      slideBtnContainer.appendChild(clone);
-      slideSwitchBtns.push(clone);
-      let span = document.querySelector(`#${clone.id} span`)
-      //let deleteBtn = document.querySelector(`#${clone.id} .media-delete-btn`); // todo: make a function to create delete buttons.
-      setupDeleteButton(clone, "/slide_delete", span);
-      let button1 = document.querySelector(`#${clone.id} .media-left-btn`);
-      let button2 = document.querySelector(`#${clone.id} .media-right-btn`);
-      button1.addEventListener("click", function () {
-        let str = `${span.innerHTML},false`
-        sendStringSubmitEvent(myVideoPlayer, OperatorControls._CustomSlideButton, str);
-      })
-      button2.addEventListener("click", function () {
-        let str = `${span.innerHTML},true`
-        sendStringSubmitEvent(myVideoPlayer, OperatorControls._CustomSlideButton, str);
-      })
-    }
-  } else {
-    while (slideSwitchBtns.length > slides.length) {
-      // Elements must be destroyed.
-      slideSwitchBtns.pop().remove();
-    }
+  let setupSlide = function (slide) {
+    slide.style.display = "flex";
+    let span = document.querySelector(`#${slide.id} span`)
+    let img = document.querySelector(`#${slide.id} img`);
+    setupSlideSetAsOptionsButton(slide);
+    setupDeleteButton(slide, "/uapp/deleteHoldingSlide?url={0}", span, onSlideTabClicked);
+    img.addEventListener("click", function () {
+      unityFetch("/setHoldingSlide?url=" + img.alt, {method: "PUT"})
+        .then(response => {
+          if (response.ok) {
+            console.log("Slide set.");
+          }
+        })
+    });
   }
-  // Set data of each button.
-  for (let i = 0; i < slides.length; i += 1) {
-    let btn = slideSwitchBtns[i];
-    let img = document.querySelector(`#${btn.id} img`);
-    let label = document.querySelector(`#${btn.id} span`);
-    label.innerHTML = slides[i];
-    img.alt = img.src = `/slides/${slides[i]}`;
+  let validateSlide = function (slide, slideInfo) {
+    let img = document.querySelector(`#${slide.id} img`);
+    let label = document.querySelector(`#${slide.id} span`);
+    label.thingToDelete = slideInfo.url;
+    label.innerHTML = slideInfo.name;
+    img.src = img.alt = slideInfo.url;
   }
+  ValidateClonesWithJsonArray(slideSwitchBtn, slideBtnContainer, slideSwitchBtns, setupSlide, slides, validateSlide);
 }
 
 /* Music and Video volume Level Helper */
@@ -918,6 +1083,16 @@ let holdMusicFieldset = document.getElementById("music-fieldset");
 let volumeRangeMusic = document.getElementById("volume-range-music");
 let volumeLevelMusic  = document.getElementById("music-volume-level");
 volumeLevelMusic.innerHTML = getVolumeLevel(volumeRangeMusic.value);
+let musicProgress = document.getElementById("music-progress");
+let musicPlaybackTime = document.getElementById("music-playback-time");
+
+musicProgress.addEventListener("change", function () {
+  let str = musicProgress.value;
+  currentlyPlayingTrackTime.innerHTML = musicPlaybackTime.innerHTML = convertSecondsToTimestamp(musicProgress.value);
+  clearInterval(musicTimerIntervalId);
+  musicTimerIntervalId = 0;
+  sendStringSubmitEvent(myVideoPlayer, OperatorControls._SeekMusicButton, str);
+});
 
 volumeRangeMusic.addEventListener("input", function () {
   let str = volumeRangeMusic.value;
@@ -928,7 +1103,7 @@ volumeRangeMusic.addEventListener("input", function () {
 
 let musicPlayStopBtn = document.getElementById("music-play-stop-btn");
 musicPlayStopBtn.addEventListener("click", function () {
-  if (musicPlayStopBtn.innerHTML === "Play") {
+  if (musicPlayStopBtn.innerHTML === `<i class="bi bi-play"></i>`) {
     sendClickEvent(myVideoPlayer, OperatorControls._PlayHoldingMusic);
   } else {
     sendClickEvent(myVideoPlayer, OperatorControls._StopHoldingMusic);
@@ -949,11 +1124,21 @@ let tracksInLibrary = [];
 
 trackInLibrary.classList.add("d-none");
 
+function onMusicTabClicked() {
+  fetch("/all_holding_music")
+    .then(value => value.json())
+    .then(music => {
+      UpdateOptionGroupWithValues(holdMusicOptionGroup, music);
+      UpdateHoldMusicBrowsePreviewElement();
+      validateTracksInLibrary(music);
+    })
+}
+
 function validateTracksInLibrary(tracks) {
   let setupBtn = function (clone) {
     clone.classList.remove("d-none");
     let span = document.querySelector(`#${clone.id} span`)
-    setupDeleteButton(clone, "/music_delete", span);
+    setupDeleteButton(clone, "/music_delete/{0}", span, FetchAllUploadedMediaAndUpdateDash);
     let addTrackBtn = document.querySelector(`#${clone.id} .add-track-btn`);
     addTrackBtn.addEventListener("click", function () {
       // Add to playlist
@@ -962,7 +1147,7 @@ function validateTracksInLibrary(tracks) {
   }
   let validateBtn = function (btn, music) {
     let label = document.querySelector(`#${btn.id} span`);
-    label.innerHTML = music;
+    label.thingToDelete = label.innerHTML = music;
   }
   ValidateClonesWithJsonArray(trackInLibrary, library, tracksInLibrary, setupBtn, tracks, validateBtn)
 }
@@ -1025,13 +1210,7 @@ batchSlideFileInput.addEventListener("change", batchFileInputChanged) // todo ma
 let batchSlideUploadBtn = document.getElementById("batch-slide-upload-btn") // todo Make this function less specific as well. Verify files based on extension.
 batchSlideUploadBtn.addEventListener("click", uploadCustomSlideClicked)
 
-/** SLIDE BROWSE CONTROLS */
-let slideSelect = document.getElementById("slide-select")
-let customSlideOptionGroup = document.getElementById("custom-slide-option-group")
-slideSelect.addEventListener("change", UpdateSlideBrowsePreviewElement)
-let slideImg = document.getElementById("slide-img")
-
-/** HOLD MUSIC BROWSE CONTROLS */
+/** HOLD MUSIC PREVIEW CONTROLS */
 let holdMusicSelect = document.getElementById("hold-music-select")
 let holdMusicOptionGroup = document.getElementById("hold-music-options-group")
 holdMusicSelect.addEventListener("change", UpdateHoldMusicBrowsePreviewElement)
@@ -1049,18 +1228,15 @@ function UpdateBrowsePreviewElement(lmtRoute, element, select, srcRoute) {
     .then(value => {
       let lastModifiedTime;
       lastModifiedTime = value.lastUpdate
-      element.src = `${srcRoute}/${select.value}?${lastModifiedTime.toString()}`
+      element.src  = `${srcRoute}/${select.value}?${lastModifiedTime.toString()}`;
     })
 }
 
-function UpdateSlideBrowsePreviewElement() {
-  UpdateBrowsePreviewElement("/last_slide_update", slideImg, slideSelect, "/slides")
-}
 function UpdateHoldMusicBrowsePreviewElement() {
   UpdateBrowsePreviewElement("/last_holding_music_update", holdMusicAudioPlayer, holdMusicSelect, "/music")
 }
 function UpdateVideoBrowsePreviewElement() {
-  UpdateBrowsePreviewElement("/last_video_update", videoPlayer, videoSelect, "/videos")
+  UpdateBrowsePreviewElement("/last_slide_update", videoPlayer, videoSelect, "/slides")
 }
 
 function UpdateOptionGroupWithValues(optionGroup, options) {
@@ -1079,29 +1255,11 @@ function UpdateOptionGroupWithValues(optionGroup, options) {
 
 function FetchAllUploadedMediaAndUpdateDash() {
   // Fetch custom slides.
-  fetch("/all_custom_slides")
-    .then(value => value.json())
-    .then(slides => {
-      UpdateOptionGroupWithValues(customSlideOptionGroup, slides);
-      UpdateSlideBrowsePreviewElement();
-      validateSlideSwitchBtns(slides);
-    })
+  onSlideTabClicked()
   // Fetch holding music.
-  fetch("/all_holding_music")
-    .then(value => value.json())
-    .then(music => {
-      UpdateOptionGroupWithValues(holdMusicOptionGroup, music);
-      UpdateHoldMusicBrowsePreviewElement();
-      validateTracksInLibrary(music);
-    })
+  onMusicTabClicked();
   // Fetch videos.
-  fetch("/all_videos")
-    .then(value => value.json())
-    .then(videos => {
-      UpdateOptionGroupWithValues(videoOptionGroup, videos);
-      UpdateVideoBrowsePreviewElement();
-      validateVideoSwitchBtns(videos);
-    })
+  onVideoTabClicked();
 }
 
 // Update initially.
@@ -1126,13 +1284,17 @@ let typeToKeyWords = {
 let extensionToMethod = {
   "slide" : ["png", "jpg", "jpeg"],
   "music" : ["mp3", "ogg", "wav"],
-  "video" : ["mp4", "webmd"]
+  "video" : ["mp4", "mov"],
+  "pdf" : ["pdf"],
+  "ppt" : ["ppt", "pptm", "pptx"]
 }
 
 function SortFilesByExtension(files){
   let slideFiles = []
   let musicFiles = []
   let videoFiles = []
+  let pdfFiles = []
+  let pptFiles = []
   for (let i = 0; i < files.length; i++) {
     let file = files[i]
     let extension = file.name.split(".").pop().toLowerCase()
@@ -1142,11 +1304,15 @@ function SortFilesByExtension(files){
       musicFiles.push(file)
     } else if (extensionToMethod["video"].includes(extension)) {
       videoFiles.push(file)
+    } else if (extensionToMethod["pdf"].includes(extension)) {
+      pdfFiles.push(file)
+    } else if (extensionToMethod["ppt"].includes(extension)) {
+      pptFiles.push(file)
     } else {
       uploadDescriptor.innerHTML += `Unknown file type: ${file.name}<br>`
     }
   }
-  return [slideFiles, musicFiles, videoFiles]
+  return [slideFiles, musicFiles, videoFiles, pdfFiles, pptFiles]
 }
 
 let formInput = []
@@ -1154,10 +1320,10 @@ function clearFormInput() {
   formInput = []
 }
 
-function pushFormInput(nameOnServer, file, type) {
+function pushFormInput(file, type, assignTo = "none") {
   formInput.push({
     type: type,
-    name: nameOnServer,
+    assignTo: assignTo,
     ogName: file.name,
     file: file
   })
@@ -1168,18 +1334,28 @@ function batchFileInputChanged(){
   // Clear upload descriptor.
   uploadDescriptor.innerHTML = ""
   // Sort files into categories.
-  let [slideFiles, musicFiles, videoFiles] = SortFilesByExtension(batchSlideFileInput.files)
+  let [slideFiles, musicFiles, videoFiles, pdfFiles, pptFiles] = SortFilesByExtension(batchSlideFileInput.files)
   // Categorize slides by keywords upload.
   CategorizeSlideFilesByKeywordForUpload(slideFiles)
   // Simply push music and videos.
   for (let musicFile of musicFiles) {
-    pushFormInput(musicFile.name, musicFile, "music")
+    pushFormInput(musicFile, "music")
   }
-  uploadDescriptor.innerHTML  += `${musicFiles.length} music file(s),`
+  uploadDescriptor.innerHTML  += `${musicFiles.length} music file(s), `
   for (let videoFile of videoFiles) {
-    pushFormInput(videoFile.name, videoFile, "video")
+    pushFormInput(videoFile, "slide")
+  }
+  uploadDescriptor.innerHTML  += `${pdfFiles.length} pdf file(s), `
+  for (let pdfFile of pdfFiles) {
+    pushFormInput(pdfFile, "pdf")
+  }
+  uploadDescriptor.innerHTML  += `${pptFiles.length} ppt file(s), `
+  for (let pptFile of pptFiles) {
+    pushFormInput(pptFile, "ppt")
   }
   uploadDescriptor.innerHTML  += ` and ${videoFiles.length} video file(s).`
+  uploadDescriptor.innerHTML  += `${ pdfFiles.length > 0 || pptFiles.length > 0 ?
+    "<br><strong>Note: PDF/PPT files will be converted into slides, and will take longer to process.</strong>" : ""}`
   // Show edit button.
   editSlideBtn.style.display = "block";
 }
@@ -1197,8 +1373,8 @@ function CategorizeSlideFilesByKeywordForUpload(files) {
       let keywords = typeToKeyWords[tKey]
       // Search for keywords in file name.
       if (keywords.some(keyword => file.name.toLowerCase().includes(keyword))) {
-        // Append to form input. Will be uploaded as found type.
-        pushFormInput(tKey, file, "slide")
+        // Append to form input. Will be assigned as found type after upload.
+        pushFormInput(file, "slide", tKey)
         uploadDescriptor.innerHTML += `'${file.name}' will be used as your ${tKey} slide.<br>`
         accountedSlides.push(tKey)
         return true;
@@ -1206,7 +1382,7 @@ function CategorizeSlideFilesByKeywordForUpload(files) {
       return false; // keep looking.
     })) {
       // Type could not be identified. Will upload as custom slide.
-      pushFormInput(file.name, file, "custom_slide")
+      pushFormInput(file, "slide")
       customSlideCount++;
     }
   }
@@ -1225,11 +1401,11 @@ function CategorizeSlideFilesBySlideTypeSelects(files) {
     })
     if (select !== undefined) {
       // Type identified. Append to form input. Will be uploaded as found type.
-      pushFormInput(select.dataset.type, file, "slide")
+      pushFormInput(file, "slide", select.dataset.type)
       uploadDescriptor.innerHTML += `'${file.name}' will be used as your ${select.dataset.type} slide.<br>`
     } else {
       // Type could not be identified. Will upload as custom slide.
-      pushFormInput(file.name, file, "custom_slide")
+      pushFormInput(file, "slide")
       customSlideCount++;
     }
   }
@@ -1269,14 +1445,14 @@ function editSlideBtnClicked() {
     }
     // Create option for every slide.
     for (let i = 0; i < formInput.length; i++) {
-      // Skip if not a slide.
-      if (formInput[i].type !== "slide" && formInput[i].type !== "custom_slide") continue;
+      // Skip if not a video/slide.
+      if (formInput[i].type !== "slide") continue;
       let option = document.createElement("option");
       option.value = formInput[i].ogName;
       option.innerText = formInput[i].ogName;
       select.appendChild(option);
       // Select option if it's name matches the slide type.
-      if (formInput[i].name === select.dataset.type) {
+      if (formInput[i].assignTo === select.dataset.type) {
         select.selectedIndex = i + 1;
       }
     }
@@ -1288,15 +1464,14 @@ function editSlideSaveBtnClicked() {
   // Clear descriptor
   uploadDescriptor.innerHTML = ""
   let [slideFiles, musicFiles, videoFiles] = SortFilesByExtension(batchSlideFileInput.files)
+  // Combine video and slide files.
+  slideFiles = slideFiles.concat(videoFiles)
   CategorizeSlideFilesBySlideTypeSelects(slideFiles)
-  // Simply push music and videos.
+  // Simply push music files.
   for (let musicFile of musicFiles) {
-    pushFormInput(musicFile.name, musicFile, "music")
+    pushFormInput(musicFile, "music")
   }
   uploadDescriptor.innerHTML += `${musicFiles.length} music file(s), `
-  for (let videoFile of videoFiles) {
-    pushFormInput(videoFile.name, videoFile, "video")
-  }
   uploadDescriptor.innerHTML += ` and ${videoFiles.length} video file(s).`
 }
 
@@ -1304,18 +1479,115 @@ function uploadCustomSlideClicked() {
   // Hide edit button.
   editSlideBtn.style.display = "none";
   let parentTracker = document.getElementById("uploadTrackerContainer");
-  for (let input of formInput) {
+  batchSlideUploadBtn.disabled = true;
 
-    let formData = new FormData()
-    formData.append("type", input.type)
-    formData.append(input.name, input.file)
+  let upload = function (input) {
+    return new Promise(function(resolve, reject) {
+      let formData = new FormData()
+      formData.append("type", input.type)
+      formData.append(input.ogName, input.file)
 
-    let request = new XMLHttpRequest();
-    createUploadProgressTracker(parentTracker, request, input.name, FetchAllUploadedMediaAndUpdateDash);
-    request.open("POST", "/slide_upload");
-    request.send(formData);
+      let request = new XMLHttpRequest();
+      createUploadProgressTracker(parentTracker, request, input.ogName);
+      request.onload = function() {
+        if (request.status >= 200 && request.status < 300) {
+          resolve(request.response);
+          if (input.assignTo !== "none"){
+            let assignTo2Route = {
+              "intro": "/assignIntroSlide",
+              "technicalDifficulty": "/assignTechnicalDifficultySlide",
+              "conclusion": "/assignConclusionSlide"
+            }
+            unityFetch(`${assignTo2Route[input.assignTo]}?url=/slides/${input.ogName}`, {method: "PUT"})
+              .then((resp) => {
+                if (resp.ok){
+                  console.log("Slide assigned.")
+                }
+              })
+          }
+        } else {
+          reject(request.statusText);
+        }
+      };
+      request.open("POST", "/slide_upload");
+      request.send(formData);
+    })
   }
+
+  let uploads = formInput.map((input) => { return upload(input) });
+
+  // After all files are done uploading re-enable upload button.
+  Promise.allSettled(uploads).then(() => {
+    batchSlideUploadBtn.disabled = false;
+    if (uploads.length > 0) {
+      batchSlideFileInput.value = "";
+      uploadDescriptor.innerHTML = "Click browse to look for files to upload.";
+      clearFormInput();
+      Feedback.alertSuccess("Upload complete!");
+      FetchAllUploadedMediaAndUpdateDash();
+      FetchAssignedHoldingSlidesAndUpdatePreviews();
+    }
+  })
 }
+
+/* CONFIGURATION UPLOAD CONTROLS */
+let configFileInput = document.getElementById("config-file-input");
+let configUploadBtn = document.getElementById("config-upload-btn");
+let configDownloadBtn = document.getElementById("config-download-btn");
+
+configUploadBtn.addEventListener("click", function() {
+
+  if (configFileInput.value === ""){
+    Feedback.alertDanger("No file selected.");
+    return;
+  }
+  configUploadBtn.disabled = true;
+  let parentTracker = document.getElementById("configTrackerContainer");
+
+  let file = configFileInput.files[0];
+  let formData = new FormData();
+  formData.append("config", file);
+
+  let request = new XMLHttpRequest();
+  createUploadProgressTracker(parentTracker, request, "config");
+  request.onload = function() {
+    if (request.status >= 200 && request.status < 300) {
+      console.log("Config File Uploading")
+    } else {
+      console.log(request.response);
+    }
+  }
+
+  request.onloadend = function() {
+    if (request.status >= 200 && request.status < 300) {
+      console.log("Config File Uploaded.")
+      FetchAllUploadedMediaAndUpdateDash();
+    } else {
+      console.log("Config Upload Failed.")
+    }
+    configFileInput.value = "";
+    configUploadBtn.disabled = false;
+  }
+
+  request.open("PUT", `uapp/setConfig`);
+  request.send(formData);
+})
+
+configDownloadBtn.addEventListener("click", function() {
+  unityFetch("/getConfig", {method: "GET"})
+    .then((resp) => {
+      if (resp.ok) {
+        resp.blob().then((blob) => {
+          let url = window.URL.createObjectURL(blob);
+          let a = document.createElement('a');
+          a.href = url;
+          a.download = "config.zip";
+          a.click();
+          a.remove();
+        })
+      }
+    })
+})
 
 /* VIDEO CONTROLS */
 let videoFieldsetBar  = document.getElementById("video-fieldset-bar");
@@ -1326,20 +1598,20 @@ let videoSwitchBtns = [];
 let videoClearBtn = document.getElementById("video-clear-btn");
 let videoProgress = document.getElementById("video-progress");
 let videoPlaybackTime = document.getElementById("video-playback-time");
-let videoVolume  = document.getElementById("volume-range-video");
-let videoVolumeLevel  = document.getElementById("video-volume-level");
-videoVolumeLevel.innerHTML = getVolumeLevel(videoVolume.value);
+let volumeRangeVideo  = document.getElementById("volume-range-video");
+let volumeLevelVideo  = document.getElementById("video-volume-level");
+volumeLevelVideo.innerHTML = getVolumeLevel(volumeRangeVideo.value);
 videoClearBtn.addEventListener("click", onVideoClearClicked);
 
-videoVolume.addEventListener("input", function() {
-  let str = videoVolume.value;
-  videoVolumeLevel.innerHTML = getVolumeLevel(videoVolume.value);
+volumeRangeVideo.addEventListener("input", function() {
+  let str = volumeRangeVideo.value;
+  volumeLevelVideo.innerHTML = getVolumeLevel(volumeRangeVideo.value);
   sendStringSubmitEvent(myVideoPlayer, OperatorControls._VolumeVideo, str);
 });
 
 videoProgress.addEventListener("change", function () {
   let str = videoProgress.value;
-  videoPlaybackTime.innerHTML = videoProgress.value;
+  videoPlaybackTime.innerHTML = convertSecondsToTimestamp(videoProgress.value);
   clearInterval(videoTimerIntervalId);
   videoTimerIntervalId = 0;
   sendStringSubmitEvent(myVideoPlayer, OperatorControls._SeekVideoButton, str);
@@ -1353,6 +1625,18 @@ videoPlayPauseBtn.addEventListener("click", function() {
   }
 });
 
+function onVideoTabClicked() {
+  // Fetch videos.
+  unityFetch("/getVideos")
+    .then(value => value.json())
+    .then(videos => {
+      let videoNames = videos.map(video => video.name);
+      UpdateOptionGroupWithValues(videoOptionGroup, videoNames);
+      UpdateVideoBrowsePreviewElement();
+      validateVideoSwitchBtns(videos);
+    })
+}
+
 function onVideoClearClicked() {
   sendClickEvent(myVideoPlayer, OperatorControls._LiveButton);
 }
@@ -1360,47 +1644,47 @@ function onVideoClearClicked() {
 videoSwitchBtn.style.display = "none";
 
 function validateVideoSwitchBtns(videos) {
-  // Be sure there are enough buttons for videos.
-  if (videoSwitchBtns.length < videos.length) {
-    while (videoSwitchBtns.length < videos.length) {
-      // Elements must be added.
-      let clone = videoSwitchBtn.cloneNode(true);
-      clone.id += "-" + videoSwitchBtns.length;
-      clone.style.display = "flex"
-      videoBtnContainer.appendChild(clone);
-      videoSwitchBtns.push(clone);
-      let span = document.querySelector(`#${clone.id} span`)
-      setupDeleteButton(clone, "/video_delete", span);
-      let button1 = document.querySelector(`#${clone.id} .media-left-btn`);
-      let button2 = document.querySelector(`#${clone.id} .media-right-btn`);
-      button1.addEventListener("click", function () {
-        let str = `${span.innerHTML},false`
-        sendStringSubmitEvent(myVideoPlayer, OperatorControls._ShowVideoButton, str);
-      })
-      button2.addEventListener("click", function () {
-        let str = `${span.innerHTML},true`
-        sendStringSubmitEvent(myVideoPlayer, OperatorControls._ShowVideoButton, str);
-      })
-
-    }
-  } else {
-    while (videoSwitchBtns.length > videos.length) {
-      // Elements must be destroyed.
-      videoSwitchBtns.pop().remove();
-    }
-  }
-  // Set data of each button.
-  for (let i = 0; i < videos.length; i += 1) {
-    let btn = videoSwitchBtns[i];
-    let img = document.querySelector(`#${btn.id} img`);
-    let label = document.querySelector(`#${btn.id} span`);
-    label.innerHTML = videos[i];
-    getVideoThumb("/videos/" + label.innerHTML, 1).then(function (blob) {
-      img.src = URL.createObjectURL(blob);
-    }).catch(function (err) {
-      console.error(err);
+  let setupVideoSwitchBtn = function (videoBtn) {
+    videoBtn.style.display = "flex";
+    let label = document.querySelector(`#${videoBtn.id} span`);
+    let img = document.querySelector(`#${videoBtn.id} img`);
+    let mute = document.querySelector(`#${videoBtn.id} .media-right-btn`)
+    let unmute = document.querySelector(`#${videoBtn.id} .media-left-btn`);
+    setupSlideSetAsOptionsButton(videoBtn);
+    setupDeleteButton(videoBtn, "/uapp/deleteVideo?url={0}", label, FetchAllUploadedMediaAndUpdateDash);
+    mute.addEventListener("click", () => {unityFetch("/muteZoomAudio", {method: "PUT"})
+    .then(response => {
+      if (response.ok) {
+        console.log("Zoom Audio Muted.");
+      }
+    })});
+    unmute.addEventListener("click", () => {unityFetch("/unmuteZoomAudio", {method: "PUT"})
+    .then(response => {
+      if (response.ok) {
+        console.log("Zoom Audio Unmuted.");
+      }
+    })});
+    img.addEventListener("click", function () {
+      unityFetch("/setHoldingSlide?url=" + img.alt, {method: "PUT"})
+        .then(response => {
+          if (response.ok) {
+            console.log("Slide set");
+          }
+        });
     });
   }
+  let validateVideoSwitchBtn = function (video, slideInfo) {
+    let img = document.querySelector(`#${video.id} img`);
+    let label = document.querySelector(`#${video.id} span`);
+    label.thingToDelete = img.alt = slideInfo.url;
+    label.innerHTML = slideInfo.name;
+    getVideoThumb(slideInfo.url, 1).then(function (blob) {
+      img.src = URL.createObjectURL(blob);
+    }).catch(function (err) {
+      img.src = slideInfo.url;
+    });
+  }
+  ValidateClonesWithJsonArray(videoSwitchBtn, videoBtnContainer, videoSwitchBtns, setupVideoSwitchBtn, videos, validateVideoSwitchBtn);
 }
 
 /* LOGS DOWNLOAD */
@@ -1414,7 +1698,7 @@ listLogFileOptions.addEventListener("click", listAvailableLogs);
 
 function onLogDownloadClicked() {
   if (listLogFileOptions.value === "none") {
-    alertDisplay(errorAlertLogFile);
+    Feedback.alertDanger("Please select a log file to download.");
   } else {
     downloadLog();
   }
@@ -1482,6 +1766,7 @@ async function listAvailableLogs() {
 }
 
 /* RECORDING CONTROLS */
+let recordingFieldset = document.getElementById("recording-fieldset");
 let listFileOptions = document.getElementById("list-all-files")
 listFileOptions.addEventListener("click", listAvailableRecordings);
 
@@ -1566,6 +1851,7 @@ function downloadFile() {
 }
 
 async function listAvailableRecordings() {
+  // todo move this function to a seperate file so it can be used by the video editor page as well.
   await updateStreamPref();
   let resp = await fetch("/listRecordings/" + streamKey.value);
   let files = await resp.json();
@@ -1583,15 +1869,14 @@ async function listAvailableRecordings() {
 
   for (let i = files.length - 1; i >= 0; i--) {
     let option = listFileOptions.children[i + 1];
-    option.value = files[i];
-    option.innerText = files[i];
+    option.value = files[i].file;
+    option.innerText = files[i].file;
   }
 }
 
 function handleRecordingDownload() {
-
   if (listFileOptions.value === "none") {
-    alertDisplay(errorAlertFile);
+    Feedback.alertDanger("Please select a file from the options below.");
   } else {
     downloadFile();
   }
@@ -1608,13 +1893,13 @@ let navLayoutTabBtn = document.getElementById("nav-layout-tab");
 navLayoutTabBtn.addEventListener("click", ()=>{navLayoutTabBtn.scrollIntoView();});
 
 let navSlideTabBtn = document.getElementById("nav-slide-tab");
-navSlideTabBtn.addEventListener("click", ()=>{navSlideTabBtn.scrollIntoView();});
+navSlideTabBtn.addEventListener("click", ()=>{onSlideTabClicked(); navSlideTabBtn.scrollIntoView();});
 
 let navMusicTabBtn = document.getElementById("nav-music-tab");
-navMusicTabBtn.addEventListener("click", ()=>{navSlideTabBtn.scrollIntoView();});
+navMusicTabBtn.addEventListener("click", ()=>{onMusicTabClicked(); navSlideTabBtn.scrollIntoView();});
 
 let navVideoTabBtn = document.getElementById("nav-video-tab");
-navVideoTabBtn.addEventListener("click", ()=>{navVideoTabBtn.scrollIntoView();});
+navVideoTabBtn.addEventListener("click", ()=>{onVideoTabClicked(); navVideoTabBtn.scrollIntoView();});
 
 let navLogTabBtn = document.getElementById("nav-log-tab");
 navLogTabBtn.addEventListener("click", ()=>{navLogTabBtn.scrollIntoView(); fetchLogs();});
@@ -1624,3 +1909,9 @@ navUploadTabBtn.addEventListener("click", ()=>{navUploadTabBtn.scrollIntoView();
 
 let navRecordingTabBtn = document.getElementById("nav-recording-tab");
 navRecordingTabBtn.addEventListener("click", ()=>{navRecordingTabBtn.scrollIntoView();});
+
+/* ADVANCED SETTINGS */
+let advancedSettingsToggle = document.getElementById("advancedSettingsToggle");
+let participantAutoShowBtnGrp = document.getElementById("participant-autoshow-btn-grp");
+advancedSettingsToggle.addEventListener("change",
+() => {onEnableAdvancedSettings(advancedSettingsToggle, navZoomTabBtn, streamAuthSettings, participantAutoShowBtnGrp, navLayoutTabBtn, navLogTabBtn)});

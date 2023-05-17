@@ -1,0 +1,146 @@
+﻿#timeline{
+    position: relative;
+    width: 100%;
+    height: 100px;
+    /* Make text unslectable */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.timeline{
+    background-color: lightgrey;
+    font-family: monospace;
+    /* Create a grey solid rectangle with a border */
+    border: 1px solid grey;
+}
+
+.no-clip{
+    margin-top: 2em;
+    text-align: center;
+}
+
+.clip{
+    height: 100%;
+    position: absolute;
+    background-color: darkgray;
+    overflow: hidden;
+    /* Make borders rounded */
+    border-radius: 10px;
+    /* Make text unslectable */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.clip p{
+    margin: 2em;
+}
+
+.time-span-start, .time-span-end{
+    /* Round the corners */
+    border-radius: 10px;
+    color: white;
+    background-color: black;
+    width: 4em;
+    text-align: center;
+}
+
+#time-span-start{
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: translate(-100%);
+    /* Make text unslectable */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+#time-span-end{
+    position: absolute;
+    top: 0;
+    right: 0;
+    transform: translate(100%);
+    /* Make text unslectable */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+#selection{
+    height: 100%;
+    position: absolute;
+    /* Make semi-transparent */
+    background-color: rgba(238, 83, 83, 0.5);
+    /* width and left will be set through code */
+}
+
+.selection, .selection-start, .selection-end{
+    /* Set the background color to light red */
+    background-color: #ee5353;
+    /* Create a light red solid rectangle with a border */
+    border: 1px solid red;
+}
+
+#selection-start{
+    /* Translate the element above the box */
+    position: absolute;
+    top: -20px;
+    width: fit-content;
+}
+#selection-end{
+    /* Translate the element below the box */
+    position: absolute;
+    right: 0;
+    bottom: -20px;
+    width: fit-content;
+}
+
+.timeline-tick{
+    position: absolute;
+    bottom: 0;
+    /* Make a 1px wide line */
+    border-left: 1px solid grey;
+    /* height and left will be set through code */
+}
+
+.timeline-tick p{
+    position: absolute;
+    bottom: -20px;
+    /* Make text unslectable */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.timeline-tick-cut{
+    position: absolute;
+    bottom: 0;
+    height: 100%;
+    /* Make a 1px wide line */
+    border-left: 1px solid red;
+    /* left will be set through code */
+}
+
+.timeline-tick-playhead{
+    position: absolute;
+    bottom: 0;
+    height: 100%;
+    /* Make a 1px wide line */
+    border-left: 1px solid green;
+    /* left will be set through code */
+}
+
+.uncut-btn{
+    /* Translate the element above the box */
+    position: absolute;
+    top: -20px;
+    left: -10px;
+    width: fit-content;
+}

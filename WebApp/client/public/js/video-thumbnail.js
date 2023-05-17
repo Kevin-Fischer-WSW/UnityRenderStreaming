@@ -3,6 +3,8 @@
   return new Promise((resolve, reject) => {
     // load the file to a video player
     const videoPlayer = document.createElement('video');
+    // allow cross origin requests for the video
+    videoPlayer.setAttribute('crossorigin', 'anonymous');
     videoPlayer.setAttribute('src', url);
     videoPlayer.load();
     videoPlayer.addEventListener('error', (ex) => {

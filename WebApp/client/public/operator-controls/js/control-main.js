@@ -46,7 +46,6 @@ async function setup() {
   showWarningIfNeeded(res.startupMode);
   //showPlayButton();
   Play();
-  showStatsMessage();
 }
 
 function showWarningIfNeeded(startupMode) {
@@ -114,14 +113,35 @@ function Play() {
   elementMuteButton.style.left = '1.5em';
   elementMuteButton.innerHTML = 'Preview Audio <i class="bi bi-volume-mute"></i>';
   elementMuteButton.addEventListener('click', function () {
-    elementPreviewVideo.muted = !elementPreviewVideo.muted;
-    if (elementPreviewVideo.muted) {
-      elementMuteButton.innerHTML = 'Preview Audio <i class="bi bi-volume-mute"></i>';
-    } else {
-      elementMuteButton.innerHTML = 'Preview Audio <i class="bi bi-volume-up"></i>';
-    }
+    elementPreviewVideo.muted = false;
+    let audioTracks = myVideoPlayer.videoAudioTracks;
+    if (audioTracks.length !== 2) return;
+    // Toggle first audio track.
+    audioTracks[0].enabled = !audioTracks[0].enabled;
+    elementMuteButton.innerHTML = audioTracks[0].enabled ? 'Preview Audio <i class="bi bi-volume-up"></i>' : 'Preview Audio <i class="bi bi-volume-mute"></i>';
   });
   playerDiv.appendChild(elementMuteButton);
+
+  // add second mute button (mutes zoom call audio)
+  const elementMuteButton2 = document.createElement('button');
+  elementMuteButton2.id = 'mute-zoom-btn';
+  elementMuteButton2.classList.add('btn');
+  elementMuteButton2.classList.add('btn-secondary');
+  elementMuteButton2.classList.add('btn-sm');
+  // Make the button position relative to the bottom left of the playerDiv.
+  elementMuteButton2.style.position = 'absolute';
+  elementMuteButton2.style.bottom = '0.5em';
+  elementMuteButton2.style.left = '11em';
+  elementMuteButton2.innerHTML = 'Zoom Audio <i class="bi bi-volume-mute"></i>';
+  elementMuteButton2.addEventListener('click', function () {
+    elementPreviewVideo.muted = false;
+    let audioTracks = myVideoPlayer.videoAudioTracks;
+    if (audioTracks.length !== 2) return;
+    // Toggle second audio track.
+    audioTracks[1].enabled = !audioTracks[1].enabled;
+    elementMuteButton2.innerHTML = audioTracks[1].enabled ? 'Zoom Audio <i class="bi bi-volume-up"></i>' : 'Zoom Audio <i class="bi bi-volume-mute"></i>';
+  });
+  playerDiv.appendChild(elementMuteButton2);
 
   /* NOTE: to reenable fullscreen. Uncomment this section.
   // add fullscreen button
@@ -187,38 +207,4 @@ async function onDisconnect(message) {
   document.getElementById("join-meeting-btn").disabled = false;
   document.getElementById("general-status-bar").innerHTML = "Connection State: Disconnected"
   Play();
-}
-
-/** @type {RTCStatsReport} */
-let lastStats;
-/** @type {number} */
-let intervalId;
-
-function showStatsMessage() {
-  intervalId = setInterval(async () => {
-    if (myVideoPlayer == null) {
-      return;
-    }
-
-    const stats = await myVideoPlayer.getStats();
-    if (stats == null) {
-      return;
-    }
-
-    const array = createDisplayStringArray(stats, lastStats);
-    if (array.length) {
-      messageDiv.style.display = 'block';
-      messageDiv.innerHTML = array.join('<br>');
-    }
-    lastStats = stats;
-  }, 1000);
-}
-function clearStatsMessage() {
-  if (intervalId) {
-    clearInterval(intervalId);
-  }
-  lastStats = null;
-  intervalId = null;
-  messageDiv.style.display = 'none';
-  messageDiv.innerHTML = '';
 }

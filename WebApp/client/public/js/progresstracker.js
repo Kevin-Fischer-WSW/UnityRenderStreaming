@@ -1,9 +1,9 @@
 let counter = 0
-export function createUploadProgressTracker(parent, request, name, onUploadCompleteCB) {
+export function createUploadProgressTracker(parent, request, name) {
     let progressFieldUpload = createProgressTracker(parent);
     let progressUpload = document.querySelector(`#${progressFieldUpload.id} .progressupload`);
     let progressTextUpload = document.querySelector(`#${progressFieldUpload.id} .progresstextupload`);
-    let remainingTextUpload = document.querySelector(`#${progressFieldUpload.id} .remainingtextupload`)
+    let remainingTextUpload = document.querySelector(`#${progressFieldUpload.id} .remainingtextupload`);
     // todo Create the elements that will be added to the dom.
     let start = new Date().getTime();
 
@@ -34,7 +34,7 @@ export function createUploadProgressTracker(parent, request, name, onUploadCompl
     request.upload.addEventListener("loadend", function (e) {
         setTimeout(() => {
             progressFieldUpload.remove(); // remove tracker
-        }, 2000)
+        }, 800)
     })
 
     request.upload.addEventListener("error", function (e) {
@@ -43,9 +43,8 @@ export function createUploadProgressTracker(parent, request, name, onUploadCompl
     })
 
     request.upload.addEventListener("load", function (e) {
-        progressUpload.value = e.loaded
-        remainingTextUpload.innerHTML = "Done!"
-        onUploadCompleteCB();
+        progressUpload.value = e.loaded;
+        remainingTextUpload.innerHTML = "Done!";
     })
 
 }
@@ -61,6 +60,6 @@ export function createProgressTracker(parent) {
         `<progress class="progressupload" value="0"></progress>
     <strong  class="progresstextupload text-white"></strong>
     <strong  class="remainingtextupload text-white"></strong>`;
-    parent.appendChild(progressFieldUpload)
-    return progressFieldUpload
+    parent.appendChild(progressFieldUpload);
+    return progressFieldUpload;
 }

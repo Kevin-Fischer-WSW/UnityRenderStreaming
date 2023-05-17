@@ -78,6 +78,7 @@ export class VideoPlayer {
         _this.videoTrackList.push(data.track);
       }
       if (data.track.kind === 'audio') {
+        data.track.enabled = false;
         _this.localStream.addTrack(data.track);
       }
       if (_this.videoTrackList.length === _this.maxVideoTrackLength && !_this.videosAdded) {
@@ -175,30 +176,13 @@ export class VideoPlayer {
           if (_this.onLogMessageNotification){
             _this.onLogMessageNotification.call(_this, msgContents);
           }
+          break;
+        case MessageTypes._NewMediaNotification:
+          if (_this.onNewMediaNotification){
+            _this.onNewMediaNotification.call(_this, msgContents);
+          }
       }
     };
-  }
-
-  sendMsg(msg) {
-    if (this.opConChannel == null) {
-      Logger.log('Connection is null');
-      return;
-    }
-    switch (this.opConChannel.readyState) {
-      case 'connecting':
-        Logger.log('Connection not ready');
-        break;
-      case 'open':
-        Logger.log('Sending message');
-        this.opConChannel.send(msg);
-        break;
-      case 'closing':
-        Logger.log('Attempt to sendMsg message while closing');
-        break;
-      case 'closed':
-        Logger.log('Attempt to sendMsg message while connection closed.');
-        break;
-    }
   }
 
   resizeVideo() {
@@ -231,6 +215,10 @@ export class VideoPlayer {
 
   get videoScale() {
     return this._videoScale;
+  }
+
+  get videoAudioTracks() {
+    return this.localStream.getAudioTracks();
   }
 
   sendMsg(msg) {
