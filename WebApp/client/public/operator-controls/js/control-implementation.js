@@ -497,6 +497,15 @@ archiveBtn.addEventListener("click", onArchiveClick);
 /* STREAM BUTTON IMPLEMENTATION */
 function onPendingClick() {
   unityFetch("/startStreamAndDisplayIntroSlide", { method : "PUT"})
+  .then((response) => {
+    if (response.ok && response.status === 200) {
+      Feedback.alertSuccess("Success: Stream started.");
+    } else if (response.ok && response.status === 201) {
+      Feedback.alertInfo(response.statusText);
+    } else  {
+      Feedback.alertDanger("Failed: " + response.statusText);
+    }
+  })
 }
 
 function onLiveClick() {
@@ -509,6 +518,15 @@ function onTechnicalDiff() {
 
 function onArchiveClick() {
   unityFetch("/stopStreamAndDisplayConclusionSlide", { method : "PUT"})
+  .then((response) => {
+    if (response.ok && response.status === 200) {
+      Feedback.alertSuccess("Success: Stream stopped.");
+    } else if (response.ok && response.status === 201) {
+      Feedback.alertInfo(response.statusText);
+    } else  {
+      Feedback.alertDanger("Failed: " + response.statusText);
+    }
+  })
 }
 
 /* ZOOM CONTROLS */
