@@ -1,5 +1,5 @@
 ﻿/*Make resizable div by Hung Nguyen*/
-export function makeResizableDiv(element, resizers) {
+export function makeResizableDiv(element, resizers, getBoundingRect = null) {
     const minimum_size = 20;
     let original_width = 0;
     let original_height = 0;
@@ -7,6 +7,7 @@ export function makeResizableDiv(element, resizers) {
     let original_y = 0;
     let original_mouse_x = 0;
     let original_mouse_y = 0;
+    let original_ratio = 0;
     for (let i = 0;i < resizers.length; i++) {
         const currentResizer = resizers[i];
         currentResizer.addEventListener('mousedown', function(e) {
@@ -18,55 +19,77 @@ export function makeResizableDiv(element, resizers) {
             original_y = parseInt(getComputedStyle(element, null).getPropertyValue('top').replace('px', ''));
             original_mouse_x = e.pageX;
             original_mouse_y = e.pageY;
+            original_ratio = original_width / original_height;
             window.addEventListener('mousemove', resize)
             window.addEventListener('mouseup', stopResize)
         })
 
         function resize(e) {
+            let maintain_ratio = e.shiftKey;
+            let bounding_rect = getBoundingRect ? getBoundingRect() : new DOMRect(0, 0, Infinity, Infinity);
+            let mouse_x = e.pageX - original_mouse_x;
+            let mouse_y = e.pageY - original_mouse_y;
+            let mouse_x_bound = Math.min(Math.max(original_x + mouse_x, bounding_rect.x), bounding_rect.width);
+            let mouse_y_bound = Math.min(Math.max(original_y + mouse_y, bounding_rect.y), bounding_rect.height);
+            console.log(mouse_x, mouse_y, mouse_x_bound, mouse_y_bound)
             if (currentResizer.classList.contains('bottom-right')) {
-                const width = original_width + (e.pageX - original_mouse_x);
-                const height = original_height + (e.pageY - original_mouse_y)
-                if (width > minimum_size) {
-                    element.style.width = width + 'px'
-                }
-                if (height > minimum_size) {
-                    element.style.height = height + 'px'
-                }
+                let width = original_width + (mouse_x)
+                let height = original_height + (mouse_y)
+                if (maintain_ratio) [width, height] = maintainRatioHelper(width, height);
+                // Clamp the width and height
+                width = Math.min(Math.max(width, minimum_size), bounding_rect.x + bounding_rect.width - original_x);
+                height = Math.min(Math.max(height, minimum_size), bounding_rect.y + bounding_rect.height - original_y);
+                element.style.width = width + 'px';
+                element.style.height = height + 'px'
             }
             else if (currentResizer.classList.contains('bottom-left')) {
-                const height = original_height + (e.pageY - original_mouse_y)
-                const width = original_width - (e.pageX - original_mouse_x)
-                if (height > minimum_size) {
-                    element.style.height = height + 'px'
-                }
-                if (width > minimum_size) {
-                    element.style.width = width + 'px'
-                    element.style.left = original_x + (e.pageX - original_mouse_x) + 'px'
-                }
+                let width = original_width - (mouse_x)
+                let height = original_height + (mouse_y)
+                if (maintain_ratio) [width, height] = maintainRatioHelper(width, height);
+                // Clamp the width and height
+                width = Math.min(Math.max(width, minimum_size), original_x + original_width - bounding_rect.x);
+                height = Math.min(Math.max(height, minimum_size), bounding_rect.y + bounding_rect.height - original_y);
+                element.style.width = width + 'px'
+                element.style.height = height + 'px'
+                element.style.left = mouse_x_bound + 'px';
             }
             else if (currentResizer.classList.contains('top-right')) {
-                const width = original_width + (e.pageX - original_mouse_x)
-                const height = original_height - (e.pageY - original_mouse_y)
-                if (width > minimum_size) {
-                    element.style.width = width + 'px'
-                }
-                if (height > minimum_size) {
-                    element.style.height = height + 'px'
-                    element.style.top = original_y + (e.pageY - original_mouse_y) + 'px'
-                }
+                let width = original_width + (mouse_x)
+                let height = original_height - (mouse_y)
+                if (maintain_ratio) [width, height] = maintainRatioHelper(width, height);
+                // Clamp the width and height
+                width = Math.min(Math.max(width, minimum_size), bounding_rect.x + bounding_rect.width - original_x);
+                height = Math.min(Math.max(height, minimum_size), original_y + original_height - bounding_rect.y);
+                element.style.width = width + 'px'
+                element.style.height = height + 'px'
+                element.style.top = mouse_y_bound + 'px'
             }
-            else {
-                const width = original_width - (e.pageX - original_mouse_x)
-                const height = original_height - (e.pageY - original_mouse_y)
-                if (width > minimum_size) {
-                    element.style.width = width + 'px'
-                    element.style.left = original_x + (e.pageX - original_mouse_x) + 'px'
-                }
-                if (height > minimum_size) {
-                    element.style.height = height + 'px'
-                    element.style.top = original_y + (e.pageY - original_mouse_y) + 'px'
-                }
+            else { // top-left
+                let width = original_width - (mouse_x)
+                let height = original_height - (mouse_y)
+                if (maintain_ratio) [width, height] = maintainRatioHelper(width, height);
+                // Clamp the width and height
+                width = Math.min(Math.max(width, minimum_size), original_x + original_width - bounding_rect.x);
+                height = Math.min(Math.max(height, minimum_size), original_y + original_height - bounding_rect.y);
+                element.style.width = width + 'px'
+                element.style.left = mouse_x_bound + 'px'
+                element.style.height = height + 'px'
+                element.style.top = mouse_y_bound + 'px'
             }
+
+            function maintainRatioHelper(width, height) {
+                // Maintain the ratio
+                let ratio = width / height;
+                if (ratio > original_ratio) {
+                  // Width is too big, so clamp it.
+                  width = original_ratio * height;
+                }
+                else {
+                  // Height is too big, so clamp it.
+                  height = width / original_ratio;
+                }
+                return [width, height];
+              }
         }
 
         function stopResize() {

@@ -67,29 +67,17 @@ export class CropWidget {
     this.mainElement.style.top = currentY + 'px';
   }
 
-  boundCropSize() {
-    let boundingRect = this.bindingElement.getBoundingClientRect();
-    let mainBoundingRect = this.mainElement.getBoundingClientRect();
-    let newRight = Math.min(mainBoundingRect.right, boundingRect.right);
-    let newBottom = Math.min(mainBoundingRect.bottom, boundingRect.bottom);
-    let newLeft = Math.max(mainBoundingRect.left, boundingRect.left);
-    let newTop = Math.max(mainBoundingRect.top, boundingRect.top);
-    this.mainElement.style.width = (newRight - newLeft) + 'px';
-    this.mainElement.style.height = (newBottom - newTop) + 'px';
-    this.mainElement.style.left = newLeft + 'px';
-    this.mainElement.style.top = newTop + 'px';
-  }
-
   initResizers() {
-    makeResizableDiv(this.mainElement, this.mainElement.querySelectorAll('.resizer'));
-    let resizers = document.querySelectorAll('.resizer');
-    for (let i = 0; i < resizers.length; i++) {
-      let currentResizer = resizers[i];
-      currentResizer.addEventListener('mouseup', function (e) {
-        this.boundCropSize();
-        this.boundCropPosition();
-      }.bind(this));
+    let getBoundingRect = () => {
+      let parentBoundingRect = this.bindingElement.parentElement.getBoundingClientRect();
+      let boundingRect = this.bindingElement.getBoundingClientRect();
+      return new DOMRect(boundingRect.left - parentBoundingRect.left,
+          boundingRect.top - parentBoundingRect.top,
+          boundingRect.width,
+          boundingRect.height);
     }
+    // todo add a delegate that returns the bounding rectangle.
+    makeResizableDiv(this.mainElement, this.mainElement.querySelectorAll('.resizer'), getBoundingRect);
   }
 
   reset() {
