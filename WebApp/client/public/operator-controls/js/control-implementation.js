@@ -793,9 +793,14 @@ cropScreenShareBtn.addEventListener("click", onCropScreenShareBtnClicked);
 cropScreenShareApplyBtn.addEventListener("click", onCropScreenShareApplyBtnClicked);
 editStyleSelect.addEventListener("change", editStyleSelectionChanged)
 cropScreenSharePreview.onload = function () {
+  cropWidget.mainElement.style.display = "block";
   cropWidget.reset();
+  cropScreenSharePreview.alt = "Screen share image";
 }
-
+cropScreenSharePreview.onerror = function () {
+  cropWidget.mainElement.style.display = "none";
+  cropScreenSharePreview.alt = "No screen share image available";
+}
 
 /* LAYOUT CONTROLS IMPLEMENTATION */
 function onLayoutSelected(idx) {
