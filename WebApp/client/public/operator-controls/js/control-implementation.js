@@ -527,7 +527,8 @@ function onPendingClick() {
     } else if (response.ok && response.status === 201) {
       Feedback.alertInfo(response.statusText);
     } else  {
-      Feedback.alertDanger("Failed: " + response.statusText);
+      sendClickEvent(myVideoPlayer, OperatorControls._LiveButton)
+      Feedback.alertDanger("Failed: Could not start stream, please check settings.");
     }
   })
 }
