@@ -9,6 +9,7 @@ import { ValidateClonesWithJsonArray} from "/operator-controls/js/validation-hel
 import { unityFetch } from "../../js/unity-fetch.js";
 import { getVideoThumb } from "../../js/video-thumbnail.js";
 import { createUploadProgressTracker } from "../../js/progresstracker.js";
+import {CropWidget} from "../../js/crop-widget.js";
 import * as Feedback from "../../js/user-input-feedback-alert.js";
 import { onEnableAdvancedSettings } from "./advancedSettings.js";
 
@@ -823,12 +824,29 @@ let layoutFieldset = document.getElementById("layout-fieldset");
 let layoutDropdown = document.getElementById("layout-dropdown");
 let textSizeDropdown = document.getElementById("text-size-dropdown");
 let lowerThirdStyleDropdown = document.getElementById("lower-thirds-style-dropdown");
+let cropScreenShareBtn = document.getElementById("crop-screen-share-btn");
+let cropScreenSharePreview = document.getElementById("crop-screen-share-preview");
+let cropScreenShareApplyBtn = document.getElementById("crop-screen-share-apply-btn");
+let cropScreenShareCloseBtn = document.getElementById("crop-screen-share-close-btn");
 let editStyleSelect = document.getElementById("edit-style-select");
 
 setupDropdown(layoutDropdown, onLayoutSelected)
 setupDropdown(textSizeDropdown, onTextSizeSelected)
 setupDropdown(lowerThirdStyleDropdown, onLowerThirdStyleSelected)
+cropScreenShareBtn.addEventListener("click", onCropScreenShareBtnClicked);
+cropScreenShareApplyBtn.addEventListener("click", onCropScreenShareApplyBtnClicked);
 editStyleSelect.addEventListener("change", editStyleSelectionChanged)
+cropScreenSharePreview.onload = function () {
+  cropWidget.mainElement.style.display = "block";
+  cropWidget.reset();
+  cropScreenSharePreview.alt = "Screen share image";
+  cropScreenShareApplyBtn.disabled = false;
+}
+cropScreenSharePreview.onerror = function () {
+  cropWidget.mainElement.style.display = "none";
+  cropScreenSharePreview.alt = "No screen share image available";
+  cropScreenShareApplyBtn.disabled = true;
+}
 
 /* LAYOUT CONTROLS IMPLEMENTATION */
 function onLayoutSelected(idx) {
@@ -849,6 +867,27 @@ function onLowerThirdStyleSelected(idx) {
       break;
   }
 }
+
+let cropWidget = new CropWidget(cropScreenSharePreview);
+cropScreenSharePreview.parentElement.appendChild(cropWidget.mainElement);
+cropWidget.initResizers();
+function onCropScreenShareBtnClicked() {
+  cropScreenSharePreview.src = "uapp/getScreenShareImage?t=" + Date.now();
+}
+
+function onCropScreenShareApplyBtnClicked() {
+  let crop = cropWidget.getNormalizedCrop();
+  unityFetch(`/cropScreenShare?x=${crop.left}&y=${crop.bottom}&scale=${crop.width}`, {method: "PUT"}).then(resp => {
+    if (resp.ok) {
+      console.log("crop applied");
+    }else{
+      Feedback.alertDanger("Failed to crop screen share image");
+    }
+    // Dismiss the crop modal.
+    cropScreenShareCloseBtn.click();
+  });
+}
+
 
 function editStyleSelectionChanged() {
   let style = editStyleSelect.options[editStyleSelect.selectedIndex];
@@ -1057,7 +1096,6 @@ function setupDeleteButton(owner, route, elementWithFilename, onDeleteConfirmed)
       owner.style.opacity = 0.5;
       deleteBtn.innerHTML = "Deleting...";
       // Delete media.
-      // todo Add callback to handle response. Also make route a parameter.
       fetch(route.replace("{0}", elementWithFilename.thingToDelete), {method: "DELETE"}).then(function (response) {
         if (response.ok) {
           onDeleteConfirmed();
@@ -1877,7 +1915,6 @@ function downloadFile() {
 }
 
 async function listAvailableRecordings() {
-  // todo move this function to a seperate file so it can be used by the video editor page as well.
   await updateStreamPref();
   let resp = await fetch("/listRecordings/" + streamKey.value);
   let files = await resp.json();
