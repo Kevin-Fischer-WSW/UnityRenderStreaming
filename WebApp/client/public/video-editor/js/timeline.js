@@ -175,8 +175,8 @@ export class Timeline extends EventTarget {
     this.updateApparentStartsOfCutsAfterDeletingCut(cutSpan);
     // Set the selection to the cut.
     this.selectedClipIndex = cutSpan.clipIndex;
-    this.selectionStart = cutSpan.inpoint;
-    this.selectionEnd = cutSpan.outpoint;
+    this.selectionStart = cutSpan.apparentStart;
+    this.selectionEnd = cutSpan.outpoint - cutSpan.inpoint + cutSpan.apparentStart;
     this.selectingState = SelectionState.selectionMade;
     // Ensure selection is visible.
     this.showSelection(true);
