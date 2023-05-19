@@ -90,4 +90,17 @@ export class CropWidget {
     this.mainElement.style.left = minX + 'px';
     this.mainElement.style.top = minY + 'px';
   }
+
+  getNormalizedCrop() {
+    let mainBoundingRect = this.mainElement.getBoundingClientRect();
+    let boundingRect = this.bindingElement.getBoundingClientRect();
+    let bottomNormalized = (boundingRect.bottom - mainBoundingRect.bottom) / boundingRect.height;
+    let leftNormalized = (mainBoundingRect.left - boundingRect.left) / boundingRect.width;
+    let widthNormalized = mainBoundingRect.width / boundingRect.width;
+    return {
+      bottom: bottomNormalized,
+      left: leftNormalized,
+      width: widthNormalized
+    };
+  }
 }

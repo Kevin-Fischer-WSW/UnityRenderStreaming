@@ -25,7 +25,7 @@ export function makeResizableDiv(element, resizers, getBoundingRect = null) {
         })
 
         function resize(e) {
-            let maintain_ratio = e.shiftKey;
+            let maintain_ratio = true; // todo Allow user to hold shift to enable this.
             let bounding_rect = getBoundingRect ? getBoundingRect() : new DOMRect(0, 0, Infinity, Infinity);
             let mouse_x = e.pageX - original_mouse_x;
             let mouse_y = e.pageY - original_mouse_y;
