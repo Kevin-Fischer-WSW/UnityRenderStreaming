@@ -329,7 +329,7 @@ export const createServer = (config: Options): express.Application => {
     if (ValidatePathExists(res, _path) === false)
       return;
     try {
-      fs.rmdirSync(_path, {recursive: true});
+      fs.rmSync(_path, {recursive: true, force: true});
       res.status(200).json({message: 'Directory deleted successfully'});
     } catch (err) {
       console.log(err);
