@@ -31,24 +31,23 @@ export function makeResizableDiv(element, resizers, getBoundingRect = null) {
             let mouse_y = e.pageY - original_mouse_y;
             let mouse_x_bound = Math.min(Math.max(original_x + mouse_x, bounding_rect.x), bounding_rect.width);
             let mouse_y_bound = Math.min(Math.max(original_y + mouse_y, bounding_rect.y), bounding_rect.height);
-            console.log(mouse_x, mouse_y, mouse_x_bound, mouse_y_bound)
             if (currentResizer.classList.contains('bottom-right')) {
                 let width = original_width + (mouse_x)
                 let height = original_height + (mouse_y)
-                if (maintain_ratio) [width, height] = maintainRatioHelper(width, height);
                 // Clamp the width and height
                 width = Math.min(Math.max(width, minimum_size), bounding_rect.x + bounding_rect.width - original_x);
                 height = Math.min(Math.max(height, minimum_size), bounding_rect.y + bounding_rect.height - original_y);
+                // Maintain the ratio.
+                if (maintain_ratio) [width, height] = maintainRatioHelper(width, height);
                 element.style.width = width + 'px';
                 element.style.height = height + 'px'
             }
             else if (currentResizer.classList.contains('bottom-left')) {
                 let width = original_width - (mouse_x)
                 let height = original_height + (mouse_y)
-                if (maintain_ratio) [width, height] = maintainRatioHelper(width, height);
-                // Clamp the width and height
                 width = Math.min(Math.max(width, minimum_size), original_x + original_width - bounding_rect.x);
                 height = Math.min(Math.max(height, minimum_size), bounding_rect.y + bounding_rect.height - original_y);
+                if (maintain_ratio) [width, height] = maintainRatioHelper(width, height);
                 element.style.width = width + 'px'
                 element.style.height = height + 'px'
                 element.style.left = mouse_x_bound + 'px';
@@ -56,10 +55,9 @@ export function makeResizableDiv(element, resizers, getBoundingRect = null) {
             else if (currentResizer.classList.contains('top-right')) {
                 let width = original_width + (mouse_x)
                 let height = original_height - (mouse_y)
-                if (maintain_ratio) [width, height] = maintainRatioHelper(width, height);
-                // Clamp the width and height
                 width = Math.min(Math.max(width, minimum_size), bounding_rect.x + bounding_rect.width - original_x);
                 height = Math.min(Math.max(height, minimum_size), original_y + original_height - bounding_rect.y);
+                if (maintain_ratio) [width, height] = maintainRatioHelper(width, height);
                 element.style.width = width + 'px'
                 element.style.height = height + 'px'
                 element.style.top = mouse_y_bound + 'px'
@@ -67,10 +65,9 @@ export function makeResizableDiv(element, resizers, getBoundingRect = null) {
             else { // top-left
                 let width = original_width - (mouse_x)
                 let height = original_height - (mouse_y)
-                if (maintain_ratio) [width, height] = maintainRatioHelper(width, height);
-                // Clamp the width and height
                 width = Math.min(Math.max(width, minimum_size), original_x + original_width - bounding_rect.x);
                 height = Math.min(Math.max(height, minimum_size), original_y + original_height - bounding_rect.y);
+                if (maintain_ratio) [width, height] = maintainRatioHelper(width, height);
                 element.style.width = width + 'px'
                 element.style.left = mouse_x_bound + 'px'
                 element.style.height = height + 'px'
