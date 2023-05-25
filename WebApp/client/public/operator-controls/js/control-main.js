@@ -17,6 +17,10 @@ let playButton;
 const playerDiv = document.getElementById("video-players");
 const outputDiv = document.getElementById("output-video-container");
 const previewDiv = document.getElementById("preview-video-container");
+const outputColDiv = document.getElementById("output-container-col");
+const previewColDiv = document.getElementById("preview-container-col");
+outputColDiv.style.position = "relative";
+previewColDiv.style.position = "relative";
 
 class MainNotifications extends EventTarget {
   notifyVideoSetup() {
@@ -111,16 +115,16 @@ function Play() {
   elementMuteButton.style.position = 'absolute';
   elementMuteButton.style.bottom = '0.5em';
   elementMuteButton.style.left = '1.5em';
-  elementMuteButton.innerHTML = 'Preview Audio <i class="bi bi-volume-mute"></i>';
+  elementMuteButton.innerHTML = 'Output Audio <i class="bi bi-volume-mute"></i>';
   elementMuteButton.addEventListener('click', function () {
     elementPreviewVideo.muted = false;
     let audioTracks = myVideoPlayer.videoAudioTracks;
     if (audioTracks.length !== 2) return;
     // Toggle first audio track.
     audioTracks[0].enabled = !audioTracks[0].enabled;
-    elementMuteButton.innerHTML = audioTracks[0].enabled ? 'Preview Audio <i class="bi bi-volume-up"></i>' : 'Preview Audio <i class="bi bi-volume-mute"></i>';
+    elementMuteButton.innerHTML = audioTracks[0].enabled ? 'Output Audio <i class="bi bi-volume-up"></i>' : 'Output Audio <i class="bi bi-volume-mute"></i>';
   });
-  playerDiv.appendChild(elementMuteButton);
+  outputColDiv.appendChild(elementMuteButton);
 
   // add second mute button (mutes zoom call audio)
   const elementMuteButton2 = document.createElement('button');
@@ -131,17 +135,17 @@ function Play() {
   // Make the button position relative to the bottom left of the playerDiv.
   elementMuteButton2.style.position = 'absolute';
   elementMuteButton2.style.bottom = '0.5em';
-  elementMuteButton2.style.left = '11em';
-  elementMuteButton2.innerHTML = 'Zoom Audio <i class="bi bi-volume-mute"></i>';
+  elementMuteButton2.style.left = '1.5em';
+  elementMuteButton2.innerHTML = 'Input Audio <i class="bi bi-volume-mute"></i>';
   elementMuteButton2.addEventListener('click', function () {
     elementPreviewVideo.muted = false;
     let audioTracks = myVideoPlayer.videoAudioTracks;
     if (audioTracks.length !== 2) return;
     // Toggle second audio track.
     audioTracks[1].enabled = !audioTracks[1].enabled;
-    elementMuteButton2.innerHTML = audioTracks[1].enabled ? 'Zoom Audio <i class="bi bi-volume-up"></i>' : 'Zoom Audio <i class="bi bi-volume-mute"></i>';
+    elementMuteButton2.innerHTML = audioTracks[1].enabled ? 'Input Audio <i class="bi bi-volume-up"></i>' : 'Input Audio <i class="bi bi-volume-mute"></i>';
   });
-  playerDiv.appendChild(elementMuteButton2);
+  previewColDiv.appendChild(elementMuteButton2);
 
   /* NOTE: to reenable fullscreen. Uncomment this section.
   // add fullscreen button
