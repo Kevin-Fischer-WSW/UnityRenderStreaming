@@ -114,10 +114,8 @@ function setupParticipantOnVidCtrl(node, idx) {
   let dragEl = document.querySelector(`div#${node.id} .participant-on-vid-drag`);
   let eyeEl = document.querySelector(`div#${node.id} .participant-on-vid-eye`);
   let earEl = document.querySelector(`div#${node.id} .participant-on-vid-ear`);
-  let muteEl = document.querySelector(`div#${node.id} .participant-on-vid-mute`);
   let renameEl = document.querySelector(`div#${node.id} a[target="action-rename"]`);
   let showLtEl = document.querySelector(`div#${node.id} a[target="action-show-lt"]`);
-  // let camEl = document.querySelector(`div#${node.id} .participant-on-vid-cam`);
 
   node.classList.remove("d-none");
 
@@ -141,30 +139,36 @@ function setupParticipantOnVidCtrl(node, idx) {
     }
   }
 
-  earEl.addEventListener("click", function () {
+  earEl.addEventListener("mousedown", function (ev) {
+    let earElmy = ev.pageY;
+    let initialVolume = participantJsonParsed[idx].volume;
     let p = participantJsonParsed[idx];
-    unityFetch(`/toggleParticipantAudibility?participantId=${p.id}&enable=${!p.audible}`, {method: "PUT"})
-      .then(resp => {
-        if (resp.ok) {
-          console.log("audibility toggled")
-        }
-      })
+    let mouseMove = function (ev) {
+      let str = p.id + "," + (initialVolume + (earElmy - ev.pageY) / 100);
+      sendStringSubmitEvent(myVideoPlayer, OperatorControls._SetParticipantVolume, str);
+    }
+    let mouseUp = function (ev) {
+      window.removeEventListener("mousemove", mouseMove);
+      window.removeEventListener("mouseup", mouseUp);
+      if (earElmy === ev.pageY) {
+        unityFetch(`/muteParticipantAudioSource?participantId=${p.id}&mute=${!p.mutedAudioSource}`, {method: "PUT"})
+      }
+    }
+    window.addEventListener("mousemove", mouseMove);
+    window.addEventListener("mouseup", mouseUp);
+  })
+
+  earEl.addEventListener("wheel", function (ev) {
+    ev.preventDefault();
+    let p = participantJsonParsed[idx];
+    let str = p.id + "," + (p.volume + (ev.deltaY > 0 ? -0.1 : 0.1));
+    sendStringSubmitEvent(myVideoPlayer, OperatorControls._SetParticipantVolume, str);
   })
 
   eyeEl.addEventListener("click", function () {
     let p = participantJsonParsed[idx];
     let str = p.id + "," + !p.visible;
     sendStringSubmitEvent(myVideoPlayer, OperatorControls._ToggleParticipantVisibilityButton, str);
-  })
-
-  muteEl.addEventListener("click", function () {
-    let p = participantJsonParsed[idx];
-    if (p.muted){
-      let str = p.id + ",false";
-      sendStringSubmitEvent(myVideoPlayer, OperatorControls._MuteParticipantButton, str);
-    } else {
-      console.log("Only can mute from zoom");
-    }
   })
 
   renameEl.addEventListener("click", function() {

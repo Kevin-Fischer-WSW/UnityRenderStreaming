@@ -745,10 +745,9 @@ button, input, optgroup, select, textarea {
 .participant-on-vid-drag{
   position: absolute;
   opacity: 1%;
-  background-color: $blue;
-  top: 25%;
-  height: 50%;
-  width: 85%;
+  background-color: $gray-500;
+  height: 100%;
+  width: 100%;
 }
 
 .participant-on-vid-drag:hover{
@@ -758,13 +757,13 @@ button, input, optgroup, select, textarea {
 
 .participant-on-vid-options{
   position: absolute;
-  right: 0;
-  top: 0;
-  width: 15%;
-  height: 25%;
+  left: 87.16%;
+  top: 3.51%;
+  width: 11.22%;
+  height: 18.12%;
+  z-index: 1;
   opacity: 1%;
-  background-color: $blue;
-  border: none;
+  background-color: $gray-500;
 }
 
 .participant-on-vid-options:hover{
@@ -772,29 +771,15 @@ button, input, optgroup, select, textarea {
   cursor: pointer;
 }
 
-.participant-on-vid-mute {
-  position: absolute;
-  left: 15%;
-  top: 0;
-  width: 15%;
-  height: 25%;
-  opacity: 1%;
-  background-color: $blue;
-}
-
-.participant-on-vid-mute:hover {
-  opacity: 50%;
-  cursor: pointer;
-}
-
 .participant-on-vid-ear {
   position: absolute;
-  right: 15%;
-  top: 75%;
-  width: 15%;
-  height: 25%;
+  left: 76.6%;
+  top: 79.25%;
+  width: 10.12%;
+  height: 18.12%;
+  z-index: 1;
   opacity: 1%;
-  background-color: $blue;
+  background-color: $gray-500;
 }
 
 .participant-on-vid-ear:hover {
@@ -804,12 +789,13 @@ button, input, optgroup, select, textarea {
 
 .participant-on-vid-eye {
   position: absolute;
-  right: 0;
-  top: 75%;
-  width: 15%;
-  height: 25%;
+  left: 86.72%;
+  top: 79.25%;
+  width: 11.62%;
+  height: 18.12%;
+  z-index: 1;
   opacity: 1%;
-  background-color: $blue;
+  background-color: $gray-500;
 }
 
 .participant-on-vid-eye:hover {
