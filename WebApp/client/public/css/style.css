@@ -180,6 +180,8 @@ video {
 #general-status-bar {
   background-color: #4c4c4c;
   height: 8%;
+  width: 75%;
+  margin: auto;
   border: none;
   border-radius: 5px;
   color: white;
@@ -187,6 +189,36 @@ video {
   padding-left: 0.5rem;
   padding-right: 0.5rem;
   text-align: center; }
+
+#stream-activity-bar {
+  margin: auto;
+  background-color: #4c4c4c;
+  border: 2px solid black;
+  height: 15%;
+  width: 75%;
+  align-items: center;
+  justify-content: center;
+  display: flex; }
+
+#on-air-indicator {
+  background-color: grey;
+  border: 2px solid black;
+  border-radius: 50%;
+  height: 20px;
+  width: 20px;
+  margin: 0;
+  margin-right: 5%; }
+
+#on-air-text {
+  color: grey;
+  font-size: 48px;
+  margin: 0;
+  margin-right: 5%; }
+
+#on-air-info-text {
+  color: grey;
+  font-size: 18px;
+  margin: 0; }
 
 /*!
    * Bootstrap  v5.2.2 (https://getbootstrap.com/)

@@ -243,6 +243,12 @@ pwd.addEventListener("input", flagStreamPrefChange);
 /* -> Feedback Alerts */
 let boardData = document.getElementById('kt_clipboard_4');
 
+/* ACTIVITY BAR */
+let streamActivityBar = document.getElementById("stream-activity-bar")
+let onAirText = document.getElementById("on-air-text")
+let onAirIndicator = document.getElementById("on-air-indicator")
+let onAirInfoText = document.getElementById("on-air-info-text")
+
 /* GENERAL STATUS BAR */
 let generalStatBar = document.getElementById("general-status-bar");
 
@@ -383,6 +389,39 @@ function updateStreamButtons() {
   intro_preview.addEventListener("click", onPendingClick);
 }
 
+function updatestreamActivityBarInfo(appStatus) {
+  /* update aesthetics */
+  streamActivityBar.style.backgroundColor = "#7FDB6A";
+  onAirText.style.color = onAirIndicator.style.backgroundColor = "red";
+  onAirInfoText.style.color = "black";
+
+  let videoInfo = "none";
+  let audioInfo = [];
+
+  /* check audio sources */
+  if (appStatus.isAnyParticipantAudible) audioInfo.push("Presenter");
+  if (appStatus.playingHoldingMusic && appStatus.holdingMusicVolume) audioInfo.push("Holding music");
+  if (appStatus.playingVideo && appStatus.currentVideoVolume) audioInfo.push("Video playback audio");
+  
+  /* check video sources */
+  if (appStatus.holdingSlide) videoInfo = appStatus.holdingSlide;
+  if (appStatus.videoIsShowing && appStatus.holdingSlide) videoInfo = "Video playback";
+  if (appStatus.isAnyParticipantVisible && !appStatus.videoIsShowing && appStatus.holdingSlide == "none") videoInfo = "Presenter";
+  
+  /* update information */
+  onAirInfoText.innerHTML = `Audio: ${ audioInfo.length > 0 ? audioInfo.join(", ") : "none" } 
+    <br> Video: ${videoInfo}
+    <br> Recording: ${appStatus.recording ? "Active" : "Inactive"}`
+
+}
+
+function resetstreamActivityBarInfo() {
+  /* reset aesthetics to default */
+  onAirText.style.color = onAirIndicator.style.backgroundColor = onAirInfoText.style.color = "grey";
+  streamActivityBar.style.backgroundColor = "#4c4c4c";
+  onAirInfoText.innerHTML = `Audio: none <br> Video: none <br> Recording: Inactive`;
+}
+
 function appStatusReceived(json) {
 
   let appStatus = JSON.parse(json)
@@ -394,13 +433,7 @@ function appStatusReceived(json) {
 
   addParticipantSelectCheckEventListener(); // adds event listeners to each select checkbox
 
-  generalStatBar.innerHTML =
-  `Stream: ${appStatus.streaming ? "Yes" : "No"} |
-  Recording Stream: ${appStatus.recording ? "Yes" : "No"} |
-  Zoom Local Recording: ${appStatus.canRecordLocalFiles ? "Allowed" : "Not Allowed"} |
-  Holding Slide: ${appStatus.holdingSlide} |
-  Holding Music: ${appStatus.playingHoldingMusic ? "Playing" : "Not Playing"} |
-  Holding Video: ${appStatus. playingVideo ? "Playing" : "Not Playing"}`
+  generalStatBar.innerHTML = `Zoom Local Recording: ${appStatus.canRecordLocalFiles ? "Allowed" : "Not Allowed"}`
 
   if (appStatus.inMeeting || appStatus.meetingSimulated) {
     validateTracksInPlaylist(appStatus.playlist, appStatus.currentlyPlayingIndex)
@@ -457,6 +490,7 @@ function appStatusReceived(json) {
     if (appStatus.streaming) {
 
       updateStreamButtons();
+      updatestreamActivityBarInfo(appStatus);
 
       if (appStatus.holdingSlide === "pending") {
         ActivateButtonHelper(pendingBtn, true)
@@ -468,7 +502,8 @@ function appStatusReceived(json) {
         ActivateButtonHelper(archiveBtn, true)
       }
     } else {
-      resetStreamButtonsOnLeaveOrEnd()
+      resetStreamButtonsOnLeaveOrEnd();
+      resetstreamActivityBarInfo();
       // todo: This causes a custom slide named "conclusion" to immediately be dismissed.
       // if (jsonParsed.holdingSlide === "endOfStream" || jsonParsed.holdingSlide === "conclusion") {
       //   sendClickEvent(myVideoPlayer, OperatorControls._LiveButton);
