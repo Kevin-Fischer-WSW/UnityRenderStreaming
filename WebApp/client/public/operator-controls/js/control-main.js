@@ -200,7 +200,6 @@ async function onConnect() {
 async function onDisconnect(message) {
   // Clear generated elements.
   //playerDiv.removeChild(document.getElementById('playButtonElement'));
-  playerDiv.removeChild(document.getElementById('mute-preview-btn'));
   outputDiv.removeChild(document.getElementById('output-video'));
   previewDiv.removeChild(document.getElementById('preview-video'));
   await myVideoPlayer.stop();
