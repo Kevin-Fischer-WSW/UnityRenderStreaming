@@ -443,7 +443,6 @@ function appStatusReceived(json) {
     validateTracksInPlaylist(appStatus.playlist, appStatus.currentlyPlayingIndex)
     meetingNoInputField.disabled = true;
     joinMeetingBtn.disabled = true;
-    leaveMeetingBtn.disabled = false;
     holdMusicFieldset.disabled = false;
     musicPlayStopBtn.innerHTML = appStatus.playingHoldingMusic ? '<i class="bi bi-pause"></i>' : '<i class="bi bi-play"></i>';
     currentlyPlayingSpan.innerHTML = appStatus.currentlyPlayingTrack;
@@ -526,7 +525,6 @@ function appStatusReceived(json) {
     generalStatBar.innerHTML = "Connection State: Connected";
     meetingNoInputField.disabled = false;
     joinMeetingBtn.disabled = false;
-    leaveMeetingBtn.disabled = true;
     holdMusicFieldset.disabled = true;
     //videoFieldsetBar.disabled = true;
   }
