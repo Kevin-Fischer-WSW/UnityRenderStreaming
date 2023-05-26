@@ -1421,7 +1421,7 @@ function clearFormInput() {
   formInput = []
 }
 
-function pushFormInput(file, type, assignTo = "none") {
+function pushFormInput(file, type, assignTo = []) {
   formInput.push({
     type: type,
     assignTo: assignTo,
@@ -1496,14 +1496,19 @@ function CategorizeSlideFilesBySlideTypeSelects(files) {
   for (let i = 0; i < files.length; i++) {
     let file = files[i]
     // Find slide type from select.
-    let select = slideTypeSelects.find(select => {
+    let select = slideTypeSelects.filter(select => {
       // Check if file name matches select value.
       return file.name === select.value;
     })
-    if (select !== undefined) {
+    if (select !== []) {
+      // if assigned to multiple types, find all types.
+      let arr = []
+      for (let i = 0; i < select.length; i++) {
+        arr.push(select[i].dataset.type)
+      }
       // Type identified. Append to form input. Will be uploaded as found type.
-      pushFormInput(file, "slide", select.dataset.type)
-      uploadDescriptor.innerHTML += `'${file.name}' will be used as your ${select.dataset.type} slide.<br>`
+      pushFormInput(file, "slide", arr)
+      uploadDescriptor.innerHTML += `'${file.name}' will be used as your ${arr.join(", ")} slide.<br>`
     } else {
       // Type could not be identified. Will upload as custom slide.
       pushFormInput(file, "slide")
@@ -1524,18 +1529,6 @@ let conclusionSelect = document.getElementById("conclusion-slide-type-select")
 let slideTypeSelects = [introSelect, techDiffSelect, conclusionSelect]
 
 editSlideBtn.style.display = "none";
-// Add event listeners to each select.
-for (let select of slideTypeSelects) {
-  select.addEventListener("change", function () {
-    // Ensure that no two selects have the same value.
-    for (let otherSelect of slideTypeSelects) {
-      if (otherSelect === select) continue;
-      if (otherSelect.value === select.value) {
-        otherSelect.selectedIndex = 0;
-      }
-    }
-  })
-}
 
 function editSlideBtnClicked() {
   // Iterate through slide type selects.
@@ -1593,18 +1586,20 @@ function uploadCustomSlideClicked() {
       request.onload = function() {
         if (request.status >= 200 && request.status < 300) {
           resolve(request.response);
-          if (input.assignTo !== "none"){
+          if (input.assignTo !== []) {
             let assignTo2Route = {
               "intro": "/assignIntroSlide",
               "technicalDifficulty": "/assignTechnicalDifficultySlide",
               "conclusion": "/assignConclusionSlide"
             }
-            unityFetch(`${assignTo2Route[input.assignTo]}?url=/slides/${input.ogName}`, {method: "PUT"})
+            for (let i = 0; i < input.assignTo.length; i++) {
+              unityFetch(`${assignTo2Route[input.assignTo[i]]}?url=/slides/${input.ogName}`, {method: "PUT"})
               .then((resp) => {
                 if (resp.ok){
                   console.log("Slide assigned.")
                 }
               })
+            }
           }
         } else {
           reject(request.statusText);
