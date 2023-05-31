@@ -713,7 +713,7 @@ muteSelectParticipantBtn.addEventListener("click", () => {
   for (let i = 0; i <  selectedParticipants.length; i++) {
     if (selectedParticipants[i].checked) {
       let p = participantJsonParsed[i]
-      unityFetch(`/toggleParticipantAudibility?enable=false&participantId=${p.id}`, {method:"PUT"})
+      unityFetch(`/muteParticipantAudioSource?participantId=${p.id}&mute=true`, {method: "PUT"})
     }
   }
 })
@@ -734,7 +734,7 @@ unmuteSelectParticipantBtn.addEventListener("click", () => {
   for (let i = 0; i <  selectedParticipants.length; i++) {
     if (selectedParticipants[i].checked) {
       let p = participantJsonParsed[i]
-      unityFetch(`/toggleParticipantAudibility?enable=true&participantId=${p.id}`, {method:"PUT"})
+      unityFetch(`/muteParticipantAudioSource?participantId=${p.id}&mute=false`, {method: "PUT"})
     }
   }
 })
@@ -769,7 +769,7 @@ function validateParticipantInputGroups() {
     let nameSpan = document.querySelector(`#${clone.id} .name-span`);
 
     visibilityBtn.firstChild.className = data.visible ? "bi bi-eye" : "bi bi-eye-slash";
-    audibilityBtn.firstChild.className = data.audible ? "bi bi-ear" : "bi bi-ear-fill";
+    audibilityBtn.firstChild.className = data.mutedAudioSource ? "bi bi-ear" : "bi bi-ear-fill";
     if (data.title === ""){
       nameSpan.innerHTML = `<b>${data.name}</b>`;
     }else{
@@ -834,7 +834,7 @@ function setupParticipantInputGroup(node, idx) {
 
   audibilityBtn.addEventListener("click", function () {
     let p = participantJsonParsed[idx]
-    unityFetch(`/toggleParticipantAudibility?participantId=${p.id}&enable=${!p.audible}`, {method: "PUT"})
+    unityFetch(`/muteParticipantAudioSource?participantId=${p.id}&mute=${!p.mutedAudioSource}`, {method: "PUT"})
     .then(resp => {
       if (resp.ok) {
         console.log("audibility toggled")
