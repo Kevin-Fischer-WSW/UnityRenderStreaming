@@ -181,6 +181,17 @@ export class VideoPlayer {
           if (_this.onNewMediaNotification){
             _this.onNewMediaNotification.call(_this, msgContents);
           }
+          break;
+        case MessageTypes._WrongPasswordNotification:
+          if (_this.onWrongPasswordNotification){
+            _this.onWrongPasswordNotification.call(_this, msgContents);
+          }
+          break;
+        case MessageTypes._RegistrationUrl:
+          if (_this.onRegistrationUrlReceived){
+            _this.onRegistrationUrlReceived.call(_this, msgContents);
+          }
+          break;
       }
     };
   }

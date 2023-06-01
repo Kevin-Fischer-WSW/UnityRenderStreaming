@@ -22,7 +22,20 @@ mainNotifications.addEventListener('setup', function () {
   myVideoPlayer.onStyleValuesReceived = onReceiveStyleValues;
   myVideoPlayer.onLogMessageNotification = onLogMessageNotification;
   myVideoPlayer.onNewMediaNotification = onNewMediaNotification;
+  myVideoPlayer.onWrongPasswordNotification = onWrongPasswordNotification;
+  myVideoPlayer.onRegistrationUrlReceived = onRegistrationUrlReceived;
 });
+
+function onWrongPasswordNotification () {
+  Feedback.alertDanger("Meeting password is incorrect.");
+}
+
+function onRegistrationUrlReceived (url) {
+  let a = document.getElementById("registration-url");
+  a.href = url;
+  a.innerText = url;
+  $('#registration-url-modal').modal('show');
+}
 
 function onLogMessageNotification () {
   if (navLogTabBtn.classList.contains("active")){
@@ -406,14 +419,14 @@ function updatestreamActivityBarInfo(appStatus) {
   if (appStatus.isAnyParticipantAudible) audioInfo.push("Presenter");
   if (appStatus.playingHoldingMusic && appStatus.holdingMusicVolume) audioInfo.push("Holding music");
   if (appStatus.playingVideo && appStatus.currentVideoVolume) audioInfo.push("Video playback audio");
-  
+
   /* check video sources */
   if (appStatus.holdingSlide) videoInfo = appStatus.holdingSlide;
   if (appStatus.videoIsShowing && appStatus.holdingSlide) videoInfo = "Video playback";
   if (appStatus.isAnyParticipantVisible && !appStatus.videoIsShowing && appStatus.holdingSlide == "none") videoInfo = "Presenter";
-  
+
   /* update information */
-  onAirInfoText.innerHTML = `Audio: ${ audioInfo.length > 0 ? audioInfo.join(", ") : "none" } 
+  onAirInfoText.innerHTML = `Audio: ${ audioInfo.length > 0 ? audioInfo.join(", ") : "none" }
     <br> Video: ${videoInfo}
     <br> Recording: ${appStatus.recording ? "Active" : "Inactive"}`
 
