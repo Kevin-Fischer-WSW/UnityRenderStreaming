@@ -117,7 +117,7 @@
 #archive-btn:hover {
   background-color: #db3333; }
 
-#logout, #stream-settings, #reset-to-default {
+#logout, #stream-settings {
   cursor: pointer;
   float: right;
   color: white; }
@@ -125,7 +125,7 @@
 .bi-gear-fill, .bi-box-arrow-right, .bi-bootstrap-reboot {
   font-size: 32px; }
 
-#stream-settings:hover, #logout:hover, #reset-to-default:hover {
+#stream-settings:hover, #logout:hover {
   color: #000; }
 
 #video-players {

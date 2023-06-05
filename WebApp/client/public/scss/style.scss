@@ -146,7 +146,7 @@ $body-bg: #616161;
   background-color: #db3333;
 }
 
-#logout, #stream-settings, #reset-to-default  {
+#logout, #stream-settings  {
   cursor: pointer;
   float: right;
   color: white;
@@ -156,7 +156,7 @@ $body-bg: #616161;
   font-size: 32px;
 }
 
-#stream-settings:hover, #logout:hover, #reset-to-default:hover{
+#stream-settings:hover, #logout:hover {
   color: #000;
 }
 
