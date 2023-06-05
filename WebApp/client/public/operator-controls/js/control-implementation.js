@@ -533,7 +533,7 @@ function appStatusReceived(json) {
     }
 
   } else {
-
+    resetstreamActivityBarInfo();
     resetStreamButtonsOnLeaveOrEnd();
     generalStatBar.innerHTML = "Connection State: Connected";
     meetingNoInputField.disabled = false;
