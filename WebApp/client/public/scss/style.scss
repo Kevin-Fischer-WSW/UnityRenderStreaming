@@ -135,7 +135,8 @@ $body-bg: #616161;
 }
 
 // avoid button text from overflowing.
-#pending-btn, #live-btn, #technical-diff-btn, #archive-btn {
+#pending-btn, #live-btn, #technical-diff-btn, #archive-btn,
+#on-air-text, #on-air-info-text {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

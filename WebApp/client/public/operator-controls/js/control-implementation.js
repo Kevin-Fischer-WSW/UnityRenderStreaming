@@ -412,7 +412,7 @@ function updatestreamActivityBarInfo(appStatus) {
   onAirText.style.color = onAirIndicator.style.backgroundColor = "red";
   onAirInfoText.style.color = "black";
 
-  let videoInfo = "none";
+  let videoInfo = "None";
   let audioInfo = [];
 
   /* check audio sources */
@@ -421,12 +421,12 @@ function updatestreamActivityBarInfo(appStatus) {
   if (appStatus.playingVideo && appStatus.currentVideoVolume) audioInfo.push("Video playback audio");
 
   /* check video sources */
-  if (appStatus.holdingSlide) videoInfo = appStatus.holdingSlide;
+  if (appStatus.holdingSlide) videoInfo = appStatus.holdingSlide.charAt(0).toUpperCase() + appStatus.holdingSlide.slice(1);
   if (appStatus.videoIsShowing && appStatus.holdingSlide) videoInfo = "Video playback";
   if (appStatus.isAnyParticipantVisible && !appStatus.videoIsShowing && appStatus.holdingSlide == "none") videoInfo = "Presenter";
 
   /* update information */
-  onAirInfoText.innerHTML = `Audio: ${ audioInfo.length > 0 ? audioInfo.join(", ") : "none" }
+  onAirInfoText.innerHTML = `Audio: ${ audioInfo.length > 0 ? audioInfo.join(", ") : "None" }
     <br> Video: ${videoInfo}
     <br> Recording: ${appStatus.recording ? "Active" : "Inactive"}`
 
@@ -436,7 +436,7 @@ function resetstreamActivityBarInfo() {
   /* reset aesthetics to default */
   onAirText.style.color = onAirIndicator.style.backgroundColor = onAirInfoText.style.color = "grey";
   streamActivityBar.style.backgroundColor = "#4c4c4c";
-  onAirInfoText.innerHTML = `Audio: none <br> Video: none <br> Recording: Inactive`;
+  onAirInfoText.innerHTML = `Audio: None <br> Video: None <br> Recording: Inactive`;
 }
 
 function appStatusReceived(json) {
