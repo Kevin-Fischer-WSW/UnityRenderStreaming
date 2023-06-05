@@ -360,7 +360,9 @@ function setupDropdown(dropdown, func) {
 }
 
 function participantDataReceived(json) {
-  participantJsonParsed = JSON.parse(json);
+  let data = JSON.parse(json);
+  participantJsonParsed = data["ParticipantsData"];
+  groupJsonParsed = data["GroupsData"]
   validateParticipantInputGroups()
   validateParticipantOnVidCtrls()
 }
@@ -640,6 +642,7 @@ function onLeaveClicked() {
 
 /* PARTICIPANT CONTROLS */
 let participantJsonParsed;
+let groupJsonParsed;
 let participantFieldset = document.getElementById("participant-fieldset");
 let showAllLowerThirdsBtn = document.getElementById("show-all-lower-thirds-btn");
 showAllLowerThirdsBtn.addEventListener("click", onShowAllLowerThirdsClick);
@@ -657,6 +660,49 @@ let hideSelectParticipantBtn = document.getElementById("hide-select-ppt-btn");
 let muteSelectParticipantBtn = document.getElementById("mute-select-ppt-btn");
 let unmuteSelectParticipantBtn = document.getElementById("unmute-select-ppt-btn");
 
+let allParticipantsDiv = document.getElementById("all-participants-div")
+let groupParticipantsBtn = document.getElementById("group-select-ppt-btn")
+
+let participantsGroupLabelDiv = document.getElementById("ppt-grp-input-div")
+let participantsGroupLabelInput = document.getElementById("ppt-grp-label-name")
+let participantsGroupLabelSubmitBtn = document.getElementById("ppt-grp-label-submit")
+
+groupParticipantsBtn.disabled = true;
+participantsGroupLabelSubmitBtn.disabled = true;
+
+groupParticipantsBtn.addEventListener("click", () => {participantsGroupLabelDiv.classList.remove("d-none")});
+participantsGroupLabelInput.addEventListener("input", validateGroupLabel);
+participantsGroupLabelSubmitBtn.addEventListener("click", groupParticipants);
+
+function validateGroupLabel() {
+  if (participantsGroupLabelInput.value !== "" ) {
+    participantsGroupLabelSubmitBtn.disabled = false;
+  } else {
+    participantsGroupLabelSubmitBtn.disabled = true;
+  }
+}
+
+function hideGroupElementsOnSelectNone() {
+  groupParticipantsBtn.disabled = true;
+  participantsGroupLabelInput.value = "";
+  participantsGroupLabelDiv.classList.add("d-none");
+}
+
+function groupParticipants() {
+  participantsGroupLabelDiv.classList.add("d-none");
+
+  let participants = mapSelectParticipantsToInputGroups();
+  let selectedParticipants = []
+  for (let i = 0; i <  participants.length; i++) {
+    if (participants[i].checked) {
+      selectedParticipants.push(participantJsonParsed[i].id)
+    }
+  }
+  let groupId = participantsGroupLabelInput.value;
+  
+  unityFetch(`/createParticipantsGroup?groupId=${groupId}&participantId=${selectedParticipants.join()}`, { method : "PUT"})
+}
+
 function addParticipantSelectCheckEventListener() {
   let cbs = document.getElementsByName('checked-participant');
   for (let i = 0; i < cbs.length; i++) {
@@ -664,7 +710,7 @@ function addParticipantSelectCheckEventListener() {
   }
 }
 
-function mapSelectParticiapntsToInputGroups() {
+function mapSelectParticipantsToInputGroups() {
   let arr = participantInputGroups.map(group => {
     return group.querySelector(".check");
   });
@@ -673,8 +719,9 @@ function mapSelectParticiapntsToInputGroups() {
 
 function updateSelectParticipantBtnText() {
   let counter = 0;
-  let selectedParticipants = mapSelectParticiapntsToInputGroups();
-
+  let selectedParticipants = mapSelectParticipantsToInputGroups();
+  groupParticipantsBtn.disabled = false;
+  
   for (let i = 0; i <  selectedParticipants.length; i++) {
     if (selectedParticipants[i].checked) {
       counter++;
@@ -682,24 +729,31 @@ function updateSelectParticipantBtnText() {
   }
 
   if (counter === selectedParticipants.length) {
+    groupParticipantsBtn.disabled = true;
     selectAllParticipantBtn.innerHTML = "Unselect All";
   } else {
     selectAllParticipantBtn.innerHTML = "Select All";
+  }
+
+  if (counter === 0) {
+    // if participants selection is none
+    hideGroupElementsOnSelectNone();
   }
 }
 
 selectAllParticipantBtn.addEventListener("click", () => {
 
+  groupParticipantsBtn.disabled = true;
   if (selectAllParticipantBtn.innerHTML === "Select All") {
     selectAllParticipantBtn.innerHTML = "Unselect All";
-    let selectedParticipants = mapSelectParticiapntsToInputGroups();
+    let selectedParticipants = mapSelectParticipantsToInputGroups();
 
     for (let i = 0; i <  selectedParticipants.length; i++) {
       selectedParticipants[i].checked = true;
     }
   } else if (selectAllParticipantBtn.innerHTML === "Unselect All") {
     selectAllParticipantBtn.innerHTML = "Select All";
-    let selectedParticipants = mapSelectParticiapntsToInputGroups();
+    let selectedParticipants = mapSelectParticipantsToInputGroups();
     for (let i = 0; i <  selectedParticipants.length; i++) {
       selectedParticipants[i].checked = false;
     }
@@ -732,7 +786,7 @@ muteSelectParticipantBtn.addEventListener("click", () => {
 })
 
 hideSelectParticipantBtn.addEventListener("click", () => {
-  let selectedParticipants = mapSelectParticiapntsToInputGroups();
+  let selectedParticipants = mapSelectParticipantsToInputGroups();
   for (let i = 0; i <  selectedParticipants.length; i++) {
     if (selectedParticipants[i].checked) {
       let p = participantJsonParsed[i]
@@ -743,7 +797,7 @@ hideSelectParticipantBtn.addEventListener("click", () => {
 })
 
 unmuteSelectParticipantBtn.addEventListener("click", () => {
-  let selectedParticipants = mapSelectParticiapntsToInputGroups();
+  let selectedParticipants = mapSelectParticipantsToInputGroups();
   for (let i = 0; i <  selectedParticipants.length; i++) {
     if (selectedParticipants[i].checked) {
       let p = participantJsonParsed[i]
@@ -789,7 +843,7 @@ function validateParticipantInputGroups() {
       nameSpan.innerHTML = `<b>${data.name}</b>&nbsp-&nbsp<i>${data.title}</i>`;
     }
   }
-  ValidateClonesWithJsonArray(participantInputGroupOg, participantFieldset, participantInputGroups, setupGroup, participantJsonParsed, validateGroup);
+  ValidateClonesWithJsonArray(participantInputGroupOg, allParticipantsDiv, participantInputGroups, setupGroup, participantJsonParsed, validateGroup);
 }
 
 let currentlyDraggedP
