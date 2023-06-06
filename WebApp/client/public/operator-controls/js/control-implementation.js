@@ -263,7 +263,7 @@ let boardData = document.getElementById('kt_clipboard_4');
 /* ACTIVITY BAR */
 let streamActivityBar = document.getElementById("stream-activity-bar")
 let onAirText = document.getElementById("on-air-text")
-let onAirIndicator = document.getElementById("on-air-indicator")
+let onAirIndicator = document.getElementById("on-air-indicator-icon")
 let onAirInfoText = document.getElementById("on-air-info-text")
 
 /* GENERAL STATUS BAR */
@@ -395,6 +395,9 @@ function resetStreamButtonsOnLeaveOrEnd() {
 function updateStreamButtons() {
   streamSettingsFieldset.disabled = true;
   pendingBtn.innerHTML = "Intro Slide";
+  liveBtn. innerHTML = "Live";
+  technicalDiffBtn.innerHTML = "Technical Difficulties";
+  archiveBtn.innerHTML = "Conclusion Slide";
   streamBtnGrp.classList.add("w-100");
   pendingBtn.classList.remove("rounded");
   liveBtn.classList.remove("d-none");
@@ -408,8 +411,8 @@ function updateStreamButtons() {
 
 function updatestreamActivityBarInfo(appStatus) {
   /* update aesthetics */
-  streamActivityBar.style.backgroundColor = "#7FDB6A";
-  onAirText.style.color = onAirIndicator.style.backgroundColor = "red";
+  streamActivityBar.style.backgroundColor = "#2ecc71";
+  onAirText.style.color = onAirIndicator.style.color = "red";
   onAirInfoText.style.color = "black";
 
   let videoInfo = "None";
@@ -434,7 +437,7 @@ function updatestreamActivityBarInfo(appStatus) {
 
 function resetstreamActivityBarInfo() {
   /* reset aesthetics to default */
-  onAirText.style.color = onAirIndicator.style.backgroundColor = onAirInfoText.style.color = "grey";
+  onAirText.style.color = onAirIndicator.style.color = onAirInfoText.style.color = "grey";
   streamActivityBar.style.backgroundColor = "#4c4c4c";
   onAirInfoText.innerHTML = `Audio: None <br> Video: None <br> Recording: Inactive`;
 }
@@ -444,7 +447,7 @@ function appStatusReceived(json) {
   let appStatus = JSON.parse(json)
 
   ActivateButtonHelper(pendingBtn, false)
-  ActivateButtonHelper(technicalDiffBtn, false)
+  ActivateButtonHelper(technicalDiffBtn, false);
   ActivateButtonHelper(liveBtn, false)
   ActivateButtonHelper(archiveBtn, false)
 
@@ -508,13 +511,16 @@ function appStatusReceived(json) {
       updateStreamButtons();
       updatestreamActivityBarInfo(appStatus);
 
-      if (appStatus.holdingSlide === "pending") {
+      if (appStatus.holdingSlide === "intro") {
+        pendingBtn.innerHTML = `Intro Slide <i class="bi bi-broadcast"></i>`
         ActivateButtonHelper(pendingBtn, true)
       } else if (appStatus.holdingSlide === "technicalDifficulties") {
+        technicalDiffBtn.innerHTML = `Techincal Difficulties <i class="bi bi-broadcast"></i>`
         ActivateButtonHelper(technicalDiffBtn, true)
       } else if (appStatus.holdingSlide === "none" || appStatus.isCustomSlide) {
+        liveBtn.innerHTML = `Live <i class="bi bi-broadcast"></i>`
         ActivateButtonHelper(liveBtn, true)
-      } else if (appStatus.holdingSlide === "endOfStream") {
+      } else if (appStatus.holdingSlide === "conclusion") {
         ActivateButtonHelper(archiveBtn, true)
       }
     } else {
@@ -527,7 +533,7 @@ function appStatusReceived(json) {
     }
 
     if (appStatus.secondClickEndsStream) {
-      archiveBtn.innerHTML = "End Stream"
+      archiveBtn.innerHTML = `End Stream <i class="bi bi-broadcast"></i>`
     } else {
       archiveBtn.innerHTML = "Conclusion Slide"
     }

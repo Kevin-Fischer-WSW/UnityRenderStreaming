@@ -23,7 +23,7 @@ $body-bg: #616161;
 }
 
 #slide-clear-btn, #video-clear-btn {
-  background-color: #7FDB6A;
+  background-color: #2ecc71;
 }
 
 #slide-btn-container, #video-btn-container {
@@ -79,59 +79,53 @@ $body-bg: #616161;
 }
 
 .activated {
-  filter: saturate(2.2)
+  box-shadow: 0px 13px 5px -5px #b2de27, 0px -11px 5px -5px #b2de27;
 }
 
 .deactivated {
-  filter: grayscale(30%)
+  box-shadow: none;
 }
 
 #pending-btn {
-  background-color: #EEDC31;
-  border: 2px solid #3D3D3D;
+  background-color: #fff000;
+  //border: 2px solid #3D3D3D;
   height: 70px;
   width: 150px;
   font-size: 20px;
   cursor: pointer;
-}
-
-#pending-btn:hover {
-  background-color: rgb(197, 181, 89);
 }
 
 #live-btn {
-  background-color: #7FDB6A;
-  border: 2px solid #3D3D3D;
+  background-color: #2ecc71;
+  //border: 2px solid #3D3D3D;
   height: 70px;
   width: 150px;
   font-size: 20px;
   cursor: pointer;
-}
-
-#live-btn:hover {
-  background-color: #60d146;
 }
 
 #technical-diff-btn {
-  background-color: #F57A37;
-  border: 2px solid #3D3D3D;
+  background-color: #f9690e;
+  //border: 2px solid #3D3D3D;
   height: 70px;
   width: 150px;
   font-size: 20px;
   cursor: pointer;
-}
-
-#technical-diff-btn:hover {
-  background-color: #db6d31;
 }
 
 #archive-btn {
-  background-color: #F44747;
-  border: 2px solid #3D3D3D;
+  background-color: #ff4c30;
+  //border: 2px solid #3D3D3D;
   height: 70px;
   width: 150px;
   font-size: 20px;
   cursor: pointer;
+}
+
+#pending-btn:hover, #live-btn:hover, 
+#technical-diff-btn:hover, #archive-btn:hover {
+  font-size: 21px;
+  transition: font-size .08s ease-in-out;
 }
 
 // avoid button text from overflowing.
@@ -141,10 +135,6 @@ $body-bg: #616161;
   text-overflow: ellipsis;
   white-space: nowrap;
   //max-width: 150px;
-}
-
-#archive-btn:hover {
-  background-color: #db3333;
 }
 
 #logout, #stream-settings  {
@@ -245,7 +235,6 @@ $secondary: #4c4c4c;
 #stream-activity-bar {
   margin: auto;
   background-color: $secondary;
-  border: 2px solid black;
   height: 15%;
   width: 75%;
   align-items: center;
@@ -254,13 +243,13 @@ $secondary: #4c4c4c;
 }
 
 #on-air-indicator {
-  background-color: grey;
-  border: 2px solid black;
-  border-radius: 50%;
-  height: 20px;
-  width: 20px;
   margin: 0;
   margin-right: 5%;
+}
+
+.bi-broadcast-lg {
+  font-size: 40px;
+  color: grey;
 }
 
 #on-air-text {
