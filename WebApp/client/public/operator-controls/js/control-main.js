@@ -115,15 +115,23 @@ function Play() {
   elementMuteButton.style.position = 'absolute';
   elementMuteButton.style.bottom = '0.5em';
   elementMuteButton.style.left = '1.5em';
-  elementMuteButton.innerHTML = 'Output Audio <i class="bi bi-volume-mute"></i>';
+  elementMuteButton.innerHTML = 'Output Audio <i class="bi bi-volume-mute"></i> <input type="range" class="form-range d-none" value="100">';
+  let elementMuteIcon = elementMuteButton.getElementsByTagName('i')[0];
+  let elementMuteSlider = elementMuteButton.getElementsByTagName('input')[0];
   elementMuteButton.addEventListener('click', function () {
     elementPreviewVideo.muted = false;
     let audioTracks = myVideoPlayer.videoAudioTracks;
     if (audioTracks.length !== 2) return;
     // Toggle first audio track.
     audioTracks[0].enabled = !audioTracks[0].enabled;
-    elementMuteButton.innerHTML = audioTracks[0].enabled ? 'Output Audio <i class="bi bi-volume-up"></i>' : 'Output Audio <i class="bi bi-volume-mute"></i>';
+    elementMuteIcon.classList.add(audioTracks[0].enabled ? "bi-volume-up" : "bi-volume-mute")
+    elementMuteIcon.classList.remove(audioTracks[0].enabled ? "bi-volume-mute" : "bi-volume-up")
+    elementMuteSlider.classList.add(audioTracks[0].enabled ? "d-block" : "d-none")
+    elementMuteSlider.classList.remove(audioTracks[0].enabled ? "d-none" : "d-block")
   });
+  elementMuteSlider.addEventListener('click', function (ev) {
+    ev.stopPropagation();
+  })
   outputColDiv.appendChild(elementMuteButton);
 
   // add second mute button (mutes zoom call audio)
@@ -136,14 +144,34 @@ function Play() {
   elementMuteButton2.style.position = 'absolute';
   elementMuteButton2.style.bottom = '0.5em';
   elementMuteButton2.style.left = '1.5em';
-  elementMuteButton2.innerHTML = 'Input Audio <i class="bi bi-volume-mute"></i>';
+  elementMuteButton2.innerHTML = 'Input Audio <i class="bi bi-volume-mute"></i> <input type="range" class="form-range d-none" value="100">';
+  let elementMuteIcon2 = elementMuteButton2.getElementsByTagName('i')[0];
+  let elementMuteSlider2 = elementMuteButton2.getElementsByTagName('input')[0];
   elementMuteButton2.addEventListener('click', function () {
     elementPreviewVideo.muted = false;
     let audioTracks = myVideoPlayer.videoAudioTracks;
     if (audioTracks.length !== 2) return;
     // Toggle second audio track.
     audioTracks[1].enabled = !audioTracks[1].enabled;
-    elementMuteButton2.innerHTML = audioTracks[1].enabled ? 'Input Audio <i class="bi bi-volume-up"></i>' : 'Input Audio <i class="bi bi-volume-mute"></i>';
+    elementMuteIcon2.classList.add(audioTracks[1].enabled ? "bi-volume-up" : "bi-volume-mute")
+    elementMuteIcon2.classList.remove(audioTracks[1].enabled ? "bi-volume-mute" : "bi-volume-up")
+    elementMuteSlider2.classList.add(audioTracks[1].enabled ? "d-block" : "d-none")
+    elementMuteSlider2.classList.remove(audioTracks[1].enabled ? "d-none" : "d-block")
+  });
+  elementMuteSlider2.addEventListener('click', function (ev) {
+    ev.stopPropagation();
+  })
+  elementMuteSlider.addEventListener('input', function () {
+    let audioTracks = myVideoPlayer.videoAudioTracks;
+    if (audioTracks.length !== 2) return;
+    elementPreviewVideo.volume = elementMuteSlider.value / 100;
+    elementMuteSlider2.value = elementMuteSlider.value;
+  });
+  elementMuteSlider2.addEventListener('input', function () {
+    let audioTracks = myVideoPlayer.videoAudioTracks;
+    if (audioTracks.length !== 2) return;
+    elementPreviewVideo.volume = elementMuteSlider2.value / 100;
+    elementMuteSlider.value = elementMuteSlider2.value;
   });
   previewColDiv.appendChild(elementMuteButton2);
 
