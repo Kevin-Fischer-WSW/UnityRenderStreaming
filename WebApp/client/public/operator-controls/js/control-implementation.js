@@ -1539,6 +1539,7 @@ function CategorizeSlideFilesBySlideTypeSelects(files) {
 
 /* EDIT SLIDE ASSIGNMENT MODAL */
 let editSlideBtn = document.getElementById("edit-slide-btn")
+let editSlideCloseBtn = document.getElementById("edit-slide-close-btn")
 editSlideBtn.addEventListener("click", editSlideBtnClicked)
 let editSlideSaveBtn = document.getElementById("edit-slide-save-btn")
 editSlideSaveBtn.addEventListener("click", editSlideSaveBtnClicked)
@@ -1546,6 +1547,53 @@ let introSelect = document.getElementById("intro-slide-type-select")
 let techDiffSelect = document.getElementById("technical-difficulty-slide-type-select")
 let conclusionSelect = document.getElementById("conclusion-slide-type-select")
 let slideTypeSelects = [introSelect, techDiffSelect, conclusionSelect]
+
+let modalIntroCaption = document.getElementById("modal-intro-caption")
+let modalIntroPreview = document.getElementById("modal-intro-preview")
+let modalTechDiffCaption = document.getElementById("modal-techdiff-caption")
+let modalTechDiffPreview = document.getElementById("modal-techdiff-preview")
+let modalConclusionCaption = document.getElementById("modal-conclusion-caption")
+let modalConclusionPreview = document.getElementById("modal-conclusion-preview")
+
+
+// reset preview elements upon modal close or save.
+function resetEditSlideAssignmentPreviewElements() {
+  modalIntroCaption.innerHTML = modalTechDiffCaption.innerHTML = modalConclusionCaption.innerHTML
+  = "No slide selected to preview";
+  
+  modalIntroPreview.src = modalTechDiffPreview.src = modalConclusionPreview.src = "...";
+  
+  modalIntroPreview.classList.add("d-none");
+  modalTechDiffPreview.classList.add("d-none");
+  modalConclusionPreview.classList.add("d-none");
+}
+
+// loads file preview based on user selection
+function fileReaderHelper(previewEl, selection) {
+  const fileReader = new FileReader();
+  fileReader.onload = e => {
+    previewEl.src = e.target.result;
+  }
+  fileReader.readAsDataURL(formInput[selection.selectedIndex - 1].file);
+}
+
+editSlideCloseBtn.addEventListener("click", resetEditSlideAssignmentPreviewElements);
+
+introSelect.addEventListener("change", () => {
+  modalIntroCaption.innerHTML = introSelect.value + " will be assigned as your intro slide.";
+  fileReaderHelper(modalIntroPreview, introSelect);
+  modalIntroPreview.classList.remove("d-none");
+});
+techDiffSelect.addEventListener("change", () => {
+  modalTechDiffCaption.innerHTML = techDiffSelect.value + " will be assigned as your tech diff slide."
+  fileReaderHelper(modalTechDiffPreview, techDiffSelect);
+  modalTechDiffPreview.classList.remove("d-none");
+});
+conclusionSelect.addEventListener("change", () => {
+  modalConclusionCaption.innerHTML = conclusionSelect.value + " will be assigned as your conclusion slide."
+  fileReaderHelper(modalConclusionPreview, conclusionSelect);
+  modalConclusionPreview.classList.remove("d-none");
+});
 
 editSlideBtn.style.display = "none";
 
@@ -1574,6 +1622,7 @@ function editSlideBtnClicked() {
 
 function editSlideSaveBtnClicked() {
   clearFormInput();
+  resetEditSlideAssignmentPreviewElements();
   // Clear descriptor
   uploadDescriptor.innerHTML = ""
   let [slideFiles, musicFiles, videoFiles] = SortFilesByExtension(batchSlideFileInput.files)

@@ -669,9 +669,9 @@
               <div class="modal-content">
                 <div class="modal-header">
                   <h5 class="modal-title" id="edit-slide-modal-label">Edit slide assignment</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  <button type="button" id="edit-slide-close-btn" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" style="max-height: 500px; overflow-y: scroll;">
                   <!-- Change slide that will be used for intro type -->
                   <h6>Intro slide</h6>
                   <select data-type="intro" id="intro-slide-type-select" class="form-select mb-2"
@@ -679,6 +679,10 @@
                     <option>No slide selected. Slide will not update.</option>
                     <!-- Further options will be generated -->
                   </select>
+                  <figure class="figure">
+                    <figcaption id="modal-intro-caption"class="figure-caption">No slide selected to preview.</figcaption>
+                    <img id="modal-intro-preview" src="..." class="img-fluid d-none" alt="...">
+                  </figure>
                   <!-- Change slide that will be used for technicalDifficulty type -->
                   <h6>Tech difficulty slide</h6>
                   <select data-type="technicalDifficulty" id="technical-difficulty-slide-type-select"
@@ -686,6 +690,10 @@
                     <option>No slide selected. Slide will not update.</option>
                     <!-- Further options will be generated -->
                   </select>
+                  <figure class="figure">
+                    <figcaption id="modal-techdiff-caption"class="figure-caption">No slide selected to preview.</figcaption>
+                    <img id="modal-techdiff-preview" src="..." class="img-fluid d-none" alt="...">
+                  </figure>
                   <!-- Change slide that will be used for conclusion type -->
                   <h6>Conclusion slide</h6>
                   <select data-type="conclusion" id="conclusion-slide-type-select" class="form-select mb-2"
@@ -693,6 +701,10 @@
                     <option>No slide selected. Slide will not update.</option>
                     <!-- Further options will be generated -->
                   </select>
+                  <figure class="figure">
+                    <figcaption id="modal-conclusion-caption"class="figure-caption">No slide selected to preview.</figcaption>
+                    <img id="modal-conclusion-preview" src="..." class="img-fluid d-none" alt="...">
+                  </figure>
                 </div>
                 <div class="modal-footer">
                   <button id="edit-slide-save-btn" type="button" class="btn btn-secondary"
