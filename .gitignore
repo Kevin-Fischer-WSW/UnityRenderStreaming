@@ -365,3 +365,6 @@ WebApp/data.json
 
 # Exclude generated files for WebApp
 WebApp/client/public/operator-controls/js/*.gen.js
+
+# Exclude compiled css
+WebApp/client/public/css/style.css
