@@ -17,6 +17,7 @@ $body-bg: #616161;
 
 #intro-preview, #techdiff-preview, #conc-preview {
   background-size: cover;
+  background-blend-mode: multiply;
   padding: 0;
   display: inline-flex;
   align-items: flex-end;
@@ -183,10 +184,15 @@ video {
 
 $primary : white;
 $secondary: #4c4c4c;
+$btn-hover-bg-shade-amount: 50%;
+$btn-active-bg-shade-amount: 75%;
 
 @import "node_modules/bootstrap/scss/_functions";
 @import "node_modules/bootstrap/scss/_variables";
 @import "node_modules/bootstrap/scss/mixins";
+
+// Import all of Bootstrap's css.
+@import 'node_modules/bootstrap/scss/bootstrap';
 
 .check-box-centered {
   padding-left: 6px;
@@ -264,8 +270,6 @@ $secondary: #4c4c4c;
   font-size: 18px;
   margin: 0;
 }
-// Import all of Bootstrap's css.
-@import 'node_modules/bootstrap/scss/bootstrap';
 
 .card-bordered {
   border: 1px solid #ebebeb;
@@ -324,22 +328,6 @@ h4.card-title {
   margin-left: 8px;
   margin-right: 8px;
 }
-
-// .btn-secondary {
-//   color: #4d5259 !important;
-//   background-color: #e4e7ea;
-//   border-color: #e4e7ea;
-//   color: #fff;
-// }
-
-// .btn-xs {
-//   font-size: 11px;
-//   padding: 2px 8px;
-//   line-height: 18px;
-// }
-// .btn-xs:hover{
-//   color:#fff !important;
-// }
 
 .card-title {
   font-family: Roboto,sans-serif;

@@ -344,8 +344,8 @@
               <input id="meeting-number-input" type="text" class="form-control mb-1" placeholder="Meeting ID" aria-label="Meeting number">
               <input id="meeting-password-input" type="text" class="form-control" placeholder="Password" aria-label="Meeting password">
             </fieldset>
-            <button id="join-meeting-btn" class="btn btn-primary" type="button" title="Join">Join</button>
-            <button id="leave-meeting-btn" class="btn btn-primary" type="button" title="Leave">Leave</button>
+            <button id="join-meeting-btn" class="btn btn-light" type="button" title="Join">Join</button>
+            <button id="leave-meeting-btn" class="btn btn-light" type="button" title="Leave">Leave</button>
         </fieldset>
       </div>
       <!-- Participant controls -->
@@ -359,9 +359,9 @@
               thirds</button>
           </div>
           <div id="participant-autoshow-btn-grp" class="btn-group d-none w-50 mt-2" role="group" aria-label="Enable/Disable Autoshow all participants.">
-            <button id="enable-autoshow-btn" type="button" class="btn btn-secondary" 
+            <button id="enable-autoshow-btn" type="button" class="btn btn-secondary"
             title="Enable auto show participants in output upon join">Enable Auto Show</button>
-            <button id="disable-autoshow-btn" type="button" class="btn btn-secondary" 
+            <button id="disable-autoshow-btn" type="button" class="btn btn-secondary"
             title="Disable auto show participants in output upon join">Disable Auto Show</button>
           </div>
           <div class="btn-group w-50 mt-2 mb-2" role="group" aria-label="Show/Hide select participants.">
@@ -380,7 +380,7 @@
 
             <span class="input-group-text" draggable="true"><i class="bi bi-grip-vertical"></i></span>
             <span class="input-group-text name-span" style="flex-grow: 1">Name & Title</span>
-            <button class="btn btn-secondary rename-btn" aria-label="Participant's name" data-bs-toggle="modal" 
+            <button class="btn btn-secondary rename-btn" aria-label="Participant's name" data-bs-toggle="modal"
             data-bs-target="#rename-modal" title="Rename"><i class="bi bi-pencil"></i></button>
             <button class="btn btn-secondary visibility-btn" type="button" title="Visibility toggle"><i class="bi bi-eye"></i></button>
             <button class="btn btn-secondary audibility-btn" type="button" title="Audibility toggle"><i class="bi bi-ear"></i></button>
@@ -472,13 +472,13 @@
           <legend class="title text-white mt-2">Slide controls</legend>
 
           <div class="btn-group d-flex w-100 mt-2">
-            <button id= "intro-preview" type="button" class="btn btn-primary" data-bs-toggle="modal" 
+            <button id= "intro-preview" type="button" class="btn btn-light" data-bs-toggle="modal"
             data-bs-target="#stream-confirmation-modal" title="Intro slide preview"><span class="bg-dark text-light p-1">Intro</span></button>
-            <button id= "techdiff-preview" type="button" class="btn btn-primary" 
+            <button id= "techdiff-preview" type="button" class="btn btn-light"
             title="Tech diff slide preview"><span class="bg-dark text-light p-1">Technical Difficulty</span></button>
-            <button id= "conc-preview" type="button" class="btn btn-primary"
+            <button id= "conc-preview" type="button" class="btn btn-light"
             title="Conclusion slide preview"><span class="bg-dark text-light p-1">Conclusion</span></button>
-            <button id="slide-clear-btn" type="button" class="btn btn-primary"
+            <button id="slide-clear-btn" type="button" class="btn btn-light"
             title="Clear output">Live</button>
           </div>
 
@@ -488,7 +488,7 @@
             <div id="slide-btn-element" class="media-btn-element flex-column m-1">
               <span class="media-btn-label" >Switch</span>
               <img src="..." alt="..." class="media-switch-thumb rounded">
-              <button class="media-set-as-btn btn btn-primary rounded-pill" type="button" data-bs-toggle="dropdown" title = "Options">
+              <button class="media-set-as-btn btn btn-light rounded-pill" type="button" data-bs-toggle="dropdown" title = "Options">
                 <i class="bi bi-three-dots"></i>
               </button>
               <ul class="dropdown-menu">
@@ -603,7 +603,7 @@
                 <input type="range" class="custom-range w-100" min="0" max="1" step="0.01" id="volume-range-video">
                 <span id="video-volume-level" class="text-white"></span>
               </div>
-              <button id="video-clear-btn" type="button" class="btn" data-toggle="tooltip" data-placement="top" 
+              <button id="video-clear-btn" type="button" class="btn" data-toggle="tooltip" data-placement="top"
               title="Clear Output" data-delay-show="0">Live</button> <!-- Clear button -->
             </div>
           </fieldset>
@@ -614,7 +614,7 @@
             <div id="video-btn-element" class="media-btn-element flex-column m-1">
               <span class="media-btn-label">Switch</span>
               <img src="..." alt="..." class="media-switch-thumb rounded">
-              <button class="media-set-as-btn btn btn-primary rounded-pill" type="button" data-bs-toggle="dropdown" title="Options">
+              <button class="media-set-as-btn btn btn-light rounded-pill" type="button" data-bs-toggle="dropdown" title="Options">
                 <i class="bi bi-three-dots"></i>
               </button>
               <ul class="dropdown-menu">
@@ -664,7 +664,7 @@
           <legend class="title text-white mt-2">Upload</legend>
           <!-- Descriptor of action performed on files -->
           <div id="slide-upload-descriptor" class="text-white">Click browse to look for files to upload.</div>
-          <button id="edit-slide-btn" class="btn btn-primary mb-2" type="button" data-bs-toggle="modal"
+          <button id="edit-slide-btn" class="btn btn-light mb-2" type="button" data-bs-toggle="modal"
             data-bs-target="#edit-slide-modal" title="Assign slides to types">Assign before upload
           </button>
           <!-- Modal to edit slide -->
@@ -674,7 +674,7 @@
               <div class="modal-content">
                 <div class="modal-header">
                   <h5 class="modal-title" id="edit-slide-modal-label">Edit slide assignment</h5>
-                  <button type="button" id="edit-slide-close-btn" class="btn-close" data-bs-dismiss="modal" 
+                  <button type="button" id="edit-slide-close-btn" class="btn-close" data-bs-dismiss="modal"
                   aria-label="Close" title="Close"></button>
                 </div>
                 <div class="modal-body" style="max-height: 500px; overflow-y: scroll;">
@@ -743,7 +743,7 @@
             </select>
             <button id="recording-download" class="btn btn-secondary" type="button" title="Download">Download</button>
           </div>
-          <a class="btn btn-secondary mt-1" type="button" href="../video-editor/index.html" target="_blank" 
+          <a class="btn btn-secondary mt-1" type="button" href="../video-editor/index.html" target="_blank"
           rel="noreferrer noopener" title="Redirects to video editor page">Open video editor</a>
         </fieldset>
       </div>
@@ -757,7 +757,7 @@
             <button id="config-upload-btn" class="btn btn-secondary" type="button" title="Upload">Upload</button>
           </div>
           <!-- Button to download configuration -->
-          <button id="config-download-btn" class="btn btn-primary mt-2" type="button" title="Download">Download</button>
+          <button id="config-download-btn" class="btn btn-light mt-2" type="button" title="Download">Download</button>
           <div id="configTrackerContainer" class="container overflow-auto overflow-div"></div>
         </fieldset>
       </div>
