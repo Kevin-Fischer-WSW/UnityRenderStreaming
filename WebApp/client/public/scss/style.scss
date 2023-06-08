@@ -830,7 +830,7 @@ input[type=range] {
   cursor: pointer;
   height: .2rem;
   --bs-bg-opacity: 1;
-  accent-color: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity)) !important;;
+  accent-color: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity));
   border-radius: 0;
 }
 

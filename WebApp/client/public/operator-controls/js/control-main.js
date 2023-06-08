@@ -107,6 +107,7 @@ function Play() {
 
   // add mute button (mutes audio from the preview video)
   const muteOutputButton = document.createElement('button');
+  muteOutputButton.title = "Mute/Unmute output audio"
   muteOutputButton.id = 'mute-output-btn';
   muteOutputButton.classList.add('btn');
   muteOutputButton.classList.add('btn-secondary');
@@ -115,9 +116,10 @@ function Play() {
   muteOutputButton.style.position = 'absolute';
   muteOutputButton.style.bottom = '0.5em';
   muteOutputButton.style.left = '1.5em';
-  muteOutputButton.innerHTML = 'Output Audio <i class="bi bi-volume-mute"></i> <input type="range" class="form-range d-none" value="100">';
+  muteOutputButton.innerHTML = 'Output Audio <i class="bi bi-volume-mute"></i> <input type="range" class="custom-range d-none" value="100">';
   let muteOutputIcon = muteOutputButton.getElementsByTagName('i')[0];
   let muteOutputSlider = muteOutputButton.getElementsByTagName('input')[0];
+  muteOutputSlider.style.padding = "8px";
   muteOutputButton.addEventListener('click', function () {
     elementPreviewVideo.muted = false;
     let audioTracks = myVideoPlayer.videoAudioTracks;
@@ -136,6 +138,7 @@ function Play() {
 
   // add second mute button (mutes zoom call audio)
   const muteInputButton = document.createElement('button');
+  muteInputButton.title = "Mute/Unmute input audio"
   muteInputButton.id = 'mute-input-btn';
   muteInputButton.classList.add('btn');
   muteInputButton.classList.add('btn-secondary');
@@ -144,9 +147,10 @@ function Play() {
   muteInputButton.style.position = 'absolute';
   muteInputButton.style.bottom = '0.5em';
   muteInputButton.style.left = '1.5em';
-  muteInputButton.innerHTML = 'Input Audio <i class="bi bi-volume-mute"></i> <input type="range" class="form-range d-none" value="100">';
+  muteInputButton.innerHTML = 'Input Audio <i class="bi bi-volume-mute"></i> <input type="range" class="custom-range d-none" value="100">';
   let muteInputIcon = muteInputButton.getElementsByTagName('i')[0];
   let muteInputSlider = muteInputButton.getElementsByTagName('input')[0];
+  muteInputSlider.style.padding = "8px";
   muteInputButton.addEventListener('click', function () {
     elementPreviewVideo.muted = false;
     let audioTracks = myVideoPlayer.videoAudioTracks;
