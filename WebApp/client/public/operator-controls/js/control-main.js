@@ -106,108 +106,74 @@ function Play() {
   });
 
   // add mute button (mutes audio from the preview video)
-  const elementMuteButton = document.createElement('button');
-  elementMuteButton.id = 'mute-preview-btn';
-  elementMuteButton.classList.add('btn');
-  elementMuteButton.classList.add('btn-secondary');
-  elementMuteButton.classList.add('btn-sm');
+  const muteOutputButton = document.createElement('button');
+  muteOutputButton.id = 'mute-output-btn';
+  muteOutputButton.classList.add('btn');
+  muteOutputButton.classList.add('btn-secondary');
+  muteOutputButton.classList.add('btn-sm');
   // Make the button position relative to the bottom left of the playerDiv.
-  elementMuteButton.style.position = 'absolute';
-  elementMuteButton.style.bottom = '0.5em';
-  elementMuteButton.style.left = '1.5em';
-  elementMuteButton.innerHTML = 'Output Audio <i class="bi bi-volume-mute"></i> <input type="range" class="form-range d-none" value="100">';
-  let elementMuteIcon = elementMuteButton.getElementsByTagName('i')[0];
-  let elementMuteSlider = elementMuteButton.getElementsByTagName('input')[0];
-  elementMuteButton.addEventListener('click', function () {
+  muteOutputButton.style.position = 'absolute';
+  muteOutputButton.style.bottom = '0.5em';
+  muteOutputButton.style.left = '1.5em';
+  muteOutputButton.innerHTML = 'Output Audio <i class="bi bi-volume-mute"></i> <input type="range" class="form-range d-none" value="100">';
+  let muteOutputIcon = muteOutputButton.getElementsByTagName('i')[0];
+  let muteOutputSlider = muteOutputButton.getElementsByTagName('input')[0];
+  muteOutputButton.addEventListener('click', function () {
     elementPreviewVideo.muted = false;
     let audioTracks = myVideoPlayer.videoAudioTracks;
     if (audioTracks.length !== 2) return;
     // Toggle first audio track.
     audioTracks[0].enabled = !audioTracks[0].enabled;
-    elementMuteIcon.classList.add(audioTracks[0].enabled ? "bi-volume-up" : "bi-volume-mute")
-    elementMuteIcon.classList.remove(audioTracks[0].enabled ? "bi-volume-mute" : "bi-volume-up")
-    elementMuteSlider.classList.add(audioTracks[0].enabled ? "d-block" : "d-none")
-    elementMuteSlider.classList.remove(audioTracks[0].enabled ? "d-none" : "d-block")
+    muteOutputIcon.classList.add(audioTracks[0].enabled ? "bi-volume-up" : "bi-volume-mute")
+    muteOutputIcon.classList.remove(audioTracks[0].enabled ? "bi-volume-mute" : "bi-volume-up")
+    muteOutputSlider.classList.add(audioTracks[0].enabled ? "d-block" : "d-none")
+    muteOutputSlider.classList.remove(audioTracks[0].enabled ? "d-none" : "d-block")
   });
-  elementMuteSlider.addEventListener('click', function (ev) {
+  muteOutputSlider.addEventListener('click', function (ev) {
     ev.stopPropagation();
   })
-  outputColDiv.appendChild(elementMuteButton);
+  outputColDiv.appendChild(muteOutputButton);
 
   // add second mute button (mutes zoom call audio)
-  const elementMuteButton2 = document.createElement('button');
-  elementMuteButton2.id = 'mute-zoom-btn';
-  elementMuteButton2.classList.add('btn');
-  elementMuteButton2.classList.add('btn-secondary');
-  elementMuteButton2.classList.add('btn-sm');
+  const muteInputButton = document.createElement('button');
+  muteInputButton.id = 'mute-input-btn';
+  muteInputButton.classList.add('btn');
+  muteInputButton.classList.add('btn-secondary');
+  muteInputButton.classList.add('btn-sm');
   // Make the button position relative to the bottom left of the playerDiv.
-  elementMuteButton2.style.position = 'absolute';
-  elementMuteButton2.style.bottom = '0.5em';
-  elementMuteButton2.style.left = '1.5em';
-  elementMuteButton2.innerHTML = 'Input Audio <i class="bi bi-volume-mute"></i> <input type="range" class="form-range d-none" value="100">';
-  let elementMuteIcon2 = elementMuteButton2.getElementsByTagName('i')[0];
-  let elementMuteSlider2 = elementMuteButton2.getElementsByTagName('input')[0];
-  elementMuteButton2.addEventListener('click', function () {
+  muteInputButton.style.position = 'absolute';
+  muteInputButton.style.bottom = '0.5em';
+  muteInputButton.style.left = '1.5em';
+  muteInputButton.innerHTML = 'Input Audio <i class="bi bi-volume-mute"></i> <input type="range" class="form-range d-none" value="100">';
+  let muteInputIcon = muteInputButton.getElementsByTagName('i')[0];
+  let muteInputSlider = muteInputButton.getElementsByTagName('input')[0];
+  muteInputButton.addEventListener('click', function () {
     elementPreviewVideo.muted = false;
     let audioTracks = myVideoPlayer.videoAudioTracks;
     if (audioTracks.length !== 2) return;
     // Toggle second audio track.
     audioTracks[1].enabled = !audioTracks[1].enabled;
-    elementMuteIcon2.classList.add(audioTracks[1].enabled ? "bi-volume-up" : "bi-volume-mute")
-    elementMuteIcon2.classList.remove(audioTracks[1].enabled ? "bi-volume-mute" : "bi-volume-up")
-    elementMuteSlider2.classList.add(audioTracks[1].enabled ? "d-block" : "d-none")
-    elementMuteSlider2.classList.remove(audioTracks[1].enabled ? "d-none" : "d-block")
+    muteInputIcon.classList.add(audioTracks[1].enabled ? "bi-volume-up" : "bi-volume-mute")
+    muteInputIcon.classList.remove(audioTracks[1].enabled ? "bi-volume-mute" : "bi-volume-up")
+    muteInputSlider.classList.add(audioTracks[1].enabled ? "d-block" : "d-none")
+    muteInputSlider.classList.remove(audioTracks[1].enabled ? "d-none" : "d-block")
   });
-  elementMuteSlider2.addEventListener('click', function (ev) {
+  muteInputSlider.addEventListener('click', function (ev) {
     ev.stopPropagation();
   })
-  elementMuteSlider.addEventListener('input', function () {
+  muteOutputSlider.addEventListener('input', function () {
     let audioTracks = myVideoPlayer.videoAudioTracks;
     if (audioTracks.length !== 2) return;
-    elementPreviewVideo.volume = elementMuteSlider.value / 100;
-    elementMuteSlider2.value = elementMuteSlider.value;
+    elementPreviewVideo.volume = muteOutputSlider.value / 100;
+    muteInputSlider.value = muteOutputSlider.value;
   });
-  elementMuteSlider2.addEventListener('input', function () {
+  muteInputSlider.addEventListener('input', function () {
     let audioTracks = myVideoPlayer.videoAudioTracks;
     if (audioTracks.length !== 2) return;
-    elementPreviewVideo.volume = elementMuteSlider2.value / 100;
-    elementMuteSlider.value = elementMuteSlider2.value;
+    elementPreviewVideo.volume = muteInputSlider.value / 100;
+    muteOutputSlider.value = muteInputSlider.value;
   });
-  previewColDiv.appendChild(elementMuteButton2);
-
-  /* NOTE: to reenable fullscreen. Uncomment this section.
-  // add fullscreen button
-  const elementFullscreenButton = document.createElement('img');
-  elementFullscreenButton.id = 'fullscreenButton';
-  elementFullscreenButton.src = 'images/FullScreen.png';
-  playerDiv.appendChild(elementFullscreenButton);
-  elementFullscreenButton.addEventListener("click", function () {
-    if (!document.fullscreenElement || !document.webkitFullscreenElement) {
-      if (document.documentElement.requestFullscreen) {
-        document.documentElement.requestFullscreen();
-      } else if (document.documentElement.webkitRequestFullscreen) {
-        document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
-      } else {
-        if (playerDiv.style.position == "absolute") {
-          playerDiv.style.position = "relative";
-        } else {
-          playerDiv.style.position = "absolute";
-        }
-      }
-    }
-  });
-  document.addEventListener('webkitfullscreenchange', onFullscreenChange);
-  document.addEventListener('fullscreenchange', onFullscreenChange);
-    function onFullscreenChange() {
-    if (document.webkitFullscreenElement || document.fullscreenElement) {
-      playerDiv.style.position = "absolute";
-      elementFullscreenButton.style.display = 'none';
-    } else {
-      playerDiv.style.position = "relative";
-      elementFullscreenButton.style.display = 'block';
-    }
-  }
-   */
+  previewColDiv.appendChild(muteInputButton);
 }
 
 async function setupVideoPlayer(previewElement, outputElement) {
@@ -229,7 +195,9 @@ async function onDisconnect(message) {
   // Clear generated elements.
   //playerDiv.removeChild(document.getElementById('playButtonElement'));
   outputDiv.removeChild(document.getElementById('output-video'));
+  outputColDiv.removeChild(document.getElementById('mute-output-btn'));
   previewDiv.removeChild(document.getElementById('preview-video'));
+  previewColDiv.removeChild(document.getElementById('mute-input-btn'));
   await myVideoPlayer.stop();
   myVideoPlayer = null;
 
