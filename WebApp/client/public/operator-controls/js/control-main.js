@@ -119,7 +119,7 @@ function Play() {
   muteOutputButton.innerHTML = 'Output Audio <i class="bi bi-volume-mute"></i> <input type="range" class="custom-range d-none" value="100">';
   let muteOutputIcon = muteOutputButton.getElementsByTagName('i')[0];
   let muteOutputSlider = muteOutputButton.getElementsByTagName('input')[0];
-  muteOutputSlider.style.padding = "8px";
+  muteOutputSlider.style.margin = "8px";
   muteOutputButton.addEventListener('click', function () {
     elementPreviewVideo.muted = false;
     let audioTracks = myVideoPlayer.videoAudioTracks;
@@ -150,7 +150,7 @@ function Play() {
   muteInputButton.innerHTML = 'Input Audio <i class="bi bi-volume-mute"></i> <input type="range" class="custom-range d-none" value="100">';
   let muteInputIcon = muteInputButton.getElementsByTagName('i')[0];
   let muteInputSlider = muteInputButton.getElementsByTagName('input')[0];
-  muteInputSlider.style.padding = "8px";
+  muteInputSlider.style.margin = "8px";
   muteInputButton.addEventListener('click', function () {
     elementPreviewVideo.muted = false;
     let audioTracks = myVideoPlayer.videoAudioTracks;

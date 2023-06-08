@@ -1178,6 +1178,7 @@ function validateSlideSwitchBtns(slides) {
     slide.style.display = "flex";
     let span = document.querySelector(`#${slide.id} span`)
     let img = document.querySelector(`#${slide.id} img`);
+    
     setupSlideSetAsOptionsButton(slide);
     setupDeleteButton(slide, "/uapp/deleteHoldingSlide?url={0}", span, onSlideTabClicked);
     img.addEventListener("click", function () {
@@ -1195,6 +1196,7 @@ function validateSlideSwitchBtns(slides) {
     label.thingToDelete = slideInfo.url;
     label.innerHTML = slideInfo.name;
     img.src = img.alt = slideInfo.url;
+    slide.title = "Switch to " + slideInfo.name;
   }
   ValidateClonesWithJsonArray(slideSwitchBtn, slideBtnContainer, slideSwitchBtns, setupSlide, slides, validateSlide);
 }
@@ -1818,22 +1820,8 @@ function validateVideoSwitchBtns(videos) {
     videoBtn.style.display = "flex";
     let label = document.querySelector(`#${videoBtn.id} span`);
     let img = document.querySelector(`#${videoBtn.id} img`);
-    let mute = document.querySelector(`#${videoBtn.id} .media-right-btn`)
-    let unmute = document.querySelector(`#${videoBtn.id} .media-left-btn`);
     setupSlideSetAsOptionsButton(videoBtn);
     setupDeleteButton(videoBtn, "/uapp/deleteVideo?url={0}", label, FetchAllUploadedMediaAndUpdateDash);
-    mute.addEventListener("click", () => {unityFetch("/muteZoomAudio", {method: "PUT"})
-    .then(response => {
-      if (response.ok) {
-        console.log("Zoom Audio Muted.");
-      }
-    })});
-    unmute.addEventListener("click", () => {unityFetch("/unmuteZoomAudio", {method: "PUT"})
-    .then(response => {
-      if (response.ok) {
-        console.log("Zoom Audio Unmuted.");
-      }
-    })});
     img.addEventListener("click", function () {
       unityFetch("/setHoldingSlide?url=" + img.alt, {method: "PUT"})
         .then(response => {
@@ -1853,6 +1841,7 @@ function validateVideoSwitchBtns(videos) {
     }).catch(function (err) {
       img.src = slideInfo.url;
     });
+    video.title = "Switch to " + slideInfo.name;
   }
   ValidateClonesWithJsonArray(videoSwitchBtn, videoBtnContainer, videoSwitchBtns, setupVideoSwitchBtn, videos, validateVideoSwitchBtn);
 }
