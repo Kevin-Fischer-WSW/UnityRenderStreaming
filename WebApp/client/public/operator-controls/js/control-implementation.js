@@ -6,6 +6,7 @@ import { OperatorControls } from "/operator-controls/js/control-map.gen.js";
 import { sendClickEvent, sendStringSubmitEvent } from "/videoplayer/js/register-events.js";
 import { myVideoPlayer, mainNotifications } from "/operator-controls/js/control-main.js";
 import { ValidateClonesWithJsonArray} from "/operator-controls/js/validation-helper.js";
+import * as Style from "/operator-controls/js/style-helper.js";
 import { unityFetch } from "../../js/unity-fetch.js";
 import { getVideoThumb } from "../../js/video-thumbnail.js";
 import { createUploadProgressTracker } from "../../js/progresstracker.js";
@@ -788,6 +789,9 @@ function validateParticipantInputGroups() {
     let lowerThirdBtn = document.querySelector(`#${clone.id} .show-lower-third-btn`);
     let nameSpan = document.querySelector(`#${clone.id} .name-span`);
 
+    Style.SetActive(visibilityBtn, data.visible);
+    Style.SetActive(audibilityBtn, !data.mutedAudioSource);
+    Style.SetActive(lowerThirdBtn, data.lowerThirdShowing);
     visibilityBtn.firstChild.className = data.visible ? "bi bi-eye" : "bi bi-eye-slash";
     audibilityBtn.firstChild.className = data.mutedAudioSource ? "bi bi-ear" : "bi bi-ear-fill";
     lowerThirdBtn.firstChild.className = data.lowerThirdShowing ? "bi bi-person-vcard-fill" : "bi bi-person-vcard";
@@ -1562,9 +1566,9 @@ let modalConclusionPreview = document.getElementById("modal-conclusion-preview")
 function resetEditSlideAssignmentPreviewElements() {
   modalIntroCaption.innerHTML = modalTechDiffCaption.innerHTML = modalConclusionCaption.innerHTML
   = "No slide selected to preview";
-  
+
   modalIntroPreview.src = modalTechDiffPreview.src = modalConclusionPreview.src = "...";
-  
+
   modalIntroPreview.classList.add("d-none");
   modalTechDiffPreview.classList.add("d-none");
   modalConclusionPreview.classList.add("d-none");
