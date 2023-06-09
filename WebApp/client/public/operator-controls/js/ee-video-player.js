@@ -162,11 +162,6 @@ export class VideoPlayer {
             _this.onAppStatusReceived.call(_this, msgContents);
           }
           break;
-        case MessageTypes._StyleSchema:
-          if (_this.onStyleSchemaReceived){
-            _this.onStyleSchemaReceived.call(_this, msgContents);
-          }
-          break;
         case MessageTypes._StyleValues:
           if (_this.onStyleValuesReceived){
             _this.onStyleValuesReceived.call(_this, msgContents);

@@ -7,7 +7,7 @@ import { sendClickEvent, sendStringSubmitEvent } from "/videoplayer/js/register-
 import { myVideoPlayer, mainNotifications } from "/operator-controls/js/control-main.js";
 import { ValidateClonesWithJsonArray} from "/operator-controls/js/validation-helper.js";
 import * as Style from "/operator-controls/js/style-helper.js";
-import { unityFetch } from "../../js/unity-fetch.js";
+import {unityFetch, unityPutJson} from "../../js/unity-fetch.js";
 import { getVideoThumb } from "../../js/video-thumbnail.js";
 import { createUploadProgressTracker } from "../../js/progresstracker.js";
 import {CropWidget} from "../../js/crop-widget.js";
@@ -19,7 +19,6 @@ Feedback.setDefaultParentElement(document.getElementById("alert-container"));
 mainNotifications.addEventListener('setup', function () {
   myVideoPlayer.onParticipantDataReceived = participantDataReceived;
   myVideoPlayer.onAppStatusReceived = appStatusReceived;
-  myVideoPlayer.onStyleSchemaReceived = onReceiveStyleSchema;
   myVideoPlayer.onStyleValuesReceived = onReceiveStyleValues;
   myVideoPlayer.onLogMessageNotification = onLogMessageNotification;
   myVideoPlayer.onNewMediaNotification = onNewMediaNotification;
@@ -234,7 +233,7 @@ let streamingServerAdd = document.getElementById("serverAddressSelect");
 let uname = document.getElementById("username-input");
 
 let saveBtn = document.getElementById("save-btn");
-let streamSettingsBtn = document.getElementById("stream-settings"); 
+let streamSettingsBtn = document.getElementById("stream-settings");
 
 // => PRIMITIVE AND OTHER TYPES
 var clipboard = new ClipboardJS(copyBtn, {
@@ -539,7 +538,7 @@ function ClearSelectParticipantsOnDrag() {
   let selectedParticipants = participantInputGroups.map(group => {
     return group.querySelector(".check");
   });
-  
+
   for (let i = 0; i <  selectedParticipants.length; i++) {
     selectedParticipants[i].checked = false;
   }
@@ -723,7 +722,7 @@ selectAllParticipantBtn.addEventListener("click", () => {
   } else if (selectAllParticipantBtn.innerHTML === "Unselect All") {
     selectAllParticipantBtn.innerHTML = "Select All";
     let selectedParticipants = mapSelectParticiapntsToInputGroups();
-    
+
     for (let i = 0; i <  selectedParticipants.length; i++) {
       selectedParticipants[i].checked = false;
     }
@@ -775,17 +774,16 @@ let cropWidget = new CropWidget(cropScreenSharePreview);
 
 // => METHODS
 function editStyleSelectionChanged() {
+  if (layout_editor) {
+    layout_editor.destroy();
+  }
   let style = editStyleSelect.options[editStyleSelect.selectedIndex];
   let category = style.parentElement.label;
-  let id = style.value;
-  switch (category) {
-    case "Lower Thirds":
-      sendStringSubmitEvent(myVideoPlayer, OperatorControls._GetLowerThirdStyleSchema, id);
-      break;
-    case "Layouts":
-      sendStringSubmitEvent(myVideoPlayer, OperatorControls._GetLayoutStyleSchema, id);
-      break;
-  }
+  unityFetch(`/getStyle?category=${category}&title=${style.label}`).then(resp => {
+    if (resp.ok) {
+      resp.text().then(onReceiveStyleSchema);
+    }
+  });
 }
 
 function onCropScreenShareApplyBtnClicked() {
@@ -858,7 +856,7 @@ cropWidget.initResizers();
 setupDropdown(layoutDropdown, onLayoutSelected);
 setupDropdown(textSizeDropdown, onTextSizeSelected);
 setupDropdown(lowerThirdStyleDropdown, onLowerThirdStyleSelected);
-    
+
                     /* LAYOUT TAB -SCHEMA EDITOR */
 // => DOM ELEMENTS
 let layout_element = document.getElementById('layout-schema-editor');
@@ -874,16 +872,7 @@ function onLayoutEditorChanged(){
     return;
   }
   if (validateSchema()) {
-    switch(layout_editor.options.schema.category){
-      case "Lower Third":
-        let str = layout_editor.options.schema.id + JSON.stringify(layout_editor.getValue());
-        sendStringSubmitEvent(myVideoPlayer, OperatorControls._ChangeLowerThirdStyle, str);
-        break;
-      case "Layout":
-        let str2 = layout_editor.options.schema.id + JSON.stringify(layout_editor.getValue());
-        sendStringSubmitEvent(myVideoPlayer, OperatorControls._ChangeLayoutStyle, str2);
-        break;
-    }
+    unityPutJson(`/setStyle?title=${layout_editor.options.schema.title}&category=${layout_editor.options.schema.category}`, layout_editor.getValue())
   }
 }
 
@@ -906,7 +895,10 @@ function onReceiveStyleSchema(json) {
     validateSchema();
   });
 
-  layout_editor.on('change', onLayoutEditorChanged);
+  // layout_editor emits a change event immediately unless we wait a bit.
+  setTimeout(() => {
+    layout_editor.on('change', onLayoutEditorChanged);
+  }, 1000);
 }
 
 function onReceiveStyleValues(json) {
@@ -1434,13 +1426,13 @@ function batchFileInputChanged() {
   let [slideFiles, musicFiles, videoFiles, pdfFiles, pptFiles]
   = SortFilesByExtension(batchSlideFileInput.files); // Sort files into categories.
   CategorizeSlideFilesByKeywordForUpload(slideFiles); // Categorize slides by keywords upload.
-  
+
   // Simply push music and videos.
   for (let musicFile of musicFiles) {
     pushFormInput(musicFile, "music");
   }
   uploadDescriptor.innerHTML += `${musicFiles.length} music file(s), `;
-  
+
   for (let videoFile of videoFiles) {
     pushFormInput(videoFile, "slide");
   }
@@ -1503,17 +1495,17 @@ function editSlideSaveBtnClicked() {
 function CategorizeSlideFilesByKeywordForUpload(files) {
   let accountedSlides = [];
   let customSlideCount = 0;
-  
+
   for (let i = 0; i < files.length; i++) {
     let file = files[i];
-    
+
     // Identify the type of slide being uploaded.
     if (!Object.keys(typeToKeyWords).some(tKey => {
-      
+
       // Check if type is already accounted for.
       if (accountedSlides.includes(tKey)) return false;
       let keywords = typeToKeyWords[tKey]; // Get keywords associated with type.
-      
+
       // Search for keywords in file name.
       if (keywords.some(keyword => file.name.toLowerCase().includes(keyword))) {
         pushFormInput(file, "slide", tKey); // Append to form input. Will be assigned as found type after upload.
@@ -1532,22 +1524,22 @@ function CategorizeSlideFilesByKeywordForUpload(files) {
 
 function CategorizeSlideFilesBySlideTypeSelects(files) {
   let customSlideCount = 0;
-  
+
   // Iterate through files from batch slide file input.
   for (let i = 0; i < files.length; i++) {
     let file = files[i];
     let select = slideTypeSelects.filter(select => {
       return file.name === select.value; // Check if file name matches select value.
     }); // Find slide type from select.
-    
+
     if (select !== []) {
       let arr = [];
-      
+
       // if assigned to multiple types, find all types.
       for (let i = 0; i < select.length; i++) {
         arr.push(select[i].dataset.type);
       }
-      
+
       pushFormInput(file, "slide", arr); // Type identified. Append to form input. Will be uploaded as found type.
       uploadDescriptor.innerHTML += `'${file.name}' will be used as your ${arr.join(", ")} slide.<br>`;
     } else {
@@ -1655,13 +1647,13 @@ function uploadCustomSlideClicked() {
   editSlideBtn.style.display = "none";
   let parentTracker = document.getElementById("uploadTrackerContainer");
   batchSlideUploadBtn.disabled = true;
-  
+
   let upload = function (input) {
     return new Promise(function(resolve, reject) {
       let formData = new FormData();
       formData.append("type", input.type);
       formData.append(input.ogName, input.file);
-      
+
       let request = new XMLHttpRequest();
       createUploadProgressTracker(parentTracker, request, input.ogName);
       request.onload = function() {
@@ -1692,7 +1684,7 @@ function uploadCustomSlideClicked() {
   }
 
   let uploads = formInput.map((input) => { return upload(input); });
-  
+
   // After all files are done uploading re-enable upload button.
   Promise.allSettled(uploads).then(() => {
     batchSlideUploadBtn.disabled = false;
@@ -1738,7 +1730,7 @@ editSlideBtn.style.display = "none";
 FetchAllUploadedMediaAndUpdateDash(); // Update Initially
 
                     /* CONFIGURATION TAB */
-// => DOM ELEMENTS           
+// => DOM ELEMENTS
 let configFileInput = document.getElementById("config-file-input");
 
 let configDownloadBtn = document.getElementById("config-download-btn");
