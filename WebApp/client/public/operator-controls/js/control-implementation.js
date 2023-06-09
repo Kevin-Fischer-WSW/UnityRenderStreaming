@@ -459,8 +459,8 @@ function appStatusReceived(json) {
     meetingNoInputField.disabled = true;
     joinMeetingBtn.disabled = true;
     holdMusicFieldset.disabled = false;
-    musicPlayStopBtn.innerHTML = appStatus.playingHoldingMusic ? '<i class="bi bi-pause"></i>' : '<i class="bi bi-play"></i>';
-    currentlyPlayingSpan.innerHTML = appStatus.currentlyPlayingTrack;
+    musicPlayStopBtn.innerHTML = appStatus.playingHoldingMusic ? '<i class="bi bi-stop"></i>' : '<i class="bi bi-play"></i>';
+    currentlyPlayingSpan.innerHTML = currentlyPlayingSpan.title = appStatus.currentlyPlayingTrack;
     volumeRangeMusic.value = appStatus.holdingMusicVolume;
     volumeLevelMusic.innerHTML = getVolumeLevel(volumeRangeMusic.value);
 
@@ -1254,7 +1254,7 @@ function validateTracksInLibrary(tracks) {
   }
   let validateBtn = function (btn, music) {
     let label = document.querySelector(`#${btn.id} span`);
-    label.thingToDelete = label.innerHTML = music;
+    label.thingToDelete = label.innerHTML = label.title = music;
   }
   ValidateClonesWithJsonArray(trackInLibrary, library, tracksInLibrary, setupBtn, tracks, validateBtn)
 }
@@ -1290,7 +1290,7 @@ function validateTracksInPlaylist(playlistData, currentlyPlayingIndex){
     removeTrackBtn.classList.remove("btn-secondary");
     removeTrackBtn.classList.remove("btn-info");
     let label = document.querySelector(`#${btn.id} span`);
-    label.innerHTML = music.trackLabel;
+    label.innerHTML = label.title = music.trackLabel;
     if (music.loaded === false) {
       labelDiv.classList.add("text-danger");
       labelDiv.classList.add("bg-secondary");
