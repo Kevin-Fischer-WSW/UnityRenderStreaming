@@ -23,6 +23,8 @@ mainNotifications.addEventListener('setup', function () {
   myVideoPlayer.onStyleValuesReceived = onReceiveStyleValues;
   myVideoPlayer.onLogMessageNotification = onLogMessageNotification;
   myVideoPlayer.onNewMediaNotification = onNewMediaNotification;
+  myVideoPlayer.onMusicPlaybackTimeReceived = onMusicPlaybackTimeReceived;
+  myVideoPlayer.onVideoPlaybackTimeReceived = onVideoPlaybackTimeReceived;
   myVideoPlayer.onWrongPasswordNotification = onWrongPasswordNotification;
   myVideoPlayer.onRegistrationUrlReceived = onRegistrationUrlReceived;
 });
@@ -367,10 +369,6 @@ function participantDataReceived(json) {
 }
 
 let currentlyPlayingTrackTime = document.getElementById("currently-playing-track-time")
-let holdingMusicTimer = 0;
-let musicTimerIntervalId = 0;
-let videoTimer = 0;
-let videoTimerIntervalId = 0;
 
 function convertSecondsToTimestamp(sec) {
   let hh = Math.floor(sec / 3600);
@@ -465,44 +463,10 @@ function appStatusReceived(json) {
     currentlyPlayingSpan.innerHTML = appStatus.currentlyPlayingTrack;
     volumeRangeMusic.value = appStatus.holdingMusicVolume;
     volumeLevelMusic.innerHTML = getVolumeLevel(volumeRangeMusic.value);
-    if (appStatus.playingHoldingMusic) {
-      holdingMusicTimer = Math.round(appStatus.currentTrackPlaybackTime);
-      currentlyPlayingTrackTime.innerHTML = musicPlaybackTime.innerHTML = convertSecondsToTimestamp(holdingMusicTimer);
-      musicProgress.value = holdingMusicTimer > musicProgress.max ? musicProgress.max : holdingMusicTimer;
-      if (musicTimerIntervalId === 0) {
-        musicTimerIntervalId = setInterval(function () {
-          // Decrease the time left by 1 second
-          holdingMusicTimer++;
-          currentlyPlayingTrackTime.innerHTML = musicPlaybackTime.innerHTML = convertSecondsToTimestamp(holdingMusicTimer);
-          musicProgress.value = holdingMusicTimer > musicProgress.max ? musicProgress.max : holdingMusicTimer;
-        }, 1000);
-      }
-    } else {
-      clearInterval(musicTimerIntervalId);
-      musicTimerIntervalId = 0;
-      musicPlaybackTime.innerHTML = "00:00:00";
-      currentlyPlayingTrackTime.innerHTML = "";
-    }
 
     //videoFieldsetBar.disabled = !jsonParsed.videoIsShowing;
     volumeRangeVideo.value = appStatus.currentVideoVolume;
     volumeLevelVideo.innerHTML = getVolumeLevel(volumeRangeVideo.value);
-    if (appStatus.playingVideo) {
-      videoTimer = Math.round(appStatus.currentVideoPlaybackTime);
-      videoPlaybackTime.innerHTML = convertSecondsToTimestamp(videoTimer);
-      videoProgress.value = videoTimer > videoProgress.max ? videoProgress.max : videoTimer;
-      if (videoTimerIntervalId === 0) {
-        videoTimerIntervalId = setInterval ( function() {
-          videoTimer++;
-          videoPlaybackTime.innerHTML = convertSecondsToTimestamp(videoTimer);
-          videoProgress.value = videoTimer > videoProgress.max ? videoProgress.max : videoTimer;
-        }, 1000);
-      }
-    } else {
-      clearInterval(videoTimerIntervalId);
-      videoTimerIntervalId = 0;
-      //videoPlaybackTime.innerHTML = "00:00:00";
-    }
     musicProgress.max = Math.round(appStatus.currentTrackDuration);
     videoProgress.max = Math.round(appStatus.currentVideoDuration);
     videoPlayPauseBtn.innerHTML = appStatus.playingVideo ? '<i class="bi bi-pause"></i>' : '<i class="bi bi-play"></i>';
@@ -1178,7 +1142,7 @@ function validateSlideSwitchBtns(slides) {
     slide.style.display = "flex";
     let span = document.querySelector(`#${slide.id} span`)
     let img = document.querySelector(`#${slide.id} img`);
-    
+
     setupSlideSetAsOptionsButton(slide);
     setupDeleteButton(slide, "/uapp/deleteHoldingSlide?url={0}", span, onSlideTabClicked);
     img.addEventListener("click", function () {
@@ -1214,13 +1178,28 @@ volumeLevelMusic.innerHTML = getVolumeLevel(volumeRangeMusic.value);
 let musicProgress = document.getElementById("music-progress");
 let musicPlaybackTime = document.getElementById("music-playback-time");
 
-musicProgress.addEventListener("change", function () {
-  let str = musicProgress.value;
+let disableMusicProgressUpdates = false;
+
+musicProgress.addEventListener("input", function () {
+  disableMusicProgressUpdates = true;
   currentlyPlayingTrackTime.innerHTML = musicPlaybackTime.innerHTML = convertSecondsToTimestamp(musicProgress.value);
-  clearInterval(musicTimerIntervalId);
-  musicTimerIntervalId = 0;
+});
+
+musicProgress.addEventListener("change", function () {
+  setTimeout(function () {
+    disableMusicProgressUpdates = false;
+  }, 1000);
+  let str = musicProgress.value;
   sendStringSubmitEvent(myVideoPlayer, OperatorControls._SeekMusicButton, str);
 });
+
+function onMusicPlaybackTimeReceived (time) {
+  time = Math.round(time);
+  if (!disableMusicProgressUpdates){
+    currentlyPlayingTrackTime.innerHTML = musicPlaybackTime.innerHTML = convertSecondsToTimestamp(time);
+    musicProgress.value = time > musicProgress.max ? musicProgress.max : time;
+  }
+}
 
 volumeRangeMusic.addEventListener("input", function () {
   let str = volumeRangeMusic.value;
@@ -1775,18 +1754,33 @@ let volumeLevelVideo  = document.getElementById("video-volume-level");
 volumeLevelVideo.innerHTML = getVolumeLevel(volumeRangeVideo.value);
 videoClearBtn.addEventListener("click", onVideoClearClicked);
 
+let disableVideoProgressUpdates = false;
+
+videoProgress.addEventListener("input", function() {
+  disableVideoProgressUpdates = true;
+  videoPlaybackTime.innerHTML = convertSecondsToTimestamp(videoProgress.value);
+});
+
+videoProgress.addEventListener("change", function () {
+  setTimeout(function() {
+    disableVideoProgressUpdates = false;
+  }, 1000);
+  let str = videoProgress.value;
+  sendStringSubmitEvent(myVideoPlayer, OperatorControls._SeekVideoButton, str);
+});
+
+function onVideoPlaybackTimeReceived (time) {
+  time = Math.round(time);
+  if (!disableVideoProgressUpdates) {
+    videoPlaybackTime.innerHTML = convertSecondsToTimestamp(time);
+    videoProgress.value = time > videoProgress.max ? videoProgress.max : time;
+  }
+}
+
 volumeRangeVideo.addEventListener("input", function() {
   let str = volumeRangeVideo.value;
   volumeLevelVideo.innerHTML = getVolumeLevel(volumeRangeVideo.value);
   sendStringSubmitEvent(myVideoPlayer, OperatorControls._VolumeVideo, str);
-});
-
-videoProgress.addEventListener("change", function () {
-  let str = videoProgress.value;
-  videoPlaybackTime.innerHTML = convertSecondsToTimestamp(videoProgress.value);
-  clearInterval(videoTimerIntervalId);
-  videoTimerIntervalId = 0;
-  sendStringSubmitEvent(myVideoPlayer, OperatorControls._SeekVideoButton, str);
 });
 
 videoPlayPauseBtn.addEventListener("click", function() {

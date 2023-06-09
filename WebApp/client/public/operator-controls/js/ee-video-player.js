@@ -182,6 +182,16 @@ export class VideoPlayer {
             _this.onNewMediaNotification.call(_this, msgContents);
           }
           break;
+        case MessageTypes._MusicPlaybackTime:
+          if (_this.onMusicPlaybackTimeReceived){
+            _this.onMusicPlaybackTimeReceived.call(_this, msgContents);
+          }
+          break;
+        case MessageTypes._VideoPlaybackTime:
+          if (_this.onVideoPlaybackTimeReceived){
+            _this.onVideoPlaybackTimeReceived.call(_this, msgContents);
+          }
+          break;
         case MessageTypes._WrongPasswordNotification:
           if (_this.onWrongPasswordNotification){
             _this.onWrongPasswordNotification.call(_this, msgContents);
