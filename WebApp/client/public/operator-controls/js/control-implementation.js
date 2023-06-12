@@ -786,6 +786,41 @@ function editStyleSelectionChanged() {
   });
 }
 
+function onEditStyleSelectClicked() {
+  // Tell user that the styles are being fetched.
+  editStyleSelect.innerHTML = "<option>Loading...</option>";
+  unityFetch("/getStylesAvailable").then(resp => {
+    if (!resp.ok) {
+      editStyleSelect.innerHTML = "<option>Failed to load styles</option>";
+    } else {
+      resp.json().then(json => {
+        // Clear the select.
+        editStyleSelect.innerHTML = "";
+        // Iterate through the keys of the JSON object.
+        for (let category in json) {
+          // Create a new optgroup for the category.
+          let optgroup = document.createElement("optgroup");
+          optgroup.label = category;
+          // Iterate through the styles in the category.
+          for (let style of json[category]) {
+            // Create a new option for the style.
+            let option = document.createElement("option");
+            option.label = style;
+            // Add the option to the optgroup.
+            optgroup.appendChild(option);
+          }
+          // Add the optgroup to the select.
+          editStyleSelect.appendChild(optgroup);
+        }
+      });
+      // Add the event listener for when the user selects a style.
+      editStyleSelect.addEventListener("change", editStyleSelectionChanged);
+      // Available styles is static data, so we don't need to fetch it again.
+      editStyleSelect.removeEventListener("click", onEditStyleSelectClicked)
+    }
+  });
+}
+
 function onCropScreenShareApplyBtnClicked() {
   let crop = cropWidget.getNormalizedCrop();
   unityFetch(`/cropScreenShare?x=${crop.left}&y=${crop.bottom}&scale=${crop.width}`, {method: "PUT"})
@@ -835,7 +870,7 @@ function setupDropdown(dropdown, func) {
 // => EVENT LISTENERS
 cropScreenShareBtn.addEventListener("click", onCropScreenShareBtnClicked);
 cropScreenShareApplyBtn.addEventListener("click", onCropScreenShareApplyBtnClicked);
-editStyleSelect.addEventListener("change", editStyleSelectionChanged);
+editStyleSelect.addEventListener("click", onEditStyleSelectClicked);
 
 cropScreenSharePreview.onload = function () {
   cropWidget.mainElement.style.display = "block";
