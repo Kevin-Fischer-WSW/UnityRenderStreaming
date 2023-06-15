@@ -398,12 +398,12 @@
           </button>
           <!-- Layout dropdown menu -->
           <ul id="layout-dropdown" class="dropdown-menu" aria-labelledby="layout-btn">
-            <li value="0"><a class="dropdown-item">Videos Only</a></li>
-            <li value="1"><a class="dropdown-item">Screen Share - Videos Left</a></li>
-            <li value="2"><a class="dropdown-item">Screen Share - Videos Right</a></li>
-            <li value="3"><a class="dropdown-item">Screen Share - Videos Top</a></li>
-            <li value="4"><a class="dropdown-item">Screen Share - Videos Bottom</a></li>
-            <li value="5"><a class="dropdown-item">Screen Share Only</a></li>
+            <li value="0" data-title="Simple"><a class="dropdown-item">Videos Only</a></li>
+            <li value="1" data-title="Screen Share Horizontal" data-preset="Videos Left"><a class="dropdown-item">Screen Share - Videos Left</a></li>
+            <li value="2" data-title="Screen Share Horizontal" data-preset="Videos Right"><a class="dropdown-item">Screen Share - Videos Right</a></li>
+            <li value="3" data-title="Screen Share Vertical" data-preset="Videos Top"><a class="dropdown-item">Screen Share - Videos Top</a></li>
+            <li value="4" data-title="Screen Share Vertical" data-preset="Videos Bottom"><a class="dropdown-item">Screen Share - Videos Bottom</a></li>
+            <li value="5" data-title="Full Screen Screen Share"><a class="dropdown-item">Screen Share Only</a></li>
           </ul>
           <!-- Text size dropdown menu -->
           <button id="text-size-btn" class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
@@ -422,8 +422,8 @@
             Lower Thirds Style
           </button>
           <ul id="lower-thirds-style-dropdown" class="dropdown-menu" aria-labelledby="lower-thirds-style-btn">
-            <li value="0"><a class="dropdown-item">Staggered</a></li>
-            <li value="1"><a class="dropdown-item">Classic Zoom</a></li>
+            <li value="0" data-title="Staggered"><a class="dropdown-item">Staggered</a></li>
+            <li value="1" data-title="Plain Zoom"><a class="dropdown-item">Classic Zoom</a></li>
           </ul>
           <!-- Screen share crop button -->
           <button id="crop-screen-share-btn" class="btn btn-secondary" type="button" data-bs-toggle="modal"

@@ -839,30 +839,24 @@ function onCropScreenShareBtnClicked() {
   cropScreenSharePreview.src = "uapp/getScreenShareImage?t=" + Date.now();
 }
 
-function onLayoutSelected(idx) {
-  sendClickEvent(myVideoPlayer, OperatorControls._SetLayoutToSimple + idx);
+function onLayoutSelected(elem) {
+  let preset = elem.dataset.preset ? elem.dataset.preset : "";
+  unityFetch(`/setStyle?title=${elem.dataset.title}&category=Layout&preset=${preset}`, {method: "PUT"});
 }
 
-function onTextSizeSelected(idx) {
-  sendStringSubmitEvent(myVideoPlayer, OperatorControls._SetSizeOfLowerThird, idx.toString());
+function onTextSizeSelected(elem) {
+  sendStringSubmitEvent(myVideoPlayer, OperatorControls._SetSizeOfLowerThird, elem.value.toString());
 }
 
-function onLowerThirdStyleSelected(idx) {
-  switch (idx) {
-    case 0:
-      sendStringSubmitEvent(myVideoPlayer, OperatorControls._SetLowerThirdStyle1, "");
-    break;
-    case 1:
-      sendStringSubmitEvent(myVideoPlayer, OperatorControls._SetLowerThirdStyle2, "");
-    break;
-  }
+function onLowerThirdStyleSelected(elem) {
+  unityFetch(`/setStyle?title=${elem.dataset.title}&category=Lower Third`, {method: "PUT"});
 }
 
 function setupDropdown(dropdown, func) {
   for (let i = 0; i < dropdown.children.length; i++) {
-    let child = dropdown.children[i];
+    let child = dropdown.children[i]
     child.firstChild.onclick = function () {
-      func(child.value);
+      func(child)
     }
   }
 }
