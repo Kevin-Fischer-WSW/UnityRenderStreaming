@@ -1431,7 +1431,7 @@ let typeToKeyWords = {
 function batchFileInputChanged() {
   clearFormInput();
   uploadDescriptor.innerHTML = ""; // Clear upload descriptor.
-  let [slideFiles, musicFiles, videoFiles, pdfFiles, pptFiles];
+  let [slideFiles, musicFiles, videoFiles, pdfFiles, pptFiles]
   = SortFilesByExtension(batchSlideFileInput.files); // Sort files into categories.
   CategorizeSlideFilesByKeywordForUpload(slideFiles); // Categorize slides by keywords upload.
   
