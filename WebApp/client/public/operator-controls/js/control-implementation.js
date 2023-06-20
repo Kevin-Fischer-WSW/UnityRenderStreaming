@@ -901,7 +901,7 @@ function onLayoutEditorChanged(){
     return;
   }
   if (validateSchema()) {
-    unityPutJson(`/setStyle?title=${layout_editor.options.schema.title}&category=${layout_editor.options.schema.category}`, layout_editor.getValue())
+    unityPutJson(`/setStyleParameters?title=${layout_editor.options.schema.title}&category=${layout_editor.options.schema.category}`, layout_editor.getValue())
   }
 }
 
