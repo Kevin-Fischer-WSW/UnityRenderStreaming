@@ -23,13 +23,14 @@ $body-bg: #616161;
 
 #intro-preview, #techdiff-preview, #conc-preview {
   background-size: cover;
+  background-blend-mode: multiply;
   padding: 0;
   display: inline-flex;
   align-items: flex-end;
 }
 
 #slide-clear-btn, #video-clear-btn {
-  background-color: #7FDB6A;
+  background-color: #2ecc71;
 }
 
 #slide-btn-container, #video-btn-container {
@@ -85,74 +86,65 @@ $body-bg: #616161;
 }
 
 .activated {
-  filter: saturate(2.2)
+  box-shadow: 0px 13px 5px -5px #b2de27, 0px -11px 5px -5px #b2de27;
 }
 
 .deactivated {
-  filter: grayscale(30%)
+  box-shadow: none;
 }
 
 #pending-btn {
-  background-color: #EEDC31;
-  border: 2px solid #3D3D3D;
+  background-color: #fff000;
+  //border: 2px solid #3D3D3D;
   height: 70px;
   width: 150px;
   font-size: 20px;
   cursor: pointer;
-}
-
-#pending-btn:hover {
-  background-color: rgb(197, 181, 89);
 }
 
 #live-btn {
-  background-color: #7FDB6A;
-  border: 2px solid #3D3D3D;
+  background-color: #2ecc71;
+  //border: 2px solid #3D3D3D;
   height: 70px;
   width: 150px;
   font-size: 20px;
   cursor: pointer;
-}
-
-#live-btn:hover {
-  background-color: #60d146;
 }
 
 #technical-diff-btn {
-  background-color: #F57A37;
-  border: 2px solid #3D3D3D;
+  background-color: #f9690e;
+  //border: 2px solid #3D3D3D;
   height: 70px;
   width: 150px;
   font-size: 20px;
   cursor: pointer;
-}
-
-#technical-diff-btn:hover {
-  background-color: #db6d31;
 }
 
 #archive-btn {
-  background-color: #F44747;
-  border: 2px solid #3D3D3D;
+  background-color: #ff4c30;
+  //border: 2px solid #3D3D3D;
   height: 70px;
   width: 150px;
   font-size: 20px;
   cursor: pointer;
 }
 
+#pending-btn:hover, #live-btn:hover, 
+#technical-diff-btn:hover, #archive-btn:hover {
+  font-size: 21px;
+  transition: font-size .08s ease-in-out;
+}
+
 // avoid button text from overflowing.
-#pending-btn, #live-btn, #technical-diff-btn, #archive-btn {
+#pending-btn, #live-btn, #technical-diff-btn, #archive-btn,
+#on-air-text, #on-air-info-text {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   //max-width: 150px;
 }
 
-#archive-btn:hover {
-  background-color: #db3333;
-}
-
-#logout, #stream-settings, #reset-to-default  {
+#logout, #stream-settings  {
   cursor: pointer;
   float: right;
   color: white;
@@ -162,7 +154,7 @@ $body-bg: #616161;
   font-size: 32px;
 }
 
-#stream-settings:hover, #logout:hover, #reset-to-default:hover{
+#stream-settings:hover, #logout:hover {
   color: #000;
 }
 
@@ -198,10 +190,15 @@ video {
 
 $primary : white;
 $secondary: #4c4c4c;
+$btn-hover-bg-shade-amount: 50%;
+$btn-active-bg-shade-amount: 75%;
 
 @import "node_modules/bootstrap/scss/_functions";
 @import "node_modules/bootstrap/scss/_variables";
 @import "node_modules/bootstrap/scss/mixins";
+
+// Import all of Bootstrap's css.
+@import 'node_modules/bootstrap/scss/bootstrap';
 
 .check-box-centered {
   padding-left: 6px;
@@ -250,7 +247,6 @@ $secondary: #4c4c4c;
 #stream-activity-bar {
   margin: auto;
   background-color: $secondary;
-  border: 2px solid black;
   height: 15%;
   width: 75%;
   align-items: center;
@@ -259,13 +255,13 @@ $secondary: #4c4c4c;
 }
 
 #on-air-indicator {
-  background-color: grey;
-  border: 2px solid black;
-  border-radius: 50%;
-  height: 20px;
-  width: 20px;
   margin: 0;
   margin-right: 5%;
+}
+
+.bi-broadcast-lg {
+  font-size: 40px;
+  color: grey;
 }
 
 #on-air-text {
@@ -280,8 +276,6 @@ $secondary: #4c4c4c;
   font-size: 18px;
   margin: 0;
 }
-// Import all of Bootstrap's css.
-@import 'node_modules/bootstrap/scss/bootstrap';
 
 .card-bordered {
   border: 1px solid #ebebeb;
@@ -340,22 +334,6 @@ h4.card-title {
   margin-left: 8px;
   margin-right: 8px;
 }
-
-// .btn-secondary {
-//   color: #4d5259 !important;
-//   background-color: #e4e7ea;
-//   border-color: #e4e7ea;
-//   color: #fff;
-// }
-
-// .btn-xs {
-//   font-size: 11px;
-//   padding: 2px 8px;
-//   line-height: 18px;
-// }
-// .btn-xs:hover{
-//   color:#fff !important;
-// }
 
 .card-title {
   font-family: Roboto,sans-serif;
@@ -820,115 +798,6 @@ button, input, optgroup, select, textarea {
   box-shadow: 0 1px 2px 0;
 }
 
-.chat .chat-header {
-  padding: 15px 20px;
-  border-bottom: 2px solid #f4f7f6
-}
-
-.chat .chat-header img {
-  float: left;
-  border-radius: 40px;
-  width: 40px
-}
-
-.chat .chat-header .chat-about {
-  float: left;
-  padding-left: 10px
-}
-
-.chat .chat-history {
-  padding: 20px;
-  border-bottom: 2px solid #fff;
-  overflow-y: scroll;
-  max-height: 400px;
-  min-height: 250px;
-}
-
-.chat .chat-history ul {
-  padding: 0
-}
-
-.chat .chat-history ul li {
-  list-style: none;
-  margin-bottom: 30px
-}
-
-.chat .chat-history ul li:last-child {
-  margin-bottom: 0px
-}
-
-.chat .chat-history .message-data {
-  margin-bottom: 15px
-}
-
-.chat .chat-history .message-data img {
-  border-radius: 40px;
-  width: 40px
-}
-
-.chat .chat-history .message-data-time {
-  color: #434651;
-  padding-left: 6px
-}
-
-.chat .chat-history .message {
-  color: #444;
-  padding: 18px 20px;
-  line-height: 26px;
-  font-size: 16px;
-  border-radius: 7px;
-  display: inline-block;
-  position: relative
-}
-
-.chat .chat-history .message:after {
-  bottom: 100%;
-  left: 7%;
-  border: solid transparent;
-  content: " ";
-  height: 0;
-  width: 0;
-  position: absolute;
-  pointer-events: none;
-  border-bottom-color: #fff;
-  border-width: 10px;
-  margin-left: -10px
-}
-
-.chat .chat-history .my-message {
-  background: #efefef;
-  max-width: 50%;
-}
-
-.chat .chat-history .my-message:after {
-  bottom: 100%;
-  left: 30px;
-  border: solid transparent;
-  content: " ";
-  height: 0;
-  width: 0;
-  position: absolute;
-  pointer-events: none;
-  border-bottom-color: #efefef;
-  border-width: 10px;
-  margin-left: -10px
-}
-
-.chat .chat-history .other-message {
-  background: #e8f1f3;
-  text-align: right;
-  max-width: 50%;
-}
-
-.chat .chat-history .other-message:after {
-  border-bottom-color: #e8f1f3;
-  left: 93%
-}
-
-.chat .chat-message {
-  padding: 20px
-}
-
 .float-right {
   float: right
 }
@@ -955,7 +824,7 @@ input[type=range] {
   cursor: pointer;
   height: .2rem;
   --bs-bg-opacity: 1;
-  accent-color: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity)) !important;;
+  accent-color: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity));
   border-radius: 0;
 }
 

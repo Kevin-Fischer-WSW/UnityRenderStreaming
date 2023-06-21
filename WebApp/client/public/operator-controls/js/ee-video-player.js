@@ -162,11 +162,6 @@ export class VideoPlayer {
             _this.onAppStatusReceived.call(_this, msgContents);
           }
           break;
-        case MessageTypes._StyleSchema:
-          if (_this.onStyleSchemaReceived){
-            _this.onStyleSchemaReceived.call(_this, msgContents);
-          }
-          break;
         case MessageTypes._StyleValues:
           if (_this.onStyleValuesReceived){
             _this.onStyleValuesReceived.call(_this, msgContents);
@@ -180,6 +175,16 @@ export class VideoPlayer {
         case MessageTypes._NewMediaNotification:
           if (_this.onNewMediaNotification){
             _this.onNewMediaNotification.call(_this, msgContents);
+          }
+          break;
+        case MessageTypes._MusicPlaybackTime:
+          if (_this.onMusicPlaybackTimeReceived){
+            _this.onMusicPlaybackTimeReceived.call(_this, msgContents);
+          }
+          break;
+        case MessageTypes._VideoPlaybackTime:
+          if (_this.onVideoPlaybackTimeReceived){
+            _this.onVideoPlaybackTimeReceived.call(_this, msgContents);
           }
           break;
         case MessageTypes._WrongPasswordNotification:
