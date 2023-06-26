@@ -819,7 +819,6 @@ function validateParticipantInputGroups() {
       nameSpan.innerHTML = `<b>${data.name}</b>&nbsp-&nbsp<i>${data.title}</i>`;
     }
   }
-
   ValidateClonesWithJsonArray(participantInputGroupOg, allParticipantsDiv, participantInputGroups, setupParticipantInputGroup, participantJsonParsed, validateParticipantInputGroup);
 }
 
@@ -836,7 +835,7 @@ removeParticipantsBtn.addEventListener("click", onRemoveParticipantBtnClicked);
 showAllLowerThirdsBtn.addEventListener("click", onShowAllLowerThirdsClick);
 
 groupParticipantsBtn.addEventListener("click", () => {
-  //TODO reimplement the logic for this btn
+  //TODO: reimplement the logic for this btn
   participantsGroupLabelDiv.classList.remove("d-none");
 });
 
@@ -872,6 +871,7 @@ selectAllParticipantBtn.addEventListener("click", () => {
     }
   } else if (selectAllParticipantBtn.innerHTML === "Unselect All") {
     selectAllParticipantBtn.innerHTML = "Select All";
+    groupParticipantsBtn.disabled = true;
     let selectedParticipants = mapSelectParticipantsToInputGroups();
 
     for (let i = 0; i < selectedParticipants.length; i++) {
