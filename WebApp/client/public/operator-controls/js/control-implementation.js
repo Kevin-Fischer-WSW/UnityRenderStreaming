@@ -5,12 +5,12 @@ This file contains the implementations of our controls, including zoom controls,
 import { OperatorControls } from "/operator-controls/js/control-map.gen.js";
 import { sendClickEvent, sendStringSubmitEvent } from "/videoplayer/js/register-events.js";
 import { myVideoPlayer, mainNotifications } from "/operator-controls/js/control-main.js";
-import { ValidateClonesWithJsonArray} from "/operator-controls/js/validation-helper.js";
+import { ValidateClonesWithJsonArray } from "/operator-controls/js/validation-helper.js";
 import * as Style from "/operator-controls/js/style-helper.js";
-import {unityFetch, unityPutJson} from "../../js/unity-fetch.js";
+import { unityFetch, unityPutJson } from "../../js/unity-fetch.js";
 import { getVideoThumb } from "../../js/video-thumbnail.js";
 import { createUploadProgressTracker } from "../../js/progresstracker.js";
-import {CropWidget} from "../../js/crop-widget.js";
+import { CropWidget } from "../../js/crop-widget.js";
 import * as Feedback from "../../js/user-input-feedback-alert.js";
 import { onEnableAdvancedSettings } from "./advancedSettings.js";
 
@@ -28,7 +28,7 @@ mainNotifications.addEventListener('setup', function () {
   myVideoPlayer.onRegistrationUrlReceived = onRegistrationUrlReceived;
 });
 
-function onNewMediaNotification () {
+function onNewMediaNotification() {
   if (navSlideTabBtn.classList.contains("active")) {
     onSlideTabClicked();
   } else if (navMusicTabBtn.classList.contains("active")) {
@@ -38,7 +38,7 @@ function onNewMediaNotification () {
   }
 }
 
-                    /* SIGN OUT MODAL */
+/* SIGN OUT MODAL */
 // => DOM ELEMENTS
 let signOutModal = document.getElementById("signout-modal");
 
@@ -47,12 +47,13 @@ signOutModal.addEventListener('shown.bs.modal', function () {
   signOutModal.focus();
 })
 
-                      /* EXTEND (TEMPORARY) */
-document.body.addEventListener("click", function() {
+/* EXTEND (TEMPORARY) */
+document.body.addEventListener("click", function () {
 
-  setTimeout(function(){
+  setTimeout(function () {
     extend();
-  }, 700)});
+  }, 700)
+});
 
 async function extend() {
   let resp = await fetch("/extend");
@@ -63,7 +64,7 @@ async function extend() {
   }
 }
 
-                    /* PARTICIPANT ACTIONS ON VIDEO ELEMENT */
+/* PARTICIPANT ACTIONS ON VIDEO ELEMENT */
 // => DOM ELEMENTS
 let participantOnVidCtrlOg = document.getElementById("participant-on-vid-ctrl-og");
 let previewVideoContainer = document.getElementById("preview-video-container");
@@ -133,14 +134,14 @@ function setupParticipantOnVidCtrl(node, idx) {
     sendStringSubmitEvent(myVideoPlayer, OperatorControls._ToggleParticipantVisibilityButton, str);
   })
 
-  renameEl.addEventListener("click", function() {
+  renameEl.addEventListener("click", function () {
     let p = participantJsonParsed[idx];
     participantName.value = p.name;
     participantTitle.value = p.title;
     participantToRename = idx;
   })
 
-  showLtEl.addEventListener("click", function(ev) {
+  showLtEl.addEventListener("click", function (ev) {
     ev.preventDefault();
     let p = participantJsonParsed[idx];
     let str = p.id.toString();
@@ -160,7 +161,7 @@ function validateParticipantOnVidCtrls() {
   ValidateClonesWithJsonArray(participantOnVidCtrlOg, previewVideoContainer, participantOnVidCtrls, setupCtrl, participantJsonParsed, validateCtrl);
 }
 
-                    /* RENAME MODAL */
+/* RENAME MODAL */
 // => DOM ELEMENTS
 let currentlyDraggedPov;
 let participantName = document.getElementById("participant-rename-name");
@@ -184,7 +185,7 @@ renameModal.addEventListener('shown.bs.modal', function () {
   renameModal.focus();
 });
 
-                    /* ZOOM TAB */
+/* ZOOM TAB */
 // => DOM ELEMENTS
 let meetingNoInput = document.getElementById("meeting-number-input");
 let meetingNoInputField = document.getElementById("meeting-number-input-field");
@@ -197,14 +198,14 @@ meetingNoInput.addEventListener("change", () => {
 // => INIT(S)
 meetingNoInput.value = localStorage.getItem("urlOrNumber");
 
-                    /* RESET APP SETTINGS */
+/* RESET APP SETTINGS */
 // => DOM ELEMENTS
 let resetModal = document.getElementById("reset-modal");
 let resetAppSettingsBtn = document.getElementById("resetAppSettings");
 
 // => METHODS
 function onClickResetAppSettings() {
-  unityFetch("/resetAppSettings", {method:"DELETE"});
+  unityFetch("/resetAppSettings", { method: "DELETE" });
   FetchAllUploadedMediaAndUpdateDash();
 }
 
@@ -215,7 +216,7 @@ resetModal.addEventListener('shown.bs.modal', function () {
   resetModal.focus();
 });
 
-                    /* STREAM MODAL */
+/* STREAM MODAL */
 // => DOM ELEMENTS
 const copyBtn = document.getElementById('clip');
 const copyData = document.getElementById('kt_clipboard_4');
@@ -327,11 +328,11 @@ streamPrefModal.addEventListener('shown.bs.modal', function () {
   serverAddressSelect.focus();
 })
 
-                    /* GENERAL STATUS BAR */
+/* GENERAL STATUS BAR */
 // => DOM ELEMENTS
 let generalStatBar = document.getElementById("general-status-bar");
 
-                    /* STREAM ACTIVITY BAR */
+/* STREAM ACTIVITY BAR */
 // => DOM ELEMENTS
 let onAirText = document.getElementById("on-air-text");
 let onAirIndicator = document.getElementById("on-air-indicator-icon");
@@ -371,7 +372,7 @@ function updatestreamActivityBarInfo(appStatus) {
     <br> Recording: ${appStatus.recording ? "Active" : "Inactive"}`;
 }
 
-                    /* STREAM BUTTONS */
+/* STREAM BUTTONS */
 // => DOM ELEMENTS
 let previewIntroImg = document.getElementById("modal-img-preview");
 let previewIntroImgCaption = document.getElementById("modal-img-caption");
@@ -442,7 +443,7 @@ function resetStreamButtonsOnLeaveOrEnd() {
 function updateStreamButtons() {
   streamSettingsFieldset.disabled = true;
   pendingBtn.innerHTML = "Intro Slide";
-  liveBtn. innerHTML = "Live";
+  liveBtn.innerHTML = "Live";
   technicalDiffBtn.innerHTML = "Technical Difficulties";
   archiveBtn.innerHTML = "Conclusion Slide";
   streamBtnGrp.classList.add("w-100");
@@ -457,7 +458,7 @@ function updateStreamButtons() {
 }
 
 
-                    /* ZOOM CONTROLS */
+/* ZOOM CONTROLS */
 // => DOM ELEMENTS
 let joinMeetingBtn = document.getElementById("join-meeting-btn");
 let leaveMeetingBtn = document.getElementById("leave-meeting-btn");
@@ -489,14 +490,14 @@ function onLeaveClicked() {
     });
 }
 
-function onRegistrationUrlReceived (url) {
+function onRegistrationUrlReceived(url) {
   let a = document.getElementById("registration-url");
   a.href = url;
   a.innerText = url;
   $('#registration-url-modal').modal('show');
 }
 
-function onWrongPasswordNotification () {
+function onWrongPasswordNotification() {
   Feedback.alertDanger("Meeting password is incorrect.");
 }
 
@@ -504,41 +505,34 @@ function onWrongPasswordNotification () {
 joinMeetingBtn.addEventListener('click', onJoinClick);
 leaveMeetingBtn.addEventListener("click", onLeaveClicked);
 
-                    /* PARTICIPANTS TAB */
+/* PARTICIPANTS TAB */
 // => DOM ELEMENTS
+let allParticipantsDiv = document.getElementById("all-participants-div");
 let currentlyDraggedP;
 let participantFieldset = document.getElementById("participant-fieldset");
+let participantsGroupLabelDiv = document.getElementById("ppt-grp-input-div");
+let participantsGroupLabelInput = document.getElementById("ppt-grp-label-name");
+let participantsGroupSelect = document.getElementById("ppt-group-select");
 let participantInputGroupOg = document.getElementById("participant-input-group");
 
+let deleteGroupBtn = document.getElementById("delete-grp-btn");
 let disableAutoShowOnJoin = document.getElementById("disable-autoshow-btn");
 let enableAutoShowOnJoin = document.getElementById("enable-autoshow-btn");
+let groupParticipantsBtn = document.getElementById("group-select-ppt-btn");
 let hideAllLowerThirdsBtn = document.getElementById("hide-all-lower-thirds-btn");
 let hideSelectParticipantBtn = document.getElementById("hide-select-ppt-btn");
 let muteSelectParticipantBtn = document.getElementById("mute-select-ppt-btn");
+let participantsGroupLabelSubmitBtn = document.getElementById("ppt-grp-label-submit");
+let removeParticipantsBtn = document.getElementById("remove-select-ppt-btn");
 let selectAllParticipantBtn = document.getElementById("check-uncheck-all-ppt-btn");
 let showAllLowerThirdsBtn = document.getElementById("show-all-lower-thirds-btn");
 let showSelectParticipantBtn = document.getElementById("show-select-ppt-btn");
 let unmuteSelectParticipantBtn = document.getElementById("unmute-select-ppt-btn");
 
-let allParticipantsDiv = document.getElementById("all-participants-div");
-let groupParticipantsBtn = document.getElementById("group-select-ppt-btn");
-
-let participantsGroupLabelDiv = document.getElementById("ppt-grp-input-div");
-let participantsGroupLabelInput = document.getElementById("ppt-grp-label-name");
-let participantsGroupLabelSubmitBtn = document.getElementById("ppt-grp-label-submit");
-
-groupParticipantsBtn.disabled = true;
-participantsGroupLabelSubmitBtn.disabled = true;
-
-groupParticipantsBtn.addEventListener("click", () => {participantsGroupLabelDiv.classList.remove("d-none")});
-participantsGroupLabelInput.addEventListener("input", validateGroupLabel);
-participantsGroupLabelSubmitBtn.addEventListener("click", groupParticipants);
-
-
 // => PRIMITIVE AND OTHER TYPES
 let participantInputGroups = [];
-let participantJsonParsed;
-let groupJsonParsed;
+let participantJsonParsed = null;
+let groupJsonParsed = null;
 
 // => METHODS
 function addParticipantSelectCheckEventListener() {
@@ -548,14 +542,37 @@ function addParticipantSelectCheckEventListener() {
   }
 }
 
-function ClearSelectParticipantsOnDrag() {
-  selectAllParticipantBtn.innerHTML = selectAllParticipantBtn.innerHTML == "Select All" ? "Unselect All" : "Select All";
-  let selectedParticipants = participantInputGroups.map(group => {
-    return group.querySelector(".check");
-  });
-  
-  for (let i = 0; i <  selectedParticipants.length; i++) {
+function ClearAnySelectedParticipants() {
+  selectAllParticipantBtn.innerHTML = "Select All";
+  let selectedParticipants = mapSelectParticipantsToInputGroups();
+
+  for (let i = 0; i < selectedParticipants.length; i++) {
     selectedParticipants[i].checked = false;
+  }
+
+  if (!groupParticipantsBtn.disabled) groupParticipantsBtn.disabled = true;
+}
+
+function displayParticipantsInGroup() {
+  // the below code allows to display members of group only, if a group is selected.
+
+  // By default, we unhide all members and only hide if a group is selected
+  // Why? If this is not done prior to hiding members upon a selection,
+  // the code fails to list members accordingly, between selections.
+  let grp = participantsGroupSelect.value;
+  for (let i = 0; i < participantJsonParsed.length; i++) {
+    if (participantInputGroups[i].classList.contains('d-none')) participantInputGroups[i].classList.remove('d-none');
+  }
+
+  if (grp !== "default") {
+    let index = groupJsonParsed.findIndex((i) => i.group === grp); // finds index to access members of specific group.
+    let selectedParticipants = mapSelectParticipantsToInputGroups();
+
+    for (let i = 0; i < selectedParticipants.length; i++) {
+      if (!selectedParticipants[i].checked
+        && !groupJsonParsed[index].participants.includes(participantJsonParsed[i].id)
+        && !participantInputGroups[i].classList.contains('d-none')) participantInputGroups[i].classList.add('d-none');
+    }
   }
 }
 
@@ -570,14 +587,39 @@ function groupParticipants() {
 
   let participants = mapSelectParticipantsToInputGroups();
   let selectedParticipants = []
-  for (let i = 0; i <  participants.length; i++) {
+  for (let i = 0; i < participants.length; i++) {
     if (participants[i].checked) {
-      selectedParticipants.push(participantJsonParsed[i].id)
+      selectedParticipants.push(participantJsonParsed[i].id);
     }
   }
   let groupId = participantsGroupLabelInput.value;
-  
-  unityFetch(`/createParticipantsGroup?groupId=${groupId}&participantId=${selectedParticipants.join()}`, { method : "PUT"})
+  unityFetch(`/createParticipantsGroup?groupId=${groupId}&participantId=${selectedParticipants.join()}`, { method: "PUT" })
+    .then((resp) => {
+      if (resp.ok) {
+        Feedback.alertSuccess("Success: Created group " + groupId);
+      }
+      ClearAnySelectedParticipants();
+      participantsGroupLabelInput.value = "";
+    });
+}
+
+function listParticipantsGroups() {
+  if (participantsGroupSelect.childElementCount > groupJsonParsed.length + 1) {
+    while (participantsGroupSelect.childElementCount > groupJsonParsed.length + 1) {
+      participantsGroupSelect.removeChild(participantsGroupSelect.lastChild);
+    }
+  } else {
+    while (participantsGroupSelect.childElementCount < groupJsonParsed.length + 1) {
+      let option = document.createElement("option");
+      participantsGroupSelect.appendChild(option);
+    }
+  }
+
+  for (let i = 0; i < groupJsonParsed.length; i++) {
+    let group = groupJsonParsed[i].group;
+    let option = participantsGroupSelect.children[i + 1];
+    option.value = option.innerText = group;
+  }
 }
 
 function mapSelectParticipantsToInputGroups() {
@@ -588,11 +630,25 @@ function mapSelectParticipantsToInputGroups() {
 }
 
 function onEnableAutoShowOnJoin() {
-  unityFetch("/enableOutputVideoByDefault?enable=true", {method: "PUT"});
+  unityFetch("/enableOutputVideoByDefault?enable=true", { method: "PUT" });
+}
+
+function onDeleteGroupBtnClicked() {
+  unityFetch(`/deleteParticipantsGroup?groupId=${participantsGroupSelect.value}`, { method: "DELETE" })
+    .then((resp) => {
+      if (resp.ok) {
+        Feedback.alertSuccess("Success: Deleted group " + participantsGroupSelect.value);
+        participantsGroupSelect.value = "default";
+        groupParticipantsBtn.classList.remove("d-none");
+        if (!deleteGroupBtn.classList.contains("d-none")) deleteGroupBtn.classList.add("d-none");
+        if (!removeParticipantsBtn.classList.contains("d-none")) removeParticipantsBtn.classList.add("d-none");
+        displayParticipantsInGroup();
+      }
+    });
 }
 
 function onDisableAutoShowOnJoin() {
-  unityFetch("/enableOutputVideoByDefault?enable=false", {method: "PUT"});
+  unityFetch("/enableOutputVideoByDefault?enable=false", { method: "PUT" });
 }
 
 function onHideAllLowerThirdsClick() {
@@ -603,6 +659,46 @@ function onShowAllLowerThirdsClick() {
   sendClickEvent(myVideoPlayer, OperatorControls._ShowAllLowerThirds);
 }
 
+function onParticipantGroupSelectChanged() {
+  ClearAnySelectedParticipants(); // clear any selections
+
+  if (participantsGroupSelect.value !== "default") {
+    groupParticipantsBtn.classList.add("d-none");
+    if (deleteGroupBtn.classList.contains("d-none")) deleteGroupBtn.classList.remove("d-none");
+    if (removeParticipantsBtn.classList.contains("d-none")) removeParticipantsBtn.classList.remove("d-none");
+  } else {
+    groupParticipantsBtn.classList.remove("d-none");
+    deleteGroupBtn.classList.add("d-none");
+    removeParticipantsBtn.classList.add("d-none");
+  }
+
+  displayParticipantsInGroup();
+}
+
+function onParticipantGroupSelectClicked() {
+  if (!groupJsonParsed) return;
+  listParticipantsGroups();
+}
+
+function onRemoveParticipantBtnClicked() {
+  let participants = mapSelectParticipantsToInputGroups();
+  let selectedParticipants = []
+  for (let i = 0; i < participants.length; i++) {
+    if (participants[i].checked) {
+      participantInputGroups[i].classList.add("d-none");
+      selectedParticipants.push(participantJsonParsed[i].id);
+    }
+  }
+
+  ClearAnySelectedParticipants();
+  unityFetch(`/removeParticipantsFromGroup?groupId=${participantsGroupSelect.value}&participantId=${selectedParticipants}`, { method: "DELETE" })
+    .then((resp) => {
+      if (resp.ok) {
+        Feedback.alertSuccess("Success: Removed selected participants from the group.");
+      }
+    });
+}
+
 function participantDataReceived(json) {
   let data = JSON.parse(json);
   participantJsonParsed = data["ParticipantsData"];
@@ -611,7 +707,9 @@ function participantDataReceived(json) {
   validateParticipantOnVidCtrls();
 }
 
-function setupParticipantInputGroup(node, idx) {
+function setupParticipantInputGroup(node) {
+  node.style.display = "flex";
+  let idx = participantInputGroups.length - 1;
   let renameBtn = document.querySelector("div#" + node.id + " .rename-btn");
   let visibilityBtn = document.querySelector("div#" + node.id + " .visibility-btn");
   let audibilityBtn = document.querySelector("div#" + node.id + " .audibility-btn");
@@ -619,7 +717,7 @@ function setupParticipantInputGroup(node, idx) {
 
   node.ondragstart = (ev) => {
     currentlyDraggedP = node;
-    ClearSelectParticipantsOnDrag();
+    ClearAnySelectedParticipants();
   }
 
   node.ondragover = (ev) => {
@@ -678,9 +776,9 @@ function setupParticipantInputGroup(node, idx) {
 function updateSelectParticipantBtnText() {
   let counter = 0;
   let selectedParticipants = mapSelectParticipantsToInputGroups();
-  groupParticipantsBtn.disabled = false;
-  
-  for (let i = 0; i <  selectedParticipants.length; i++) {
+  if (participantsGroupSelect.value === "default") groupParticipantsBtn.disabled = false;
+
+  for (let i = 0; i < selectedParticipants.length; i++) {
     if (selectedParticipants[i].checked) {
       counter++;
     }
@@ -700,7 +798,7 @@ function updateSelectParticipantBtnText() {
 }
 
 function validateGroupLabel() {
-  if (participantsGroupLabelInput.value !== "" ) {
+  if (participantsGroupLabelInput.value !== "") {
     participantsGroupLabelSubmitBtn.disabled = false;
   } else {
     participantsGroupLabelSubmitBtn.disabled = true;
@@ -708,36 +806,44 @@ function validateGroupLabel() {
 }
 
 function validateParticipantInputGroups() {
-  let setupGroup = function (clone){
-    clone.style.display = "flex";
-    setupParticipantInputGroup(clone, participantInputGroups.length - 1);
-  }
-  let validateGroup = function (clone, data){
+  let validateParticipantInputGroup = function (clone, data) {
     let visibilityBtn = document.querySelector(`#${clone.id} .visibility-btn`);
     let audibilityBtn = document.querySelector(`#${clone.id} .audibility-btn`);
     let nameSpan = document.querySelector(`#${clone.id} .name-span`);
 
     visibilityBtn.firstChild.className = data.visible ? "bi bi-eye" : "bi bi-eye-slash";
     audibilityBtn.firstChild.className = data.mutedAudioSource ? "bi bi-ear" : "bi bi-ear-fill";
-    if (data.title === ""){
+    if (data.title === "") {
       nameSpan.innerHTML = `<b>${data.name}</b>`;
-    }else{
+    } else {
       nameSpan.innerHTML = `<b>${data.name}</b>&nbsp-&nbsp<i>${data.title}</i>`;
     }
   }
-  ValidateClonesWithJsonArray(participantInputGroupOg, allParticipantsDiv, participantInputGroups, setupGroup, participantJsonParsed, validateGroup);
+
+  ValidateClonesWithJsonArray(participantInputGroupOg, allParticipantsDiv, participantInputGroups, setupParticipantInputGroup, participantJsonParsed, validateParticipantInputGroup);
 }
 
 // => EVENT LISTENERS
+deleteGroupBtn.addEventListener("click", onDeleteGroupBtnClicked);
 disableAutoShowOnJoin.addEventListener("click", onDisableAutoShowOnJoin);
 enableAutoShowOnJoin.addEventListener("click", onEnableAutoShowOnJoin);
 hideAllLowerThirdsBtn.addEventListener("click", onHideAllLowerThirdsClick);
+participantsGroupLabelInput.addEventListener("input", validateGroupLabel);
+participantsGroupLabelSubmitBtn.addEventListener("click", groupParticipants);
+participantsGroupSelect.addEventListener("click", onParticipantGroupSelectClicked);
+participantsGroupSelect.addEventListener("change", onParticipantGroupSelectChanged);
+removeParticipantsBtn.addEventListener("click", onRemoveParticipantBtnClicked);
 showAllLowerThirdsBtn.addEventListener("click", onShowAllLowerThirdsClick);
+
+groupParticipantsBtn.addEventListener("click", () => {
+  //TODO reimplement the logic for this btn
+  participantsGroupLabelDiv.classList.remove("d-none");
+});
 
 hideSelectParticipantBtn.addEventListener("click", () => {
   let selectedParticipants = mapSelectParticipantsToInputGroups();
-  for (let i = 0; i <  selectedParticipants.length; i++) {
-    if (selectedParticipants[i].checked) {
+  for (let i = 0; i < selectedParticipants.length; i++) {
+    if (selectedParticipants[i].checked && !participantInputGroups[i].classList.contains('d-none')) {
       let p = participantJsonParsed[i];
       let str = p.id + ",false";
       sendStringSubmitEvent(myVideoPlayer, OperatorControls._ToggleParticipantVisibilityButton, str);
@@ -746,14 +852,11 @@ hideSelectParticipantBtn.addEventListener("click", () => {
 });
 
 muteSelectParticipantBtn.addEventListener("click", () => {
-  let selectedParticipants = participantInputGroups.map(group => {
-    return group.querySelector(".check");
-  });
-
-  for (let i = 0; i <  selectedParticipants.length; i++) {
-    if (selectedParticipants[i].checked) {
+  let selectedParticipants = mapSelectParticipantsToInputGroups();
+  for (let i = 0; i < selectedParticipants.length; i++) {
+    if (selectedParticipants[i].checked && !participantInputGroups[i].classList.contains('d-none')) {
       let p = participantJsonParsed[i];
-      unityFetch(`/muteParticipantAudioSource?participantId=${p.id}&mute=true`, {method: "PUT"});
+      unityFetch(`/muteParticipantAudioSource?participantId=${p.id}&mute=true`, { method: "PUT" });
     }
   }
 });
@@ -764,25 +867,23 @@ selectAllParticipantBtn.addEventListener("click", () => {
     selectAllParticipantBtn.innerHTML = "Unselect All";
     let selectedParticipants = mapSelectParticipantsToInputGroups();
 
-    for (let i = 0; i <  selectedParticipants.length; i++) {
+    for (let i = 0; i < selectedParticipants.length; i++) {
       selectedParticipants[i].checked = true;
     }
   } else if (selectAllParticipantBtn.innerHTML === "Unselect All") {
     selectAllParticipantBtn.innerHTML = "Select All";
     let selectedParticipants = mapSelectParticipantsToInputGroups();
 
-    for (let i = 0; i <  selectedParticipants.length; i++) {
+    for (let i = 0; i < selectedParticipants.length; i++) {
       selectedParticipants[i].checked = false;
     }
   }
 });
 
 showSelectParticipantBtn.addEventListener("click", () => {
-  let selectedParticipants = participantInputGroups.map(group => {
-    return group.querySelector(".check");
-  });
-  for (let i = 0; i <  selectedParticipants.length; i++) {
-    if (selectedParticipants[i].checked) {
+  let selectedParticipants = mapSelectParticipantsToInputGroups();
+  for (let i = 0; i < selectedParticipants.length; i++) {
+    if (selectedParticipants[i].checked && !participantInputGroups[i].classList.contains('d-none')) {
       let p = participantJsonParsed[i];
       let str = p.id + ",true";
       sendStringSubmitEvent(myVideoPlayer, OperatorControls._ToggleParticipantVisibilityButton, str);
@@ -792,8 +893,8 @@ showSelectParticipantBtn.addEventListener("click", () => {
 
 unmuteSelectParticipantBtn.addEventListener("click", () => {
   let selectedParticipants = mapSelectParticipantsToInputGroups();
-  for (let i = 0; i <  selectedParticipants.length; i++) {
-    if (selectedParticipants[i].checked) {
+  for (let i = 0; i < selectedParticipants.length; i++) {
+    if (selectedParticipants[i].checked && !participantInputGroups[i].classList.contains('d-none')) {
       let p = participantJsonParsed[i];
       unityFetch(`/muteParticipantAudioSource?participantId=${p.id}&mute=false`, { method: "PUT" });
     }
@@ -801,10 +902,12 @@ unmuteSelectParticipantBtn.addEventListener("click", () => {
 })
 
 // => INIT(S)
+groupParticipantsBtn.disabled = true;
+participantsGroupLabelSubmitBtn.disabled = true;
 participantInputGroupOg.style.display = "none";
 
 
-                    /* LAYOUT TAB */
+/* LAYOUT TAB */
 // => DOM ELEMENTS
 let cropScreenSharePreview = document.getElementById("crop-screen-share-preview");
 let editStyleSelect = document.getElementById("edit-style-select");
@@ -871,16 +974,16 @@ function onEditStyleSelectClicked() {
 
 function onCropScreenShareApplyBtnClicked() {
   let crop = cropWidget.getNormalizedCrop();
-  unityFetch(`/cropScreenShare?x=${crop.left}&y=${crop.bottom}&scale=${crop.width}`, {method: "PUT"})
-  .then(resp => {
-    if (resp.ok) {
-      console.log("crop applied");
-    } else {
-      Feedback.alertDanger("Failed to crop screen share image");
-    }
-    // Dismiss the crop modal.
-    cropScreenShareCloseBtn.click();
-  });
+  unityFetch(`/cropScreenShare?x=${crop.left}&y=${crop.bottom}&scale=${crop.width}`, { method: "PUT" })
+    .then(resp => {
+      if (resp.ok) {
+        console.log("crop applied");
+      } else {
+        Feedback.alertDanger("Failed to crop screen share image");
+      }
+      // Dismiss the crop modal.
+      cropScreenShareCloseBtn.click();
+    });
 }
 
 function onCropScreenShareBtnClicked() {
@@ -889,7 +992,7 @@ function onCropScreenShareBtnClicked() {
 
 function onLayoutSelected(elem) {
   let preset = elem.dataset.preset ? elem.dataset.preset : "";
-  unityFetch(`/setStyle?title=${elem.dataset.title}&category=Layout&preset=${preset}`, {method: "PUT"});
+  unityFetch(`/setStyle?title=${elem.dataset.title}&category=Layout&preset=${preset}`, { method: "PUT" });
 }
 
 function onTextSizeSelected(elem) {
@@ -897,7 +1000,7 @@ function onTextSizeSelected(elem) {
 }
 
 function onLowerThirdStyleSelected(elem) {
-  unityFetch(`/setStyle?title=${elem.dataset.title}&category=Lower Third`, {method: "PUT"});
+  unityFetch(`/setStyle?title=${elem.dataset.title}&category=Lower Third`, { method: "PUT" });
 }
 
 function setupDropdown(dropdown, func) {
@@ -934,7 +1037,7 @@ setupDropdown(layoutDropdown, onLayoutSelected);
 setupDropdown(textSizeDropdown, onTextSizeSelected);
 setupDropdown(lowerThirdStyleDropdown, onLowerThirdStyleSelected);
 
-                    /* LAYOUT TAB -SCHEMA EDITOR */
+/* LAYOUT TAB -SCHEMA EDITOR */
 // => DOM ELEMENTS
 let layout_element = document.getElementById('layout-schema-editor');
 let layout_editor;
@@ -943,7 +1046,7 @@ let layout_editor;
 let layoutEditorValuesSetInCB = false;
 
 // => METHODS
-function onLayoutEditorChanged(){
+function onLayoutEditorChanged() {
   if (layoutEditorValuesSetInCB) {
     layoutEditorValuesSetInCB = false;
     return;
@@ -967,7 +1070,7 @@ function onReceiveStyleSchema(json) {
     startval: parsedJSON.startval,
   });
 
-  layout_editor.on('ready',() => {
+  layout_editor.on('ready', () => {
     // Now the api methods will be available
     validateSchema();
   });
@@ -1003,7 +1106,7 @@ JSONEditor.defaults.options.disable_edit_json = true;
 JSONEditor.defaults.options.disable_properties = true;
 
 
-                    /* SLIDE TAB */
+/* SLIDE TAB */
 // => DOM ELEMENTS
 let conc_preview = document.getElementById("conc-preview");
 let intro_preview = document.getElementById("intro-preview");
@@ -1092,9 +1195,9 @@ function setupDeleteButton(owner, route, elementWithFilename, onDeleteConfirmed)
       // Delete media.
       fetch(route.replace("{0}", elementWithFilename.thingToDelete), { method: "DELETE" })
         .then(function (response) {
-        if (response.ok) {
-          onDeleteConfirmed();
-        }
+          if (response.ok) {
+            onDeleteConfirmed();
+          }
         })
         .finally(function () {
           owner.style.opacity = 1; // Reset owner opacity.
@@ -1108,30 +1211,30 @@ function setupDeleteButton(owner, route, elementWithFilename, onDeleteConfirmed)
 function setupSlideSetAsOptionsButton(owner) {
   let slideSetAsIntro = document.querySelector(`div#${owner.id} a[target="action-set-as-intro"]`);
   let slideSetAsTechDiff = document.querySelector(`div#${owner.id} a[target="action-set-as-techdiff"]`);
-  let slideSetAsConclusion= document.querySelector(`div#${owner.id} a[target="action-set-as-conclusion"]`);
+  let slideSetAsConclusion = document.querySelector(`div#${owner.id} a[target="action-set-as-conclusion"]`);
   let img = document.querySelector(`div#${owner.id} img`);
 
   slideSetAsIntro.addEventListener("click", (e) => {
-    unityFetch(`/assignIntroSlide?url=${img.alt}`, {method:"PUT"})
-      .then( resp => {
+    unityFetch(`/assignIntroSlide?url=${img.alt}`, { method: "PUT" })
+      .then(resp => {
         if (resp.ok) {
           FetchAssignedHoldingSlidesAndUpdatePreviews();
         }
       });
   });
 
-  slideSetAsTechDiff.addEventListener("click", (e)=>{
-    unityFetch(`/assignTechnicalDifficultySlide?url=${img.alt}`, {method:"PUT"})
-      .then( resp => {
+  slideSetAsTechDiff.addEventListener("click", (e) => {
+    unityFetch(`/assignTechnicalDifficultySlide?url=${img.alt}`, { method: "PUT" })
+      .then(resp => {
         if (resp.ok) {
           FetchAssignedHoldingSlidesAndUpdatePreviews();
         }
       });
   });
 
-  slideSetAsConclusion.addEventListener("click", (e)=>{
-    unityFetch(`/assignConclusionSlide?url=${img.alt}`, {method:"PUT"})
-      .then( resp => {
+  slideSetAsConclusion.addEventListener("click", (e) => {
+    unityFetch(`/assignConclusionSlide?url=${img.alt}`, { method: "PUT" })
+      .then(resp => {
         if (resp.ok) {
           FetchAssignedHoldingSlidesAndUpdatePreviews();
         }
@@ -1178,7 +1281,7 @@ slideSwitchBtn.style.display = "none";
 
 FetchAssignedHoldingSlidesAndUpdatePreviews(); // Update previews on load.
 
-                    /* HELPER METHODS - MUSIC & VIDEO*/
+/* HELPER METHODS - MUSIC & VIDEO*/
 function convertSecondsToTimestamp(sec) {
   let hh = Math.floor(sec / 3600);
   let mm = Math.floor(sec / 60);
@@ -1191,7 +1294,7 @@ function getVolumeLevel(value) {
 }
 
 
-                    /* MUSIC TAB */
+/* MUSIC TAB */
 // => DOM ELEMENTS
 let currentlyPlayingSpan = document.getElementById("currently-playing-track");
 let currentlyPlayingTrackTime = document.getElementById("currently-playing-track-time");
@@ -1205,7 +1308,7 @@ let musicPlaybackTime = document.getElementById("music-playback-time");
 let playlist = document.getElementById("playlist");
 let trackInLibrary = document.getElementById("track-in-library");
 let trackInPlaylist = document.getElementById("track-in-playlist");
-let volumeLevelMusic  = document.getElementById("music-volume-level");
+let volumeLevelMusic = document.getElementById("music-volume-level");
 let volumeRangeMusic = document.getElementById("volume-range-music");
 
 let musicPlayStopBtn = document.getElementById("music-play-stop-btn");
@@ -1216,7 +1319,7 @@ let tracksInLibrary = [];
 let tracksInPlaylist = [];
 
 // => METHODS
-function onMusicPlaybackTimeReceived (time) {
+function onMusicPlaybackTimeReceived(time) {
   time = Math.round(time);
   if (!disableMusicProgressUpdates) {
     currentlyPlayingTrackTime.innerHTML = musicPlaybackTime.innerHTML = convertSecondsToTimestamp(time);
@@ -1256,7 +1359,7 @@ function validateTracksInLibrary(tracks) {
   ValidateClonesWithJsonArray(trackInLibrary, library, tracksInLibrary, setupBtn, tracks, validateBtn);
 }
 
-function validateTracksInPlaylist(playlistData, currentlyPlayingIndex){
+function validateTracksInPlaylist(playlistData, currentlyPlayingIndex) {
   let setupBtn = function (clone) {
     clone.classList.remove("d-none");
     let span = document.querySelector(`#${clone.id} span`);
@@ -1335,11 +1438,11 @@ trackInLibrary.classList.add("d-none");
 trackInPlaylist.classList.add("d-none");
 volumeLevelMusic.innerHTML = getVolumeLevel(volumeRangeMusic.value);
 
-                    /* VIDEO TAB */
+/* VIDEO TAB */
 // => DOM ELEMENTS
 let videoBtnContainer = document.getElementById("video-btn-container");
-let videoFieldsetBar  = document.getElementById("video-fieldset-bar");
-let volumeLevelVideo  = document.getElementById("video-volume-level");
+let videoFieldsetBar = document.getElementById("video-fieldset-bar");
+let volumeLevelVideo = document.getElementById("video-volume-level");
 let videoOptionGroup = document.getElementById("video-option-group");
 let videoPlayer = document.getElementById("video");
 let videoPlaybackTime = document.getElementById("video-playback-time");
@@ -1360,7 +1463,7 @@ function onVideoClearClicked() {
   sendClickEvent(myVideoPlayer, OperatorControls._LiveButton);
 }
 
-function onVideoPlaybackTimeReceived (time) {
+function onVideoPlaybackTimeReceived(time) {
   time = Math.round(time);
   if (!disableVideoProgressUpdates) {
     videoPlaybackTime.innerHTML = convertSecondsToTimestamp(time);
@@ -1392,12 +1495,12 @@ function validateVideoSwitchBtns(videos) {
     setupSlideSetAsOptionsButton(videoBtn);
     setupDeleteButton(videoBtn, "/uapp/deleteVideo?url={0}", label, FetchAllUploadedMediaAndUpdateDash);
     img.addEventListener("click", function () {
-      unityFetch("/setHoldingSlide?url=" + img.alt, {method: "PUT"})
-      .then(response => {
-        if (response.ok) {
-          console.log("Slide set");
-        }
-      });
+      unityFetch("/setHoldingSlide?url=" + img.alt, { method: "PUT" })
+        .then(response => {
+          if (response.ok) {
+            console.log("Slide set");
+          }
+        });
     });
   }
   let validateVideoSwitchBtn = function (video, slideInfo) {
@@ -1426,14 +1529,14 @@ videoProgress.addEventListener("input", function () {
 });
 
 videoProgress.addEventListener("change", function () {
-  setTimeout(function() {
+  setTimeout(function () {
     disableVideoProgressUpdates = false;
   }, 1000);
   let str = videoProgress.value;
   sendStringSubmitEvent(myVideoPlayer, OperatorControls._SeekVideoButton, str);
 });
 
-videoPlayPauseBtn.addEventListener("click", function() {
+videoPlayPauseBtn.addEventListener("click", function () {
   if (videoPlayPauseBtn.innerHTML === '<i class="bi bi-play"></i>') {
     sendClickEvent(myVideoPlayer, OperatorControls._PlayVideo);
   } else {
@@ -1441,7 +1544,7 @@ videoPlayPauseBtn.addEventListener("click", function() {
   }
 });
 
-volumeRangeVideo.addEventListener("input", function() {
+volumeRangeVideo.addEventListener("input", function () {
   let str = volumeRangeVideo.value;
   volumeLevelVideo.innerHTML = getVolumeLevel(volumeRangeVideo.value);
   sendStringSubmitEvent(myVideoPlayer, OperatorControls._VolumeVideo, str);
@@ -1452,7 +1555,7 @@ volumeLevelVideo.innerHTML = getVolumeLevel(volumeRangeVideo.value);
 videoSwitchBtn.style.display = "none";
 
 
-                    /* UPLOAD TAB */
+/* UPLOAD TAB */
 // => DOM ELEMENTS
 let batchSlideFileInput = document.getElementById("batch-slide-file-input");
 let conclusionSelect = document.getElementById("conclusion-slide-type-select");
@@ -1484,16 +1587,16 @@ let typeToKeyWords = {
   "intro": ["intro"],
   "conclusion": ["conclusion"],
   "technicalDifficulty": ["technical difficulty",
-  "technical difficulties",
-  "tech difficulty",
-  "tech difficulties",
-  "tech diff",
-  "technicaldifficulty",
-  "technicaldifficulties",
-  "techdifficulty",
-  "techdifficulties",
-  "techdiff"
-]
+    "technical difficulties",
+    "tech difficulty",
+    "tech difficulties",
+    "tech diff",
+    "technicaldifficulty",
+    "technicaldifficulties",
+    "techdifficulty",
+    "techdifficulties",
+    "techdiff"
+  ]
 };
 
 // => METHODS
@@ -1501,7 +1604,7 @@ function batchFileInputChanged() {
   clearFormInput();
   uploadDescriptor.innerHTML = ""; // Clear upload descriptor.
   let [slideFiles, musicFiles, videoFiles, pdfFiles, pptFiles]
-  = SortFilesByExtension(batchSlideFileInput.files); // Sort files into categories.
+    = SortFilesByExtension(batchSlideFileInput.files); // Sort files into categories.
   CategorizeSlideFilesByKeywordForUpload(slideFiles); // Categorize slides by keywords upload.
 
   // Simply push music and videos.
@@ -1659,7 +1762,7 @@ function pushFormInput(file, type, assignTo = []) {
 // reset preview elements upon modal close or save.
 function resetEditSlideAssignmentPreviewElements() {
   modalIntroCaption.innerHTML = modalTechDiffCaption.innerHTML = modalConclusionCaption.innerHTML
-  = "No slide selected to preview";
+    = "No slide selected to preview";
 
   modalIntroPreview.src = modalTechDiffPreview.src = modalConclusionPreview.src = "...";
 
@@ -1668,7 +1771,7 @@ function resetEditSlideAssignmentPreviewElements() {
   modalConclusionPreview.classList.add("d-none");
 }
 
-function SortFilesByExtension(files){
+function SortFilesByExtension(files) {
   let slideFiles = [];
   let musicFiles = [];
   let videoFiles = [];
@@ -1726,14 +1829,14 @@ function uploadCustomSlideClicked() {
   batchSlideUploadBtn.disabled = true;
 
   let upload = function (input) {
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
       let formData = new FormData();
       formData.append("type", input.type);
       formData.append(input.ogName, input.file);
 
       let request = new XMLHttpRequest();
       createUploadProgressTracker(parentTracker, request, input.ogName);
-      request.onload = function() {
+      request.onload = function () {
         if (request.status >= 200 && request.status < 300) {
           resolve(request.response);
           if (input.assignTo !== []) {
@@ -1806,7 +1909,7 @@ editSlideBtn.style.display = "none";
 
 FetchAllUploadedMediaAndUpdateDash(); // Update Initially
 
-                    /* CONFIGURATION TAB */
+/* CONFIGURATION TAB */
 // => DOM ELEMENTS
 let configFileInput = document.getElementById("config-file-input");
 
@@ -1868,7 +1971,7 @@ configDownloadBtn.addEventListener("click", function () {
     })
 });
 
-                    /* LOG TAB */
+/* LOG TAB */
 // => DOM ELEMENTS
 let listLogFileOptions = document.getElementById("list-all-log-files");
 
@@ -1912,7 +2015,7 @@ function downloadLog() {
   }
 }
 
-function fetchLogs(){
+function fetchLogs() {
   unityFetch("/getLog")
     .then(resp => resp.text())
     .then((data) => {
@@ -1954,7 +2057,7 @@ function onLogDownloadClicked() {
   }
 }
 
-function onLogMessageNotification () {
+function onLogMessageNotification() {
   if (navLogTabBtn.classList.contains("active")) {
     fetchLogs();
   }
@@ -1964,7 +2067,7 @@ function onLogMessageNotification () {
 listLogFileOptions.addEventListener("click", listAvailableLogs);
 logDownloadBtn.addEventListener("click", onLogDownloadClicked);
 
-                    /* RECORDING TAB */
+/* RECORDING TAB */
 // => DOM ELEMENTS
 let listFileOptions = document.getElementById("list-all-files");
 let recordingFieldset = document.getElementById("recording-fieldset");
@@ -2083,7 +2186,7 @@ async function listAvailableRecordings() {
 listFileOptions.addEventListener("click", listAvailableRecordings);
 recordingDownloadBtn.addEventListener("click", handleRecordingDownload);
 
-                    /* BRING NAV-TABS INTO VIEW*/
+/* BRING NAV-TABS INTO VIEW*/
 // => DOM ELEMENTS
 let navZoomTabBtn = document.getElementById("nav-zoom-tab");
 let navPartTabBtn = document.getElementById("nav-participants-tab");
@@ -2106,16 +2209,16 @@ navLogTabBtn.addEventListener("click", () => { navLogTabBtn.scrollIntoView(); fe
 navUploadTabBtn.addEventListener("click", () => { navUploadTabBtn.scrollIntoView(); });
 navRecordingTabBtn.addEventListener("click", () => { navRecordingTabBtn.scrollIntoView(); });
 
-                    /* ADVANCED SETTINGS */
+/* ADVANCED SETTINGS */
 // => DOM ELEMENTS
 let advancedSettingsToggle = document.getElementById("advancedSettingsToggle");
 let participantAutoShowBtnGrp = document.getElementById("participant-autoshow-btn-grp");
 
 // => EVENT LISTENERS
 advancedSettingsToggle.addEventListener("change",
-() => { onEnableAdvancedSettings(advancedSettingsToggle, navZoomTabBtn, streamAuthSettings, participantAutoShowBtnGrp, navLayoutTabBtn, navLogTabBtn) });
+  () => { onEnableAdvancedSettings(advancedSettingsToggle, navZoomTabBtn, streamAuthSettings, participantAutoShowBtnGrp, navLayoutTabBtn, navLogTabBtn) });
 
-                    /*** APP STATUS METHOD ***/
+/*** APP STATUS METHOD ***/
 function appStatusReceived(json) {
 
   let appStatus = JSON.parse(json);
