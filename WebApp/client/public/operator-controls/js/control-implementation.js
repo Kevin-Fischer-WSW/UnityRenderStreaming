@@ -515,9 +515,11 @@ let participantsGroupLabelInput = document.getElementById("ppt-grp-label-name");
 let participantsGroupSelect = document.getElementById("ppt-group-select");
 let participantInputGroupOg = document.getElementById("participant-input-group");
 
+let enableAutoShowOnJoin = document.getElementById("enable-autoshow-btn");
+let enableOutputAudioOnJoin = document.getElementById("enable-automute-btn");
 let deleteGroupBtn = document.getElementById("delete-grp-btn");
 let disableAutoShowOnJoin = document.getElementById("disable-autoshow-btn");
-let enableAutoShowOnJoin = document.getElementById("enable-autoshow-btn");
+let disableOutputAudioOnJoin = document.getElementById("disable-automute-btn");
 let groupParticipantsBtn = document.getElementById("group-select-ppt-btn");
 let hideAllLowerThirdsBtn = document.getElementById("hide-all-lower-thirds-btn");
 let hideSelectParticipantBtn = document.getElementById("hide-select-ppt-btn");
@@ -633,6 +635,10 @@ function onEnableAutoShowOnJoin() {
   unityFetch("/enableOutputVideoByDefault?enable=true", { method: "PUT" });
 }
 
+function onEnableOutputAudioOnJoin() {
+  unityFetch("/enableOutputAudioByDefault?enable=true", { method: "PUT" });
+}
+
 function onDeleteGroupBtnClicked() {
   unityFetch(`/deleteParticipantsGroup?groupId=${participantsGroupSelect.value}`, { method: "DELETE" })
     .then((resp) => {
@@ -650,6 +656,11 @@ function onDeleteGroupBtnClicked() {
 function onDisableAutoShowOnJoin() {
   unityFetch("/enableOutputVideoByDefault?enable=false", { method: "PUT" });
 }
+
+function onDisableOutputAudioOnJoin() {
+  unityFetch("/enableOutputAudioByDefault?enable=false", { method: "PUT" });
+}
+
 
 function onHideAllLowerThirdsClick() {
   sendClickEvent(myVideoPlayer, OperatorControls._HideAllLowerThirds);
@@ -823,9 +834,11 @@ function validateParticipantInputGroups() {
 }
 
 // => EVENT LISTENERS
+enableAutoShowOnJoin.addEventListener("click", onEnableAutoShowOnJoin);
+enableOutputAudioOnJoin.addEventListener("click", onEnableOutputAudioOnJoin);
 deleteGroupBtn.addEventListener("click", onDeleteGroupBtnClicked);
 disableAutoShowOnJoin.addEventListener("click", onDisableAutoShowOnJoin);
-enableAutoShowOnJoin.addEventListener("click", onEnableAutoShowOnJoin);
+disableOutputAudioOnJoin.addEventListener("click", onDisableOutputAudioOnJoin);
 hideAllLowerThirdsBtn.addEventListener("click", onHideAllLowerThirdsClick);
 participantsGroupLabelInput.addEventListener("input", validateGroupLabel);
 participantsGroupLabelSubmitBtn.addEventListener("click", groupParticipants);
