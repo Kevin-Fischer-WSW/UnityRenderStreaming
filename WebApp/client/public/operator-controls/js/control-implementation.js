@@ -635,8 +635,8 @@ function onEnableAutoShowOnJoin() {
   unityFetch("/enableOutputVideoByDefault?enable=true", { method: "PUT" });
 }
 
-function onEnableOutputAudioOnJoin() {
-  unityFetch("/enableOutputAudioByDefault?enable=true", { method: "PUT" });
+function onEnableAutoMuteOnJoin() {
+  unityFetch("/enableOutputAudioByDefault?enable=false", { method: "PUT" });
 }
 
 function onDeleteGroupBtnClicked() {
@@ -657,8 +657,8 @@ function onDisableAutoShowOnJoin() {
   unityFetch("/enableOutputVideoByDefault?enable=false", { method: "PUT" });
 }
 
-function onDisableOutputAudioOnJoin() {
-  unityFetch("/enableOutputAudioByDefault?enable=false", { method: "PUT" });
+function onDisableAutoMuteOnJoin() {
+  unityFetch("/enableOutputAudioByDefault?enable=true", { method: "PUT" });
 }
 
 
@@ -835,10 +835,10 @@ function validateParticipantInputGroups() {
 
 // => EVENT LISTENERS
 enableAutoShowOnJoin.addEventListener("click", onEnableAutoShowOnJoin);
-enableOutputAudioOnJoin.addEventListener("click", onEnableOutputAudioOnJoin);
+enableOutputAudioOnJoin.addEventListener("click", onEnableAutoMuteOnJoin);
 deleteGroupBtn.addEventListener("click", onDeleteGroupBtnClicked);
 disableAutoShowOnJoin.addEventListener("click", onDisableAutoShowOnJoin);
-disableOutputAudioOnJoin.addEventListener("click", onDisableOutputAudioOnJoin);
+disableOutputAudioOnJoin.addEventListener("click", onDisableAutoMuteOnJoin);
 hideAllLowerThirdsBtn.addEventListener("click", onHideAllLowerThirdsClick);
 participantsGroupLabelInput.addEventListener("input", validateGroupLabel);
 participantsGroupLabelSubmitBtn.addEventListener("click", groupParticipants);
