@@ -1508,7 +1508,7 @@ function validateVideoSwitchBtns(videos) {
     setupSlideSetAsOptionsButton(videoBtn);
     setupDeleteButton(videoBtn, "/uapp/deleteVideo?url={0}", label, FetchAllUploadedMediaAndUpdateDash);
     img.addEventListener("click", function () {
-      unityFetch("/setHoldingSlide?url=" + img.alt, { method: "PUT" })
+      unityFetch("/prepareVideo?url=" + img.alt, { method: "PUT" })
         .then(response => {
           if (response.ok) {
             console.log("Slide set");
