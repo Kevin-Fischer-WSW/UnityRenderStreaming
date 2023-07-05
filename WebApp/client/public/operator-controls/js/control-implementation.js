@@ -68,6 +68,7 @@ async function extend() {
 // => DOM ELEMENTS
 let participantOnVidCtrlOg = document.getElementById("participant-on-vid-ctrl-og");
 let previewVideoContainer = document.getElementById("preview-video-container");
+let screenShareOnVidCtrlOg = document.getElementById("screen-share-on-vid-ctrl-og");
 
 // => PRIMITIVE AND OTHER TYPES
 let participantOnVidCtrls = [];
@@ -149,6 +150,38 @@ function setupParticipantOnVidCtrl(node, idx) {
   })
 }
 
+function setupScreenShareOnVidCtrl() {
+  let eyeEl = screenShareOnVidCtrlOg.querySelector(`.participant-on-vid-eye`);
+  let earEl = screenShareOnVidCtrlOg.querySelector(`.participant-on-vid-ear`);
+
+  earEl.addEventListener("mousedown", function (ev) {
+    let earElmy = ev.pageY;
+    let initialVolume = screenShareJsonParsed.volume;
+    let mouseMove = function (ev) {
+      let str = (initialVolume + (earElmy - ev.pageY) / 100).toString();
+      sendStringSubmitEvent(myVideoPlayer, OperatorControls._SetScreenShareVolume, str);
+    }
+    let mouseUp = function (ev) {
+      window.removeEventListener("mousemove", mouseMove);
+      window.removeEventListener("mouseup", mouseUp);
+      if (earElmy === ev.pageY) {
+        unityFetch(`/muteScreenShareAudioSource?mute=${!screenShareJsonParsed.mutedAudioSource}`, { method: "PUT" });
+      }
+    }
+    window.addEventListener("mousemove", mouseMove);
+    window.addEventListener("mouseup", mouseUp);
+  })
+
+  earEl.addEventListener("wheel", function (ev) {
+    ev.preventDefault();
+    let str = (screenShareJsonParsed.volume + (ev.deltaY > 0 ? -0.1 : 0.1));
+    sendStringSubmitEvent(myVideoPlayer, OperatorControls._SetScreenShareVolume, str);
+  })
+
+  eyeEl.addEventListener("click", function () {
+    unityFetch(`/setScreenShareVisible?visible=${!screenShareJsonParsed.visible}`, { method: "PUT" });
+  })
+}
 function validateParticipantOnVidCtrls() {
   let setupCtrl = function (clone) {
     setupParticipantOnVidCtrl(clone, participantOnVidCtrls.length - 1);
@@ -160,6 +193,21 @@ function validateParticipantOnVidCtrls() {
   }
   ValidateClonesWithJsonArray(participantOnVidCtrlOg, previewVideoContainer, participantOnVidCtrls, setupCtrl, participantJsonParsed, validateCtrl);
 }
+
+function validateScreenShareOnVidCtrl(){
+  let data = screenShareJsonParsed;
+  if (data === undefined){
+    screenShareOnVidCtrlOg.classList.add("d-none");
+  }else{
+    screenShareOnVidCtrlOg.classList.remove("d-none");
+    screenShareOnVidCtrlOg.style.top = (100 * data.top) + "%";
+    screenShareOnVidCtrlOg.style.left = (100 * data.left) + "%";
+    screenShareOnVidCtrlOg.style.width = (100 * data.width) + "%";
+  }
+}
+
+// => INIT(S)
+setupScreenShareOnVidCtrl();
 
 /* RENAME MODAL */
 // => DOM ELEMENTS
@@ -535,6 +583,7 @@ let unmuteSelectParticipantBtn = document.getElementById("unmute-select-ppt-btn"
 let participantInputGroups = [];
 let participantJsonParsed = null;
 let groupJsonParsed = null;
+let screenShareJsonParsed = null;
 
 // => METHODS
 function addParticipantSelectCheckEventListener() {
@@ -714,8 +763,10 @@ function participantDataReceived(json) {
   let data = JSON.parse(json);
   participantJsonParsed = data["ParticipantsData"];
   groupJsonParsed = data["GroupsData"];
+  screenShareJsonParsed = data["ScreenShareDisplayData"];
   validateParticipantInputGroups();
   validateParticipantOnVidCtrls();
+  validateScreenShareOnVidCtrl();
 }
 
 function setupParticipantInputGroup(node) {

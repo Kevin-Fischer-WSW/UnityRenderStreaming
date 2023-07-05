@@ -292,6 +292,11 @@
 
             <div class="participant-on-vid-drag" draggable="true"></div>
           </div>
+          <!-- Screen share control -->
+          <div id="screen-share-on-vid-ctrl-og" class="participant-on-vid-ctrl d-none">
+            <div class="participant-on-vid-eye" title="Hide/Unhide screen share"></div>
+            <div class="participant-on-vid-ear" title="Mute/Unmute screen share;Set screen share volume"></div>
+          </div>
 
         </div>
       </div>
@@ -396,7 +401,7 @@
             <button id="disable-automute-btn" type="button" class="btn btn-secondary"
               title="Disable participants audio in output upon join">Disable Auto Mute</button>
           </div>
-          
+
           <!-- Single participant control element. Will be cloned for each participant -->
           <div id="ppt-grp-input-div" class="input-group mt-2 d-none">
             <input id="ppt-grp-label-name" class="form-control" placeholder="Enter Group Label"
