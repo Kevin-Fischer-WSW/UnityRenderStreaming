@@ -194,11 +194,11 @@ function validateParticipantOnVidCtrls() {
   ValidateClonesWithJsonArray(participantOnVidCtrlOg, previewVideoContainer, participantOnVidCtrls, setupCtrl, participantJsonParsed, validateCtrl);
 }
 
-function validateScreenShareOnVidCtrl(){
+function validateScreenShareOnVidCtrl() {
   let data = screenShareJsonParsed;
-  if (data === undefined){
+  if (data === undefined) {
     screenShareOnVidCtrlOg.classList.add("d-none");
-  }else{
+  } else {
     screenShareOnVidCtrlOg.classList.remove("d-none");
     screenShareOnVidCtrlOg.style.top = (100 * data.top) + "%";
     screenShareOnVidCtrlOg.style.left = (100 * data.left) + "%";
@@ -1276,6 +1276,7 @@ function setupSlideSetAsOptionsButton(owner) {
   let slideSetAsIntro = document.querySelector(`div#${owner.id} a[target="action-set-as-intro"]`);
   let slideSetAsTechDiff = document.querySelector(`div#${owner.id} a[target="action-set-as-techdiff"]`);
   let slideSetAsConclusion = document.querySelector(`div#${owner.id} a[target="action-set-as-conclusion"]`);
+  let assignPlaylist = document.querySelector(`div#${owner.id} a[target="action-assign-playlist"]`);
   let img = document.querySelector(`div#${owner.id} img`);
 
   slideSetAsIntro.addEventListener("click", (e) => {
@@ -1302,6 +1303,15 @@ function setupSlideSetAsOptionsButton(owner) {
         if (resp.ok) {
           FetchAssignedHoldingSlidesAndUpdatePreviews();
         }
+      });
+  });
+
+  assignPlaylist.addEventListener("click", () => {
+    let labels = [];
+    playlistData.forEach(track => { labels.push(track.trackLabel)  });
+    unityFetch(`/assignPlaylistToSlide?url=${img.alt}&playlist=${labels.join(";")}`, { method: "PUT" })
+      .then(resp => {
+        //TODO
       });
   });
 
@@ -1381,6 +1391,7 @@ let musicPlayStopBtn = document.getElementById("music-play-stop-btn");
 let disableMusicProgressUpdates = false;
 let tracksInLibrary = [];
 let tracksInPlaylist = [];
+let playlistData = [];
 
 // => METHODS
 function onMusicPlaybackTimeReceived(time) {
@@ -2297,6 +2308,7 @@ function appStatusReceived(json) {
   generalStatBar.innerHTML = `Zoom Local Recording: ${appStatus.canRecordLocalFiles ? "Allowed" : "Not Allowed"}`;
 
   if (appStatus.inMeeting || appStatus.meetingSimulated) {
+    playlistData = appStatus.playlist;
     validateTracksInPlaylist(appStatus.playlist, appStatus.currentlyPlayingIndex);
     meetingNoInputField.disabled = true;
     joinMeetingBtn.disabled = true;

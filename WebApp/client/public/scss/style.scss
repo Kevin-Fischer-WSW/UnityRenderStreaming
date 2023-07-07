@@ -1,6 +1,7 @@
 $body-bg: #616161;
 
-#progress, .progressupload {
+#progress,
+.progressupload {
   height: 20px;
   display: flex;
   opacity: 1;
@@ -9,7 +10,10 @@ $body-bg: #616161;
   max-width: 100%;
 }
 
-#intro-preview, #techdiff-preview, #conc-preview, #slide-clear-btn {
+#intro-preview,
+#techdiff-preview,
+#conc-preview,
+#slide-clear-btn {
   height: 150px;
   max-width: 25%;
   border: 2px solid #3D3D3D;
@@ -21,7 +25,9 @@ $body-bg: #616161;
   background-color: #4c4c4c;
 }
 
-#intro-preview, #techdiff-preview, #conc-preview {
+#intro-preview,
+#techdiff-preview,
+#conc-preview {
   background-size: cover;
   background-blend-mode: multiply;
   padding: 0;
@@ -29,11 +35,13 @@ $body-bg: #616161;
   align-items: flex-end;
 }
 
-#slide-clear-btn, #video-clear-btn {
+#slide-clear-btn,
+#video-clear-btn {
   background-color: #2ecc71;
 }
 
-#slide-btn-container, #video-btn-container {
+#slide-btn-container,
+#video-btn-container {
   border: 3px solid #3D3D3D;
 }
 
@@ -129,36 +137,46 @@ $body-bg: #616161;
   cursor: pointer;
 }
 
-#pending-btn:hover, #live-btn:hover, 
-#technical-diff-btn:hover, #archive-btn:hover {
+#pending-btn:hover,
+#live-btn:hover,
+#technical-diff-btn:hover,
+#archive-btn:hover {
   font-size: 21px;
   transition: font-size .08s ease-in-out;
 }
 
 // avoid button text from overflowing.
-#pending-btn, #live-btn, #technical-diff-btn, #archive-btn,
-#on-air-text, #on-air-info-text {
+#pending-btn,
+#live-btn,
+#technical-diff-btn,
+#archive-btn,
+#on-air-text,
+#on-air-info-text {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   //max-width: 150px;
 }
 
-#logout, #stream-settings  {
+#logout,
+#stream-settings {
   cursor: pointer;
   float: right;
   color: white;
 }
 
-.bi-gear-fill, .bi-box-arrow-right, .bi-bootstrap-reboot {
+.bi-gear-fill,
+.bi-box-arrow-right,
+.bi-bootstrap-reboot {
   font-size: 32px;
 }
 
-#stream-settings:hover, #logout:hover {
+#stream-settings:hover,
+#logout:hover {
   color: #000;
 }
 
-#video-players{
+#video-players {
   position: relative;
 }
 
@@ -185,7 +203,7 @@ video {
   // KF 9/13/2022
   // This setting might cause minor problems with click & drag, but it doesn't seem any more or less broken than it 
   // already is!
-  width:100%;
+  width: 100%;
 }
 
 $primary : white;
@@ -213,7 +231,7 @@ $btn-active-bg-shade-amount: 75%;
   border-bottom-left-radius: 5px;
 }
 
-.video-container{
+.video-container {
   aspect-ratio: 16 / 9;
   background-color: $gray-900;
 }
@@ -230,7 +248,7 @@ $btn-active-bg-shade-amount: 75%;
   height: 100%;
 }
 
-#general-status-bar{
+#general-status-bar {
   background-color: $secondary;
   height: 8%;
   width: 75%;
@@ -285,8 +303,8 @@ $btn-active-bg-shade-amount: 75%;
   border: 0;
   border-radius: 0px;
   margin-bottom: 30px;
-  -webkit-box-shadow: 0 2px 3px rgba(0,0,0,0.03);
-  box-shadow: 0 2px 3px rgba(0,0,0,0.03);
+  -webkit-box-shadow: 0 2px 3px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.03);
   -webkit-transition: .5s;
   transition: .5s;
 }
@@ -314,7 +332,7 @@ body {
   align-items: center;
   padding: 15px 20px;
   background-color: transparent;
-  border-bottom: 1px solid rgba(77,82,89,0.07);
+  border-bottom: 1px solid rgba(77, 82, 89, 0.07);
 }
 
 .card-header .card-title {
@@ -336,12 +354,12 @@ h4.card-title {
 }
 
 .card-title {
-  font-family: Roboto,sans-serif;
+  font-family: Roboto, sans-serif;
   font-weight: 300;
   line-height: 1.5;
   margin-bottom: 0;
   padding: 15px 20px;
-  border-bottom: 1px solid rgba(77,82,89,0.07);
+  border-bottom: 1px solid rgba(77, 82, 89, 0.07);
 }
 
 .form-check-input:checked {
@@ -356,7 +374,7 @@ h4.card-title {
 .ps-container {
   -ms-touch-action: auto;
   touch-action: auto;
-  overflow: hidden!important;
+  overflow: hidden !important;
   -ms-overflow-style: none;
 }
 
@@ -405,7 +423,7 @@ h4.card-title {
   background-color: #f5f6f7;
   border-radius: 3px;
   font-weight: 100;
-  color:#9b9b9b;
+  color: #9b9b9b;
 }
 
 .media>* {
@@ -439,7 +457,8 @@ h4.card-title {
   margin-right: 16px;
 }
 
-.media-meta-day::before, .media-meta-day::after {
+.media-meta-day::before,
+.media-meta-day::after {
   content: '';
   -webkit-box-flex: 1;
   flex: 1 1;
@@ -525,8 +544,12 @@ h4.card-title {
   background-color: transparent;
 }
 
-button, input, optgroup, select, textarea {
-  font-family: Roboto,sans-serif;
+button,
+input,
+optgroup,
+select,
+textarea {
+  font-family: Roboto, sans-serif;
   font-weight: 300;
 }
 
@@ -544,7 +567,7 @@ button, input, optgroup, select, textarea {
 .file-group {
   position: relative;
   overflow: hidden;
-} 
+}
 
 .publisher-btn {
   background-color: transparent;
@@ -555,12 +578,12 @@ button, input, optgroup, select, textarea {
   overflow: -moz-hidden-unscrollable;
   -webkit-transition: .2s linear;
   transition: .2s linear;
-} 
+}
 
 .file-group input[type="file"] {
   position: absolute;
   opacity: 0;
-  z-index: -1; 
+  z-index: -1;
   width: 20px;
 }
 
@@ -577,47 +600,50 @@ button, input, optgroup, select, textarea {
   font-size: calc(2vw + 1vh);
 }
 
-.nav-link, .nav-tabs .nav-link.active {
-    color: $white;
+.nav-link,
+.nav-tabs .nav-link.active {
+  color: $white;
 }
 
-.nav-link:hover, .nav-link:focus {
-    color: $black;
+.nav-link:hover,
+.nav-link:focus {
+  color: $black;
 }
 
 .form-control {
-    background-color:$white;
-    max-width: 400px;
-    border: 3px solid $light;
-}
-
-.form-control:focus {
-  background-color:$white;
-  border-color: $light;
-}
-
-.form-control:disabled {
-  background-color:lightgray;
-  border: 3px solid $light;
-}
-
-.form-select:disabled {
-  background-color:lightgray;
-}
-
-.form-control.form-select {
-  background-color:$white;
+  background-color: $white;
   max-width: 400px;
   border: 3px solid $light;
 }
 
-.form-select, .form-select:focus {
-    border: 1px solid #4c4c4c;
-    background-color: $white;
+.form-control:focus {
+  background-color: $white;
+  border-color: $light;
+}
+
+.form-control:disabled {
+  background-color: lightgray;
+  border: 3px solid $light;
+}
+
+.form-select:disabled {
+  background-color: lightgray;
+}
+
+.form-control.form-select {
+  background-color: $white;
+  max-width: 400px;
+  border: 3px solid $light;
+}
+
+.form-select,
+.form-select:focus {
+  border: 1px solid #4c4c4c;
+  background-color: $white;
 }
 
 .form-floating {
-    margin-bottom: 5px;
+  margin-bottom: 5px;
 }
 
 .overflow-div {
@@ -626,37 +652,38 @@ button, input, optgroup, select, textarea {
   border: none;
 }
 
-.streamInput, .streamInput:focus {
-    background-color:$white;
-    border: 1px solid #4c4c4c;
-    margin-bottom: 5px;
-    width:100%;
-    max-width: 100%;
+.streamInput,
+.streamInput:focus {
+  background-color: $white;
+  border: 1px solid #4c4c4c;
+  margin-bottom: 5px;
+  width: 100%;
+  max-width: 100%;
 }
 
-.media-switch-thumb{
+.media-switch-thumb {
   aspect-ratio: 16/9;
   background-size: cover;
   background-color: aliceblue;
   min-width: 100%;
 }
 
-.slide-switch-audio-btn{
+.slide-switch-audio-btn {
   width: 50%;
   position: absolute;
 }
 
-.media-left-btn{
+.media-left-btn {
   @extend .slide-switch-audio-btn;
-  left:0;
-  bottom:0;
+  left: 0;
+  bottom: 0;
   border-radius: 0px 0px 0px $border-radius;
 }
 
-.media-right-btn{
+.media-right-btn {
   @extend .slide-switch-audio-btn;
-  right:0;
-  bottom:0;
+  right: 0;
+  bottom: 0;
   border-radius: 0px 0px $border-radius 0px;
 }
 
@@ -692,20 +719,20 @@ button, input, optgroup, select, textarea {
 
 /* Track */
 ::-webkit-scrollbar-track {
-  background: #f1f1f1; 
+  background: #f1f1f1;
   border-radius: var(--bs-border-radius);
 }
- 
+
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background: #888; 
+  background: #888;
   background-clip: padding-box;
   border-radius: var(--bs-border-radius);
 }
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-  background: #555; 
+  background: #555;
 }
 
 .not-selectable {
@@ -717,16 +744,16 @@ button, input, optgroup, select, textarea {
   user-select: none;
 }
 
-#preview-video-container{
+#preview-video-container {
   position: relative;
 }
 
-.participant-on-vid-ctrl{
+.participant-on-vid-ctrl {
   position: absolute;
   aspect-ratio: 16/9;
 }
 
-.participant-on-vid-drag{
+.participant-on-vid-drag {
   position: absolute;
   opacity: 1%;
   background-color: $gray-500;
@@ -734,12 +761,12 @@ button, input, optgroup, select, textarea {
   width: 100%;
 }
 
-.participant-on-vid-drag:hover{
+.participant-on-vid-drag:hover {
   opacity: 50%;
-    cursor: move;
+  cursor: move;
 }
 
-.participant-on-vid-options{
+.participant-on-vid-options {
   position: absolute;
   left: 87.16%;
   top: 3.51%;
@@ -750,7 +777,7 @@ button, input, optgroup, select, textarea {
   background-color: $gray-500;
 }
 
-.participant-on-vid-options:hover{
+.participant-on-vid-options:hover {
   opacity: 50%;
   cursor: pointer;
 }
@@ -843,9 +870,11 @@ input[type="range"]::-moz-range-thumb {
 input[type="range"]::-webkit-slider-thumb:hover {
   box-shadow: 0 0 0 10px rgba(0, 0, 0, 0.1)
 }
+
 input[type="range"]:active::-webkit-slider-thumb {
   box-shadow: 0 0 0 13px rgba(0, 0, 0, 0.2);
 }
+
 input[type="range"]:focus::-webkit-slider-thumb {
   box-shadow: 0 0 0 13px rgba(0, 0, 0, 0.2)
 }
@@ -853,25 +882,27 @@ input[type="range"]:focus::-webkit-slider-thumb {
 input[type="range"]::-moz-range-thumb:hover {
   box-shadow: 0 0 0 10px rgba(0, 0, 0, 0.1)
 }
+
 input[type="range"]:active::-moz-range-thumb {
   box-shadow: 0 0 0 13px rgba(0, 0, 0, 0.2);
 }
+
 input[type="range"]:focus::-moz-range-thumb {
-  box-shadow: 0 0 0 13px rgba(0, 0, 0, 0.2) 
+  box-shadow: 0 0 0 13px rgba(0, 0, 0, 0.2)
 }
 
-#timeline-controls{
+#timeline-controls {
   overflow-x: scroll;
 }
 
-#add{
+#add {
   //position: initial;
   //transform: translateY(50%);
   height: 100%;
 }
 
 #timeline-box {
- flex: 0 0 500px;
+  flex: 0 0 500px;
 }
 
 #clip-divider {
