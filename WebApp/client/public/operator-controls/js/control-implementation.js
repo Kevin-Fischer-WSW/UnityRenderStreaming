@@ -566,8 +566,6 @@ let participantInputGroupOg = document.getElementById("participant-input-group")
 let enableAutoShowOnJoin = document.getElementById("enable-autoshow-btn");
 let enableOutputAudioOnJoin = document.getElementById("enable-automute-btn");
 let deleteGroupBtn = document.getElementById("delete-grp-btn");
-let disableAutoShowOnJoin = document.getElementById("disable-autoshow-btn");
-let disableOutputAudioOnJoin = document.getElementById("disable-automute-btn");
 let groupParticipantsBtn = document.getElementById("group-select-ppt-btn");
 let hideAllLowerThirdsBtn = document.getElementById("hide-all-lower-thirds-btn");
 let hideSelectParticipantBtn = document.getElementById("hide-select-ppt-btn");
@@ -681,11 +679,25 @@ function mapSelectParticipantsToInputGroups() {
 }
 
 function onEnableAutoShowOnJoin() {
-  unityFetch("/enableOutputVideoByDefault?enable=true", { method: "PUT" });
+  unityFetch(`/enableOutputVideoByDefault?enable=${!appStatus.autoShowParticipantEnabled}`, {method: "PUT"})
+    .then((resp) => {
+      if (resp.ok) {
+        console.log("Success: Auto show on join toggled");
+      } else {
+        console.log("Error: Auto show on join toggle failed");
+      }
+    });
 }
 
 function onEnableAutoMuteOnJoin() {
-  unityFetch("/enableOutputAudioByDefault?enable=false", { method: "PUT" });
+  unityFetch(`/enableOutputAudioByDefault?enable=${appStatus.autoMuteParticipantEnabled}`, { method: "PUT" })
+    .then((resp) => {
+      if (resp.ok) {
+        console.log("Success: Auto mute on join toggled");
+      }else{
+        console.log("Error: Auto mute on join toggle failed");
+      }
+    });
 }
 
 function onDeleteGroupBtnClicked() {
@@ -701,15 +713,6 @@ function onDeleteGroupBtnClicked() {
       }
     });
 }
-
-function onDisableAutoShowOnJoin() {
-  unityFetch("/enableOutputVideoByDefault?enable=false", { method: "PUT" });
-}
-
-function onDisableAutoMuteOnJoin() {
-  unityFetch("/enableOutputAudioByDefault?enable=true", { method: "PUT" });
-}
-
 
 function onHideAllLowerThirdsClick() {
   sendClickEvent(myVideoPlayer, OperatorControls._HideAllLowerThirds);
@@ -888,8 +891,6 @@ function validateParticipantInputGroups() {
 enableAutoShowOnJoin.addEventListener("click", onEnableAutoShowOnJoin);
 enableOutputAudioOnJoin.addEventListener("click", onEnableAutoMuteOnJoin);
 deleteGroupBtn.addEventListener("click", onDeleteGroupBtnClicked);
-disableAutoShowOnJoin.addEventListener("click", onDisableAutoShowOnJoin);
-disableOutputAudioOnJoin.addEventListener("click", onDisableAutoMuteOnJoin);
 hideAllLowerThirdsBtn.addEventListener("click", onHideAllLowerThirdsClick);
 participantsGroupLabelInput.addEventListener("input", validateGroupLabel);
 participantsGroupLabelSubmitBtn.addEventListener("click", groupParticipants);
@@ -979,7 +980,7 @@ let layoutFieldset = document.getElementById("layout-fieldset");
 let layoutDropdown = document.getElementById("layout-dropdown");
 let lowerThirdStyleDropdown = document.getElementById("lower-thirds-style-dropdown");
 let textSizeDropdown = document.getElementById("text-size-dropdown");
-
+let enableAutoShowScreenShareBtn = document.getElementById("enable-auto-show-screen-share-btn");
 let cropScreenShareBtn = document.getElementById("crop-screen-share-btn");
 let cropScreenShareApplyBtn = document.getElementById("crop-screen-share-apply-btn");
 let cropScreenShareCloseBtn = document.getElementById("crop-screen-share-close-btn");
@@ -1036,6 +1037,15 @@ function onEditStyleSelectClicked() {
   });
 }
 
+function toggleAutoShowScreenShare() {
+  unityFetch(`/enableOutputScreenShareByDefault?enable=${!appStatus.autoShowScreenShareEnabled}`, { method: "PUT" })
+    .then(resp => {
+      if (resp.ok) {
+        console.log("auto show screen share toggled");
+      }
+    });
+}
+
 function onCropScreenShareApplyBtnClicked() {
   let crop = cropWidget.getNormalizedCrop();
   unityFetch(`/cropScreenShare?x=${crop.left}&y=${crop.bottom}&scale=${crop.width}`, { method: "PUT" })
@@ -1080,6 +1090,7 @@ function setupDropdown(dropdown, func) {
 cropScreenShareBtn.addEventListener("click", onCropScreenShareBtnClicked);
 cropScreenShareApplyBtn.addEventListener("click", onCropScreenShareApplyBtnClicked);
 editStyleSelect.addEventListener("click", onEditStyleSelectClicked);
+enableAutoShowScreenShareBtn.addEventListener("click", toggleAutoShowScreenShare);
 
 cropScreenSharePreview.onload = function () {
   cropWidget.mainElement.style.display = "block";
@@ -2283,9 +2294,10 @@ advancedSettingsToggle.addEventListener("change",
   () => { onEnableAdvancedSettings(advancedSettingsToggle, navZoomTabBtn, streamAuthSettings, participantAutoShowBtnGrp, navLayoutTabBtn, navLogTabBtn) });
 
 /*** APP STATUS METHOD ***/
+let appStatus;
 function appStatusReceived(json) {
 
-  let appStatus = JSON.parse(json);
+  appStatus = JSON.parse(json);
 
   ActivateButtonHelper(pendingBtn, false);
   ActivateButtonHelper(technicalDiffBtn, false);
@@ -2295,7 +2307,9 @@ function appStatusReceived(json) {
   addParticipantSelectCheckEventListener(); // adds event listeners to each select checkbox
 
   generalStatBar.innerHTML = `Zoom Local Recording: ${appStatus.canRecordLocalFiles ? "Allowed" : "Not Allowed"}`;
-
+  enableAutoShowScreenShareBtn.innerHTML = appStatus.autoShowScreenShareEnabled ? "Disable Auto Show Screen Share" : "Enable Auto Show Screen Share";
+  enableAutoShowOnJoin.innerHTML = appStatus.autoShowParticipantEnabled ? "Disable Auto Show" : "Enable Auto Show";
+  enableOutputAudioOnJoin.innerHTML = appStatus.autoMuteParticipantEnabled ? "Disable Auto Mute" : "Enable Auto Mute";
   if (appStatus.inMeeting || appStatus.meetingSimulated) {
     validateTracksInPlaylist(appStatus.playlist, appStatus.currentlyPlayingIndex);
     meetingNoInputField.disabled = true;
