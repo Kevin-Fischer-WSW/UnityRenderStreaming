@@ -563,8 +563,9 @@ let participantsGroupLabelInput = document.getElementById("ppt-grp-label-name");
 let participantsGroupSelect = document.getElementById("ppt-group-select");
 let participantInputGroupOg = document.getElementById("participant-input-group");
 
-let enableAutoShowOnJoin = document.getElementById("enable-autoshow-btn");
-let enableOutputAudioOnJoin = document.getElementById("enable-automute-btn");
+let enableParticipantVideoByDefault = document.getElementById("enable-autoshow-btn");
+let enableParticipantAudioByDefault = document.getElementById("enable-automute-btn");
+let enableScreenShareAudioByDefault = document.getElementById("enable-automutescreenshare-btn");
 let deleteGroupBtn = document.getElementById("delete-grp-btn");
 let groupParticipantsBtn = document.getElementById("group-select-ppt-btn");
 let hideAllLowerThirdsBtn = document.getElementById("hide-all-lower-thirds-btn");
@@ -678,7 +679,7 @@ function mapSelectParticipantsToInputGroups() {
   return arr;
 }
 
-function onEnableAutoShowOnJoin() {
+function onEnableParticipantVideoByDefaultClick() {
   unityFetch(`/enableOutputVideoByDefault?enable=${!appStatus.autoShowParticipantEnabled}`, {method: "PUT"})
     .then((resp) => {
       if (resp.ok) {
@@ -689,13 +690,24 @@ function onEnableAutoShowOnJoin() {
     });
 }
 
-function onEnableAutoMuteOnJoin() {
+function onEnableParticipantAudioByDefaultClick() {
   unityFetch(`/enableOutputAudioByDefault?enable=${appStatus.autoMuteParticipantEnabled}`, { method: "PUT" })
     .then((resp) => {
       if (resp.ok) {
         console.log("Success: Auto mute on join toggled");
       }else{
         console.log("Error: Auto mute on join toggle failed");
+      }
+    });
+}
+
+function onEnableScreenShareAudioByDefaultClick() {
+  unityFetch(`/enableOutputScreenShareAudioByDefault?enable=${appStatus.autoMuteScreenShareEnabled}`, { method: "PUT" })
+    .then((resp) => {
+      if (resp.ok) {
+        console.log("Success: Auto mute screen share toggled");
+      }else{
+        console.log("Error: Auto mute screen share toggle failed");
       }
     });
 }
@@ -888,8 +900,9 @@ function validateParticipantInputGroups() {
 }
 
 // => EVENT LISTENERS
-enableAutoShowOnJoin.addEventListener("click", onEnableAutoShowOnJoin);
-enableOutputAudioOnJoin.addEventListener("click", onEnableAutoMuteOnJoin);
+enableParticipantVideoByDefault.addEventListener("click", onEnableParticipantVideoByDefaultClick);
+enableParticipantAudioByDefault.addEventListener("click", onEnableParticipantAudioByDefaultClick);
+enableScreenShareAudioByDefault.addEventListener("click", onEnableScreenShareAudioByDefaultClick);
 deleteGroupBtn.addEventListener("click", onDeleteGroupBtnClicked);
 hideAllLowerThirdsBtn.addEventListener("click", onHideAllLowerThirdsClick);
 participantsGroupLabelInput.addEventListener("input", validateGroupLabel);
@@ -2308,8 +2321,9 @@ function appStatusReceived(json) {
 
   generalStatBar.innerHTML = `Zoom Local Recording: ${appStatus.canRecordLocalFiles ? "Allowed" : "Not Allowed"}`;
   enableAutoShowScreenShareBtn.innerHTML = appStatus.autoShowScreenShareEnabled ? "Disable Auto Show Screen Share" : "Enable Auto Show Screen Share";
-  enableAutoShowOnJoin.innerHTML = appStatus.autoShowParticipantEnabled ? "Disable Auto Show" : "Enable Auto Show";
-  enableOutputAudioOnJoin.innerHTML = appStatus.autoMuteParticipantEnabled ? "Disable Auto Mute" : "Enable Auto Mute";
+  enableScreenShareAudioByDefault.innerHTML = appStatus.autoMuteScreenShareEnabled ? "Disable Auto Mute Screen Share" : "Enable Auto Mute Screen Share";
+  enableParticipantVideoByDefault.innerHTML = appStatus.autoShowParticipantEnabled ? "Disable Auto Show" : "Enable Auto Show";
+  enableParticipantAudioByDefault.innerHTML = appStatus.autoMuteParticipantEnabled ? "Disable Auto Mute" : "Enable Auto Mute";
   if (appStatus.inMeeting || appStatus.meetingSimulated) {
     validateTracksInPlaylist(appStatus.playlist, appStatus.currentlyPlayingIndex);
     meetingNoInputField.disabled = true;
