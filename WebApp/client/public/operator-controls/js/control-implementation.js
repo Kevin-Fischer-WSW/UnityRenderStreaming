@@ -2302,9 +2302,15 @@ navRecordingTabBtn.addEventListener("click", () => { navRecordingTabBtn.scrollIn
 let advancedSettingsToggle = document.getElementById("advancedSettingsToggle");
 let participantAutoShowBtnGrp = document.getElementById("participant-autoshow-btn-grp");
 
+// => METHODS
+function enableAdvancedSettings() {
+  onEnableAdvancedSettings(advancedSettingsToggle, navZoomTabBtn, streamAuthSettings, participantAutoShowBtnGrp, navLayoutTabBtn, navLogTabBtn);
+}
 // => EVENT LISTENERS
-advancedSettingsToggle.addEventListener("change",
-  () => { onEnableAdvancedSettings(advancedSettingsToggle, navZoomTabBtn, streamAuthSettings, participantAutoShowBtnGrp, navLayoutTabBtn, navLogTabBtn) });
+advancedSettingsToggle.addEventListener("change", () => { enableAdvancedSettings() });
+
+// => INIT
+enableAdvancedSettings()
 
 /*** APP STATUS METHOD ***/
 let appStatus;
