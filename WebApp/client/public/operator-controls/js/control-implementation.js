@@ -13,6 +13,7 @@ import { createUploadProgressTracker } from "../../js/progresstracker.js";
 import { CropWidget } from "../../js/crop-widget.js";
 import * as Feedback from "../../js/user-input-feedback-alert.js";
 import { onEnableAdvancedSettings } from "./advancedSettings.js";
+import * as StyleHelper from "./style-helper.js";
 
 Feedback.setDefaultParentElement(document.getElementById("alert-container"));
 
@@ -1097,6 +1098,25 @@ function setupDropdown(dropdown, func) {
       func(child)
     }
   }
+}
+
+function updateCurrentLayout(layout, preset) {
+  StyleHelper.IterateListAndSetItemBold(layoutDropdown, function (child) {
+    return child.dataset.title === layout && (child.dataset.preset ? child.dataset.preset : "") === preset;
+  });
+}
+
+function updateCurrentLowerThirdStyle(style, preset) {
+  StyleHelper.IterateListAndSetItemBold(lowerThirdStyleDropdown, function (child) {
+    return child.dataset.title === style && (child.dataset.preset ? child.dataset.preset : "") === preset;
+  });
+}
+
+function updateCurrentTextSize(textSize)
+{
+  StyleHelper.IterateListAndSetItemBold(textSizeDropdown, function (child) {
+    return child.value === textSize;
+  });
 }
 
 // => EVENT LISTENERS
@@ -2330,6 +2350,9 @@ function appStatusReceived(json) {
   enableScreenShareAudioByDefault.innerHTML = appStatus.autoMuteScreenShareEnabled ? "Disable Auto Mute Screen Share" : "Enable Auto Mute Screen Share";
   enableParticipantVideoByDefault.innerHTML = appStatus.autoShowParticipantEnabled ? "Disable Auto Show" : "Enable Auto Show";
   enableParticipantAudioByDefault.innerHTML = appStatus.autoMuteParticipantEnabled ? "Disable Auto Mute" : "Enable Auto Mute";
+  updateCurrentLayout(appStatus.currentLayout, appStatus.currentLayoutPreset);
+  updateCurrentTextSize(appStatus.lowerThirdDisplayOption);
+  updateCurrentLowerThirdStyle(appStatus.currentLowerThirdStyle, appStatus.currentLowerThirdPreset);
   if (appStatus.inMeeting || appStatus.meetingSimulated) {
     validateTracksInPlaylist(appStatus.playlist, appStatus.currentlyPlayingIndex);
     meetingNoInputField.disabled = true;
