@@ -402,7 +402,7 @@ function updatestreamActivityBarInfo(appStatus) {
   onAirText.style.color = onAirIndicator.style.color = "red";
   onAirInfoText.style.color = "black";
 
-  let videoInfo = "None";
+  let videoInfo = [];
   let audioInfo = [];
 
   /* check audio sources */
@@ -412,13 +412,16 @@ function updatestreamActivityBarInfo(appStatus) {
   if (appStatus.isScreenShareAudible) audioInfo.push("ScreenShare");
 
   /* check video sources */
-  if (appStatus.holdingSlide) videoInfo = appStatus.holdingSlide.charAt(0).toUpperCase() + appStatus.holdingSlide.slice(1);
-  if (appStatus.videoIsShowing && appStatus.holdingSlide) videoInfo = "Video playback";
-  if (appStatus.isAnyParticipantVisible && !appStatus.videoIsShowing && appStatus.holdingSlide === "none") videoInfo = "Presenter";
+  if (appStatus.holdingSlide !== "none") videoInfo.push(appStatus.holdingSlide.charAt(0).toUpperCase() + appStatus.holdingSlide.slice(1));
+  else if (appStatus.videoIsShowing && appStatus.holdingSlide) videoInfo.push("Video playback");
+  else {
+    if (appStatus.isAnyParticipantVisible && !appStatus.videoIsShowing && appStatus.holdingSlide === "none") videoInfo.push("Presenter");
+    if (appStatus.isScreenShareVisible && !appStatus.videoIsShowing && appStatus.holdingSlide === "none") videoInfo.push("Screen Share");
+  }
 
   /* update information */
   onAirInfoText.innerHTML = `Audio: ${audioInfo.length > 0 ? audioInfo.join(", ") : "None"}
-    <br> Video: ${videoInfo}
+    <br> Video: ${videoInfo.length > 0 ? videoInfo.join(", ") : "None"}
     <br> Recording: ${appStatus.recording ? "Active" : "Inactive"}`;
 }
 
