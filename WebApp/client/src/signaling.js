@@ -76,7 +76,7 @@ export class Signaling extends EventTarget {
             break;
           default:
             break;
-        }     
+        }
       }
       await this.sleep(this.interval);
     }
@@ -284,6 +284,9 @@ export class WebSocketSignaling extends EventTarget {
         case "candidate":
           this.dispatchEvent(new CustomEvent('candidate', { detail: { connectionId: msg.from, candidate: msg.data.candidate, sdpMLineIndex: msg.data.sdpMLineIndex, sdpMid: msg.data.sdpMid } }));
           break;
+          case "message":
+            this.dispatchEvent(new CustomEvent('message', { detail: { message: msg.data.message, type: msg.data.type } }));
+            break;
         default:
           break;
       }

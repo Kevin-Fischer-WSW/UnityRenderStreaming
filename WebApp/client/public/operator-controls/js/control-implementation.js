@@ -27,7 +27,29 @@ mainNotifications.addEventListener('setup', function () {
   myVideoPlayer.onVideoPlaybackTimeReceived = onVideoPlaybackTimeReceived;
   myVideoPlayer.onWrongPasswordNotification = onWrongPasswordNotification;
   myVideoPlayer.onRegistrationUrlReceived = onRegistrationUrlReceived;
+  myVideoPlayer.signaling.addEventListener("message", async (e) => {
+    onAlert(e.detail);
+  });
 });
+
+function onAlert(data) {
+  let type = data.type;
+  let message = data.message;
+  switch (type) {
+    case "error":
+      Feedback.alertDanger(message);
+      break;
+    case "warning":
+      Feedback.alertWarning(message);
+      break;
+    case "info":
+      Feedback.alertInfo(message);
+      break;
+    case "success":
+      Feedback.alertSuccess(message);
+      break;
+  }
+}
 
 function onNewMediaNotification() {
   if (navSlideTabBtn.classList.contains("active")) {

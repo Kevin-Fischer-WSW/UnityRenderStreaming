@@ -86,7 +86,18 @@ export class RenderStreaming {
     if (this.options.websocket) {
       console.log(`start websocket signaling server ws://${this.getIPAddress()[0]}`);
       //Start Websocket Signaling server
-      new WSSignaling(this.server, this.options.mode);
+      let wss = new WSSignaling(this.server, this.options.mode);
+      this.app.put('/alert', (req, res) => {
+        // Only proceed if request is from localhost
+        if (req.socket.remoteAddress === req.socket.localAddress) {
+          console.log(`${req.body.type} : ${req.body.message}`);
+          wss.alert(req.body);
+          res.sendStatus(200);
+        }
+        else {
+          res.sendStatus(403);
+        }
+      });
     }
 
     console.log(`start as ${this.options.mode} mode`);

@@ -58,4 +58,8 @@ export default class WSSignaling {
       };
     });
   }
+
+  alert(alert : any): void {
+    handler.alert(alert);
+  }
 }

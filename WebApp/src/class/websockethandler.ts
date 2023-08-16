@@ -150,4 +150,10 @@ function onCandidate(ws: WebSocket, message: any): void {
   });
 }
 
-export { reset, add, remove, onConnect, onDisconnect, onOffer, onAnswer, onCandidate };
+function alert(alert : any): void {
+  clients.forEach((_v, k) => {
+    k.send(JSON.stringify({ type: "message", data: alert }));
+  });
+}
+
+export { reset, add, remove, onConnect, onDisconnect, onOffer, onAnswer, onCandidate, alert };
