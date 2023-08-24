@@ -1020,6 +1020,7 @@ let layoutFieldset = document.getElementById("layout-fieldset");
 let layoutDropdown = document.getElementById("layout-dropdown");
 let lowerThirdStyleDropdown = document.getElementById("lower-thirds-style-dropdown");
 let textSizeDropdown = document.getElementById("text-size-dropdown");
+let screenShareSizeDropdown = document.getElementById("screen-share-size-dropdown");
 let enableAutoShowScreenShareBtn = document.getElementById("enable-auto-show-screen-share-btn");
 let cropScreenShareBtn = document.getElementById("crop-screen-share-btn");
 let cropScreenShareApplyBtn = document.getElementById("crop-screen-share-apply-btn");
@@ -1113,6 +1114,18 @@ function onTextSizeSelected(elem) {
   sendStringSubmitEvent(myVideoPlayer, OperatorControls._SetSizeOfLowerThird, elem.value.toString());
 }
 
+function onScreenShareSizeSelected(elem) {
+  let size = elem.dataset.value;
+  unityFetch(`/setScreenShareStyleSize?size=${size}`, { method: "PUT" })
+    .then(resp => {
+      if (resp.ok) {
+        console.log("screen share size applied");
+      } else {
+        Feedback.alertDanger(resp.statusText);
+      }
+    });
+}
+
 function onLowerThirdStyleSelected(elem) {
   unityFetch(`/setStyle?title=${elem.dataset.title}&category=Lower Third`, { method: "PUT" });
 }
@@ -1135,6 +1148,12 @@ function updateCurrentLayout(layout, preset) {
 function updateCurrentLowerThirdStyle(style, preset) {
   StyleHelper.IterateListAndSetItemBold(lowerThirdStyleDropdown, function (child) {
     return child.dataset.title === style && (child.dataset.preset ? child.dataset.preset : "") === preset;
+  });
+}
+
+function updateCurrentScreenShareStyleSize(size) {
+  StyleHelper.IterateListAndSetItemBold(screenShareSizeDropdown, function (child) {
+    return child.dataset.value === size;
   });
 }
 
@@ -1169,6 +1188,7 @@ cropScreenSharePreview.parentElement.appendChild(cropWidget.mainElement);
 cropWidget.initResizers();
 setupDropdown(layoutDropdown, onLayoutSelected);
 setupDropdown(textSizeDropdown, onTextSizeSelected);
+setupDropdown(screenShareSizeDropdown, onScreenShareSizeSelected)
 setupDropdown(lowerThirdStyleDropdown, onLowerThirdStyleSelected);
 
 /* LAYOUT TAB -SCHEMA EDITOR */
@@ -2379,6 +2399,7 @@ function appStatusReceived(json) {
   updateCurrentLayout(appStatus.currentLayout, appStatus.currentLayoutPreset);
   updateCurrentTextSize(appStatus.lowerThirdDisplayOption);
   updateCurrentLowerThirdStyle(appStatus.currentLowerThirdStyle, appStatus.currentLowerThirdPreset);
+  updateCurrentScreenShareStyleSize(appStatus.currentScreenShareStyleSize);
   if (appStatus.inMeeting || appStatus.meetingSimulated) {
     validateTracksInPlaylist(appStatus.playlist, appStatus.currentlyPlayingIndex);
     meetingNoInputField.disabled = true;
