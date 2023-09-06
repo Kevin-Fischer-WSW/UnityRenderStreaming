@@ -304,6 +304,9 @@ let streamingApp = document.getElementById("serverAppSelect");
 let streamingServerAdd = document.getElementById("serverAddressSelect");
 let uname = document.getElementById("username-input");
 
+let zoomAudioMethodMixedBtn = document.getElementById("zoom-audio-method-mixed");
+let zoomAudioMethodSeparateBtn = document.getElementById("zoom-audio-method-separate");
+
 let saveBtn = document.getElementById("save-btn");
 let streamSettingsBtn = document.getElementById("stream-settings");
 
@@ -318,19 +321,31 @@ var clipboard = new ClipboardJS(copyBtn, {
 
 // => METHODS
 function flagStreamPrefChange() {
-
-  if (streamKey.value !== "" && uname.value !== ""
-    && pwd.value !== "" && streamingApp.value !== "none"
-    && streamingServerAdd.value !== "none") {
     saveBtn.disabled = false;
-  } else {
-    saveBtn.disabled = true;
-  }
-  //saveBtn.addEventListener("click", updateStreamPref)
 }
 
 async function saveStreamPref() {
   saveBtn.disabled = true;
+  if (streamKey.value === "") {
+    Feedback.alertDanger("You must provide a value for stream key.", streamPrefAlerts);
+    return;
+  }
+  if (uname.value === "") {
+    Feedback.alertDanger("You must provide a value for username.", streamPrefAlerts);
+    return;
+  }
+  if (pwd.value === "") {
+    Feedback.alertDanger("You must provide a value for password.", streamPrefAlerts);
+    return;
+  }
+  if (streamingApp.value === "none") {
+    Feedback.alertDanger("You must select a value for streaming app.", streamPrefAlerts);
+    return;
+  }
+  if (streamingServerAdd.value === "none") {
+    Feedback.alertDanger("You must select a value for streaming server address.", streamPrefAlerts);
+    return;
+  }
   let resp = await unityFetch("/setStreamServiceSettings?" +
     "serverUrl=" + `rtmp://${streamingServerAdd.value}.wsw.com/${streamingApp.value}/` +
     "&streamKey=" + streamKey.value +
@@ -339,18 +354,22 @@ async function saveStreamPref() {
     { method: "PUT" });
   if (!resp.ok) {
     Feedback.alertDanger(resp.statusText, streamPrefAlerts);
-  } else {
-    await updateStreamPref();
-    Feedback.alertSuccess("Stream settings saved successfully!", streamPrefAlerts);
   }
+  if (zoomAudioMethodMixedBtn.checked){
+    unityFetch("/setZoomAudioMethod?method=mixed", { method: "PUT" });
+  } else if (zoomAudioMethodSeparateBtn.checked){
+    unityFetch("/setZoomAudioMethod?method=oneway", { method: "PUT" });
+  }
+  await updateStreamPref();
+  Feedback.alertSuccess("Settings saved successfully!", streamPrefAlerts);
 }
 
 async function updateStreamPref() {
   let resp = await unityFetch("/getStreamServiceSettings");
-  let data = await resp.json();
   if (!resp.ok) {
     Feedback.alertDanger("Could not get stream service settings.", streamPrefAlerts);
   } else {
+    let data = await resp.json();
     let reg = new RegExp("[:/.]");
     let url = data.streamServiceSettings.server.split(reg);
     streamingServerAdd.value = url[3];
@@ -359,6 +378,15 @@ async function updateStreamPref() {
     uname.value = data.streamServiceSettings.username;
     pwd.value = data.streamServiceSettings.password;
     boardData.innerHTML = url[3] === "none" ? "" : data.streamServiceSettings.server + data.streamServiceSettings.key;
+  }
+  resp = await unityFetch("/getZoomAudioMethod");
+  if (resp.ok){
+    let data = await resp.text()
+    if (data === "mixed"){
+      zoomAudioMethodMixedBtn.checked = true;
+    } else if (data === "oneway"){
+      zoomAudioMethodSeparateBtn.checked = true;
+    }
   }
 }
 
@@ -370,6 +398,8 @@ streamKey.addEventListener("input", flagStreamPrefChange);
 streamingServerAdd.addEventListener("input", flagStreamPrefChange);
 streamSettingsBtn.addEventListener("click", updateStreamPref);
 uname.addEventListener("input", flagStreamPrefChange);
+zoomAudioMethodMixedBtn.addEventListener("click", flagStreamPrefChange);
+zoomAudioMethodSeparateBtn.addEventListener("click", flagStreamPrefChange);
 
 clipboard.on('success', function (e) {
   var btnIcon = copyBtn.querySelector('.bi.bi-check');

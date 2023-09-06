@@ -210,6 +210,17 @@
             </div>
             <!-- stream pref alert container -->
             <div id="stream-pref-alerts" class="sticky-lg-bottom"></div>
+            <!-- zoom audio method toggle -->
+            <fieldset id="zoom-audio-toggle-fieldset">
+              <h6>Zoom Audio Method</h6>
+              <!-- Button group -->
+              <div class="btn-group" role="group" aria-label="Zoom audio method toggle">
+                <input class="btn-check" type="radio" name="zoom-audio-method" id="zoom-audio-method-mixed" autocomplete="off" checked>
+                <label class="btn btn-outline-secondary" for="zoom-audio-method-mixed" id="zoom-audio-method-mixed-label" title="Toggle Zoom audio method">Mixed</label>
+                <input class="btn-check" type="radio" name="zoom-audio-method" id="zoom-audio-method-separate" autocomplete="off">
+                <label class="btn btn-outline-secondary" for="zoom-audio-method-separate" id="zoom-audio-method-separate-label" title="Toggle Zoom audio method">Separate</label>
+              </div>
+            </fieldset>
           </div>
           <div class="modal-footer justify-content-center text-align-center gap-3">
             <button id="reset-to-default" class="btn border-0 m-0" data-bs-toggle="modal" data-bs-target="#reset-modal"
