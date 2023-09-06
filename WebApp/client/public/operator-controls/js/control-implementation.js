@@ -126,6 +126,7 @@ function setupParticipantOnVidCtrl(node, idx) {
     }
   }
 
+  earEl.style.pointerEvents = appStatus.currentZoomAudioMethod === "mixed" ? "none" : "auto";
   earEl.addEventListener("mousedown", function (ev) {
     let earElmy = ev.pageY;
     let initialVolume = participantJsonParsed[idx].volume;
@@ -210,6 +211,8 @@ function validateParticipantOnVidCtrls() {
     setupParticipantOnVidCtrl(clone, participantOnVidCtrls.length - 1);
   }
   let validateCtrl = function (ctrl, data) {
+    let earEl = ctrl.querySelector(`.participant-on-vid-ear`);
+    earEl.style.pointerEvents = appStatus.currentZoomAudioMethod === "mixed" ? "none" : "auto";
     ctrl.style.top = (100 * data.top) + "%";
     ctrl.style.left = (100 * data.left) + "%";
     ctrl.style.width = (100 * data.width) + "%";
