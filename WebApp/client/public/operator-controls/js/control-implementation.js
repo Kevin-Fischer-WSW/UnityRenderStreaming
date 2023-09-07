@@ -1437,17 +1437,39 @@ function validateSlideSwitchBtns(slides) {
     slide.style.display = "flex";
     let span = document.querySelector(`#${slide.id} span`);
     let img = document.querySelector(`#${slide.id} img`);
+    let mute = document.querySelector(`#${slide.id} .media-right-btn`)
+    let unmute = document.querySelector(`#${slide.id} .media-left-btn`);
 
     setupSlideSetAsOptionsButton(slide);
     setupDeleteButton(slide, "/uapp/deleteHoldingSlide?url={0}", span, onSlideTabClicked);
-    img.addEventListener("click", function () {
+    mute.addEventListener("click", () => {
+      unityFetch("/muteZoomAudio", {method: "PUT"})
+        .then(response => {
+          if (response.ok) {
+            console.log("Zoom Audio Muted.");
+            setHoldingSlide(img);
+          }
+        })
+    });
+    unmute.addEventListener("click", () => {
+      unityFetch("/unmuteZoomAudio", {method: "PUT"})
+        .then(response => {
+          if (response.ok) {
+            console.log("Zoom Audio Unmuted.");
+            setHoldingSlide(img);
+          }
+        })
+    });
+    img.addEventListener("click", _ => setHoldingSlide(img));
+
+    function setHoldingSlide(img) {
       unityFetch("/setHoldingSlide?url=" + img.alt, { method: "PUT" })
         .then(response => {
           if (response.ok) {
             console.log("Slide set.");
           }
         });
-    });
+    }
   }
   let validateSlide = function (slide, slideInfo) {
     let img = document.querySelector(`#${slide.id} img`);
@@ -1681,16 +1703,38 @@ function validateVideoSwitchBtns(videos) {
     videoBtn.style.display = "flex";
     let label = document.querySelector(`#${videoBtn.id} span`);
     let img = document.querySelector(`#${videoBtn.id} img`);
+    let mute = document.querySelector(`#${videoBtn.id} .media-right-btn`)
+    let unmute = document.querySelector(`#${videoBtn.id} .media-left-btn`);
     setupSlideSetAsOptionsButton(videoBtn);
     setupDeleteButton(videoBtn, "/uapp/deleteVideo?url={0}", label, FetchAllUploadedMediaAndUpdateDash);
-    img.addEventListener("click", function () {
+    mute.addEventListener("click", () => {
+      unityFetch("/muteZoomAudio", {method: "PUT"})
+        .then(response => {
+          if (response.ok) {
+            console.log("Zoom Audio Muted.");
+            prepareVideo(img);
+          }
+        })
+    });
+    unmute.addEventListener("click", () => {
+      unityFetch("/unmuteZoomAudio", {method: "PUT"})
+        .then(response => {
+          if (response.ok) {
+            console.log("Zoom Audio Unmuted.");
+            prepareVideo(img);
+          }
+        })
+    });
+    img.addEventListener("click", _ => prepareVideo(img));
+
+    function prepareVideo(img) {
       unityFetch("/prepareVideo?url=" + img.alt, { method: "PUT" })
         .then(response => {
           if (response.ok) {
             console.log("Slide set");
           }
         });
-    });
+    }
   }
   let validateVideoSwitchBtn = function (video, slideInfo) {
     let img = document.querySelector(`#${video.id} img`);
