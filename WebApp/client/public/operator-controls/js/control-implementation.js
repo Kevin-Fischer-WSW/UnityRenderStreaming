@@ -176,6 +176,7 @@ function setupParticipantOnVidCtrl(node, idx) {
 
 function setupScreenShareOnVidCtrl() {
   let eyeEl = screenShareOnVidCtrlOg.querySelector(`.participant-on-vid-eye`);
+  /* Uncomment to reenable screen share volume control
   let earEl = screenShareOnVidCtrlOg.querySelector(`.participant-on-vid-ear`);
 
   earEl.addEventListener("mousedown", function (ev) {
@@ -201,6 +202,7 @@ function setupScreenShareOnVidCtrl() {
     let str = (screenShareJsonParsed.volume + (ev.deltaY > 0 ? -0.1 : 0.1));
     sendStringSubmitEvent(myVideoPlayer, OperatorControls._SetScreenShareVolume, str);
   })
+   */
 
   eyeEl.addEventListener("click", function () {
     unityFetch(`/setScreenShareVisible?visible=${!screenShareJsonParsed.visible}`, { method: "PUT" });
