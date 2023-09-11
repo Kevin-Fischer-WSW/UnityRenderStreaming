@@ -446,18 +446,19 @@ let onAirInfoText = document.getElementById("on-air-info-text");
 let streamActivityBar = document.getElementById("stream-activity-bar");
 
 // => METHODS
-function resetStreamActivityBarInfo() {
-  /* reset aesthetics to default */
-  onAirText.style.color = onAirIndicator.style.color = onAirInfoText.style.color = "grey";
-  streamActivityBar.style.backgroundColor = "#4c4c4c";
-  onAirInfoText.innerHTML = `Audio: None <br> Video: None <br> Recording: Inactive`;
-}
-
 function updatestreamActivityBarInfo(appStatus) {
   /* update aesthetics */
-  streamActivityBar.style.backgroundColor = "#2ecc71";
-  onAirText.style.color = onAirIndicator.style.color = "red";
-  onAirInfoText.style.color = "black";
+  if (appStatus.streaming) {
+    streamActivityBar.style.backgroundColor = "#2ecc71";
+    onAirText.style.color = onAirIndicator.style.color = "red";
+    onAirInfoText.style.color = "black";
+    onAirText.innerHTML = "On Air";
+  } else {
+    streamActivityBar.style.backgroundColor = "#4c4c4c";
+    onAirText.style.color = onAirIndicator.style.color = onAirInfoText.style.color = "grey";
+    onAirText.innerHTML = "Off Air";
+  }
+
 
   let videoInfo = [];
   let audioInfo = [];
@@ -2496,10 +2497,9 @@ function appStatusReceived(json) {
     videoProgress.max = Math.round(appStatus.currentVideoDuration);
     videoPlayPauseBtn.innerHTML = appStatus.playingVideo ? '<i class="bi bi-pause"></i>' : '<i class="bi bi-play"></i>';
 
+    updatestreamActivityBarInfo(appStatus);
     if (appStatus.streaming) {
-
       updateStreamButtons();
-      updatestreamActivityBarInfo(appStatus);
 
       if (appStatus.holdingSlide === "intro") {
         pendingBtn.innerHTML = `Intro Slide <i class="bi bi-broadcast"></i>`;
@@ -2515,7 +2515,6 @@ function appStatusReceived(json) {
       }
     } else {
       resetStreamButtonsOnLeaveOrEnd();
-      resetStreamActivityBarInfo();
       // todo: This causes a custom slide named "conclusion" to immediately be dismissed.
       // if (jsonParsed.holdingSlide === "endOfStream" || jsonParsed.holdingSlide === "conclusion") {
       //   sendClickEvent(myVideoPlayer, OperatorControls._LiveButton);
@@ -2529,7 +2528,6 @@ function appStatusReceived(json) {
     }
 
   } else {
-    resetStreamActivityBarInfo();
     resetStreamButtonsOnLeaveOrEnd();
     generalStatBar.innerHTML = "Connection State: Connected";
     meetingNoInputField.disabled = false;
