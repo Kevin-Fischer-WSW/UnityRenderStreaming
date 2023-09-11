@@ -575,6 +575,9 @@ let joinMeetingBtn = document.getElementById("join-meeting-btn");
 let leaveMeetingBtn = document.getElementById("leave-meeting-btn");
 let meetingNumberInput = document.getElementById("meeting-number-input");
 let meetingPasswordInput = document.getElementById("meeting-password-input");
+let toggleZoomAudioMuteBtn = document.getElementById("toggle-zoom-audio-mute-btn");
+let volumeRangeZoom = document.getElementById("volume-range-zoom");
+let zoomVolumeLevel = document.getElementById("zoom-volume-level");
 
 // => METHODS
 function onJoinClick() {
@@ -608,6 +611,19 @@ function onRegistrationUrlReceived(url) {
   $('#registration-url-modal').modal('show');
 }
 
+function onToggleZoomAudioMuteClicked() {
+  if (appStatus.zoomAudioMuted) {
+    unityFetch(`/unmuteZoomAudio`, { method: "PUT" });
+  } else {
+    unityFetch(`/muteZoomAudio`, { method: "PUT" });
+  }
+}
+
+function onVolumeRangeZoomChanged(){
+  let str = volumeRangeZoom.value;
+  sendStringSubmitEvent(myVideoPlayer, OperatorControls._SetZoomAudioVolume, str);
+}
+
 function onWrongPasswordNotification() {
   Feedback.alertDanger("Meeting password is incorrect.");
 }
@@ -615,6 +631,9 @@ function onWrongPasswordNotification() {
 // => EVENT LISTENERS
 joinMeetingBtn.addEventListener('click', onJoinClick);
 leaveMeetingBtn.addEventListener("click", onLeaveClicked);
+toggleZoomAudioMuteBtn.addEventListener("click", onToggleZoomAudioMuteClicked);
+volumeRangeZoom.addEventListener("input", onVolumeRangeZoomChanged);
+
 
 /* PARTICIPANTS TAB */
 // => DOM ELEMENTS
@@ -2460,6 +2479,7 @@ enableAdvancedSettings()
 
 /*** APP STATUS METHOD ***/
 let appStatus;
+
 function appStatusReceived(json) {
 
   appStatus = JSON.parse(json);
@@ -2470,6 +2490,10 @@ function appStatusReceived(json) {
   ActivateButtonHelper(archiveBtn, false);
 
   addParticipantSelectCheckEventListener(); // adds event listeners to each select checkbox
+
+  toggleZoomAudioMuteBtn.innerHTML = appStatus.zoomAudioMuted ? "Unmute Zoom Audio" : "Mute Zoom Audio";
+  volumeRangeZoom.value = appStatus.currentZoomAudioVolume;
+  zoomVolumeLevel.innerHTML = getVolumeLevel(volumeRangeZoom.value);
 
   generalStatBar.innerHTML = `Zoom Local Recording: ${appStatus.canRecordLocalFiles ? "Allowed" : "Not Allowed"}`;
   enableAutoShowScreenShareBtn.innerHTML = appStatus.autoShowScreenShareEnabled ? "Disable Auto Show Screen Share" : "Enable Auto Show Screen Share";
