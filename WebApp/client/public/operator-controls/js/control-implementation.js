@@ -126,7 +126,9 @@ function setupParticipantOnVidCtrl(node, idx) {
     }
   }
 
-  earEl.style.pointerEvents = appStatus.currentZoomAudioMethod === "mixed" ? "none" : "auto";
+  if (appStatus !== undefined) {
+    earEl.style.pointerEvents = appStatus.currentZoomAudioMethod === "mixed" ? "none" : "auto";
+  }
   earEl.addEventListener("mousedown", function (ev) {
     let earElmy = ev.pageY;
     let initialVolume = participantJsonParsed[idx].volume;
