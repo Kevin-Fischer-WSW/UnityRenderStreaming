@@ -314,7 +314,8 @@ let uname = document.getElementById("username-input");
 let zoomAudioMethodMixedBtn = document.getElementById("zoom-audio-method-mixed");
 let zoomAudioMethodSeparateBtn = document.getElementById("zoom-audio-method-separate");
 
-let saveBtn = document.getElementById("save-btn");
+let saveSettingsBtn = document.getElementById("save-settings-btn");
+let saveStreamPrefBtn = document.getElementById("save-stream-pref-btn");
 let streamSettingsBtn = document.getElementById("stream-settings");
 
 // => PRIMITIVE AND OTHER TYPES
@@ -328,11 +329,23 @@ var clipboard = new ClipboardJS(copyBtn, {
 
 // => METHODS
 function flagStreamPrefChange() {
-    saveBtn.disabled = false;
+    saveStreamPrefBtn.disabled = false;
+}
+
+async function saveSettings() {
+  if (saveStreamPrefBtn.disabled === false){
+    await saveStreamPref();
+  }
+  if (zoomAudioMethodMixedBtn.checked){
+    unityFetch("/setZoomAudioMethod?method=mixed", { method: "PUT" });
+  } else if (zoomAudioMethodSeparateBtn.checked){
+    unityFetch("/setZoomAudioMethod?method=oneway", { method: "PUT" });
+  }
+  await updateSettings();
 }
 
 async function saveStreamPref() {
-  saveBtn.disabled = true;
+  saveStreamPrefBtn.disabled = true;
   if (streamKey.value === "") {
     Feedback.alertDanger("You must provide a value for stream key.", streamPrefAlerts);
     return;
@@ -367,11 +380,10 @@ async function saveStreamPref() {
   } else if (zoomAudioMethodSeparateBtn.checked){
     unityFetch("/setZoomAudioMethod?method=oneway", { method: "PUT" });
   }
-  await updateStreamPref();
-  Feedback.alertSuccess("Settings saved successfully!", streamPrefAlerts);
+  await updateSettings();
 }
 
-async function updateStreamPref() {
+async function updateSettings() {
   let resp = await unityFetch("/getStreamServiceSettings");
   if (!resp.ok) {
     Feedback.alertDanger("Could not get stream service settings.", streamPrefAlerts);
@@ -399,14 +411,13 @@ async function updateStreamPref() {
 
 // => EVENT LISTENERS
 pwd.addEventListener("input", flagStreamPrefChange);
-saveBtn.addEventListener("click", saveStreamPref);
+saveSettingsBtn.addEventListener("click", saveSettings);
+saveStreamPrefBtn.addEventListener("click", saveStreamPref);
 streamingApp.addEventListener("input", flagStreamPrefChange);
 streamKey.addEventListener("input", flagStreamPrefChange);
 streamingServerAdd.addEventListener("input", flagStreamPrefChange);
-streamSettingsBtn.addEventListener("click", updateStreamPref);
+streamSettingsBtn.addEventListener("click", updateSettings);
 uname.addEventListener("input", flagStreamPrefChange);
-zoomAudioMethodMixedBtn.addEventListener("click", flagStreamPrefChange);
-zoomAudioMethodSeparateBtn.addEventListener("click", flagStreamPrefChange);
 
 clipboard.on('success', function (e) {
   var btnIcon = copyBtn.querySelector('.bi.bi-check');
@@ -432,7 +443,7 @@ clipboard.on('success', function (e) {
 });
 
 streamPrefModal.addEventListener('shown.bs.modal', function () {
-  saveBtn.disabled = true;
+  saveStreamPrefBtn.disabled = true;
   serverAddressSelect.focus();
 })
 
@@ -2415,7 +2426,7 @@ function handleRecordingDownload() {
 }
 
 async function listAvailableRecordings() {
-  await updateStreamPref();
+  await updateSettings();
   let resp = await fetch("/listRecordings/" + streamKey.value);
   let files = await resp.json();
 
