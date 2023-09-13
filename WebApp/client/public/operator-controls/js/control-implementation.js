@@ -1482,7 +1482,7 @@ function validateSlideSwitchBtns(slides) {
           }
         })
     });
-    img.addEventListener("click", _ => setHoldingSlide(img));
+    img.addEventListener("click", _ => mute.click());
 
     function setHoldingSlide(img) {
       unityFetch("/setHoldingSlide?url=" + img.alt, { method: "PUT" })
