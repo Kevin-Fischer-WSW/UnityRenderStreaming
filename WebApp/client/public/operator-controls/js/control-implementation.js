@@ -2483,11 +2483,13 @@ let participantAutoShowBtnGrp = document.getElementById("participant-autoshow-bt
 // => METHODS
 function enableAdvancedSettings() {
   onEnableAdvancedSettings(advancedSettingsToggle, navZoomTabBtn, streamAuthSettings, participantAutoShowBtnGrp, navLayoutTabBtn, navLogTabBtn);
+  localStorage.setItem("advancedSettingsEnabled", advancedSettingsToggle.checked);
 }
 // => EVENT LISTENERS
 advancedSettingsToggle.addEventListener("change", () => { enableAdvancedSettings() });
 
 // => INIT
+advancedSettingsToggle.checked = localStorage.getItem("advancedSettingsEnabled") === "true";
 enableAdvancedSettings()
 
 /*** APP STATUS METHOD ***/
