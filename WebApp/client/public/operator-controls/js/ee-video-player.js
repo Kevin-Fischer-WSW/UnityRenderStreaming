@@ -58,13 +58,8 @@ export class VideoPlayer {
       this.signaling = new Signaling();
     }
 
-    // Check local stroage for connectionId
-    if (localStorage.getItem('connectionId') !== null) {
-      this.connectionId = localStorage.getItem('connectionId');
-    } else {
-      this.connectionId = uuid4();
-      localStorage.setItem('connectionId', this.connectionId);
-    }
+    this.connectionId = uuid4();
+    localStorage.setItem('connectionId', this.connectionId);
 
     // Create peerConnection with proxy server and set up handlers
     const config = getRTCConfiguration();
