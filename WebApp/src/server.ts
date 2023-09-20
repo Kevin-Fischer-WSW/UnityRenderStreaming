@@ -76,6 +76,27 @@ export const createServer = (config: Options): express.Application => {
     req.pipe(request);
   });
 
+  app.get('/connector', function(req, res, next) {
+    // Wait until port 46000 is ready, then return 200.
+    const net = require('net');
+    const port = 46000;
+    const host = 'localhost';
+    const timeout = 10000;
+    const socket = net.createConnection(port, host);
+    socket.on('connect', () => {
+      socket.end();
+      res.status(200).send('Unity App is ready');
+    });
+    socket.on('error', (error) => {
+      log(LogLevel.error, error);
+    });
+    socket.setTimeout(timeout, () => {
+      socket.destroy();
+      res.status(500).send('Unity App is not ready');
+    });
+  });
+
+
   app.use(express.urlencoded({ extended: true, limit: '2gb' }));
   app.use(express.json());
   app.get('/config', (req, res) => res.json({ useWebSocket: config.websocket, startupMode: config.mode, logging: config.logging }));
