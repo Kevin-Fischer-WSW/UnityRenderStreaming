@@ -88,7 +88,8 @@ export const createServer = (config: Options): express.Application => {
       res.status(200).send('Unity App is ready');
     });
     socket.on('error', (error) => {
-      log(LogLevel.error, error);
+      socket.destroy();
+      res.status(500).send('Unity App is not ready');
     });
     socket.setTimeout(timeout, () => {
       socket.destroy();
