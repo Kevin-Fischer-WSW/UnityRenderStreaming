@@ -5,5 +5,5 @@ export function setStreamkeys(keys: string) {
 }
 
 export function getStreamkeys() : string[] {
-    return streamkeys.split(',');
+    return streamkeys.split(';');
 }
