@@ -11,6 +11,7 @@ import * as session from 'express-session';
 import * as Ffmpeg  from 'fluent-ffmpeg';
 import {FfprobeData} from "fluent-ffmpeg";
 import {execSync} from "child_process";
+import * as streamkey from './streamkey';
 
 declare module 'express-session' {
   export interface SessionData {
@@ -496,6 +497,21 @@ export const createServer = (config: Options): express.Application => {
           res.status(500).end();
         }
       });
+  });
+
+  app.get('/streamkeys', (req, res) => {
+    if (!req.session.authorized) {
+      return res.status(401).redirect('/');
+    }
+    res.status(200).json({streamkeys: streamkey.getStreamkeys()});
+  });
+
+  app.put('/streamkeys', (req, res) => {
+    if (!req.session.authorized) {
+      return res.status(401).redirect('/');
+    }
+    streamkey.setStreamkeys(req.body.streamkeys);
+    res.status(200).json({streamkeys: streamkey.getStreamkeys()});
   });
 
   let videoEditingDir = path.normalize(config.videoEditingDir);
