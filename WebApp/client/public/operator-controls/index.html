@@ -167,10 +167,19 @@
                 <label for="serverAppSelect">Streaming Application</label>
               </div>
 
-              <!-- stream key input div -->
+              <!-- stream key input group div -->
+
               <div class="form-floating">
-                <input type="text" class="form-control streamInput" id="stream-key-input" placeholder="Stream Key">
-                <label for="stream-key-input">Stream Key</label>
+                <select class="form-select" id="stream-key-select">
+                  <option selected value="custom">Custom</option>
+                  <option value="eebot1">eebot1</option>
+                  <option value="eebot2">eebot2</option>
+                </select>
+                <label for="stream-key-select">Streaming Key</label>
+              </div>
+              <div class="form-floating">
+                <input type="text" class="form-control streamInput" id="stream-key-input" placeholder="key">
+                <label for="stream-key-input">Custom Stream Key</label>
               </div>
               <fieldset id="stream-auth-settings" class="d-none">
                 <h6>Authentication Info</h6>
