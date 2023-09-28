@@ -983,10 +983,12 @@ function validateParticipantInputGroups() {
   let validateParticipantInputGroup = function (clone, data) {
     let visibilityBtn = document.querySelector(`#${clone.id} .visibility-btn`);
     let audibilityBtn = document.querySelector(`#${clone.id} .audibility-btn`);
+    let lowerThirdBtn = document.querySelector(`#${clone.id} .show-lower-third-btn`);
     let nameSpan = document.querySelector(`#${clone.id} .name-span`);
 
-    visibilityBtn.firstChild.className = data.visible ? "bi bi-eye" : "bi bi-eye-slash";
+    visibilityBtn.firstChild.className = data.visible ? "bi bi-eye-fill" : "bi bi-eye-slash";
     audibilityBtn.firstChild.className = data.mutedAudioSource ? "bi bi-ear" : "bi bi-ear-fill";
+    lowerThirdBtn.firstChild.className = data.lowerThirdShowing ? "bi bi-person-vcard-fill" : "bi bi-person-vcard";
     if (data.title === "") {
       nameSpan.innerHTML = `<b>${data.name}</b>`;
     } else {
