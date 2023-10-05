@@ -316,8 +316,12 @@ let uname = document.getElementById("username-input");
 let zoomAudioMethodMixedBtn = document.getElementById("zoom-audio-method-mixed");
 let zoomAudioMethodSeparateBtn = document.getElementById("zoom-audio-method-separate");
 
+let autoShowCheckbox = document.getElementById("auto-show-checkbox");
+let autoMuteCheckbox = document.getElementById("auto-mute-checkbox");
+let autoShowScreenShareCheckbox = document.getElementById("auto-show-screen-share-checkbox");
+let autoMuteScreenShareCheckbox = document.getElementById("auto-mute-screen-share-checkbox");
+
 let saveSettingsBtn = document.getElementById("save-settings-btn");
-let saveStreamPrefBtn = document.getElementById("save-stream-pref-btn");
 let streamSettingsBtn = document.getElementById("stream-settings");
 
 // => PRIMITIVE AND OTHER TYPES
@@ -328,14 +332,15 @@ var clipboard = new ClipboardJS(copyBtn, {
     return copyData.innerHTML;
   }
 });
+let saveStreamPrefFlag = false;
 
 // => METHODS
 function flagStreamPrefChange() {
-    saveStreamPrefBtn.disabled = false;
+  saveStreamPrefFlag = true;
 }
 
 async function saveSettings() {
-  if (saveStreamPrefBtn.disabled === false){
+  if (saveStreamPrefFlag === true){
     await saveStreamPref();
   }
   if (zoomAudioMethodMixedBtn.checked){
@@ -343,11 +348,16 @@ async function saveSettings() {
   } else if (zoomAudioMethodSeparateBtn.checked){
     unityFetch("/setZoomAudioMethod?method=oneway", { method: "PUT" });
   }
+  unityFetch(`/enableOutputVideoByDefault?enable=${autoShowCheckbox.checked}`, {method: "PUT"});
+  unityFetch(`/enableOutputAudioByDefault?enable=${!autoMuteCheckbox.checked}`, {method: "PUT"});
+  unityFetch(`/enableOutputScreenShareByDefault?enable=${autoShowScreenShareCheckbox.checked}`, {method: "PUT"});
+  unityFetch(`/enableOutputScreenShareAudioByDefault?enable=${!autoMuteScreenShareCheckbox.checked}`, {method: "PUT"});
   await updateSettings();
+  Feedback.alertSuccess("Settings saved.", streamPrefAlerts);
 }
 
 async function saveStreamPref() {
-  saveStreamPrefBtn.disabled = true;
+  saveStreamPrefFlag = false;
   if (streamKey.value === "") {
     Feedback.alertDanger("You must provide a value for stream key.", streamPrefAlerts);
     return;
@@ -377,11 +387,6 @@ async function saveStreamPref() {
   if (!resp.ok) {
     Feedback.alertDanger(resp.statusText, streamPrefAlerts);
   }
-  if (zoomAudioMethodMixedBtn.checked){
-    unityFetch("/setZoomAudioMethod?method=mixed", { method: "PUT" });
-  } else if (zoomAudioMethodSeparateBtn.checked){
-    unityFetch("/setZoomAudioMethod?method=oneway", { method: "PUT" });
-  }
   await updateSettings();
 }
 
@@ -409,12 +414,19 @@ async function updateSettings() {
       zoomAudioMethodSeparateBtn.checked = true;
     }
   }
+  resp = await unityFetch("/getAutomationSettings");
+  if (resp.ok) {
+    let data = await resp.json();
+    autoShowCheckbox.checked = data.autoShowParticipantEnabled;
+    autoMuteCheckbox.checked = data.autoMuteParticipantEnabled;
+    autoShowScreenShareCheckbox.checked = data.autoShowScreenShareEnabled;
+    autoMuteScreenShareCheckbox.checked = data.autoMuteScreenShareEnabled;
+  }
 }
 
 // => EVENT LISTENERS
 pwd.addEventListener("input", flagStreamPrefChange);
 saveSettingsBtn.addEventListener("click", saveSettings);
-saveStreamPrefBtn.addEventListener("click", saveStreamPref);
 streamingApp.addEventListener("input", flagStreamPrefChange);
 streamKey.addEventListener("input", flagStreamPrefChange);
 streamingServerAdd.addEventListener("input", flagStreamPrefChange);
@@ -445,7 +457,6 @@ clipboard.on('success', function (e) {
 });
 
 streamPrefModal.addEventListener('shown.bs.modal', function () {
-  saveStreamPrefBtn.disabled = true;
   serverAddressSelect.focus();
 })
 
@@ -660,9 +671,6 @@ let participantsGroupLabelInput = document.getElementById("ppt-grp-label-name");
 let participantsGroupSelect = document.getElementById("ppt-group-select");
 let participantInputGroupOg = document.getElementById("participant-input-group");
 
-let enableParticipantVideoByDefault = document.getElementById("enable-autoshow-btn");
-let enableParticipantAudioByDefault = document.getElementById("enable-automute-btn");
-let enableScreenShareAudioByDefault = document.getElementById("enable-automutescreenshare-btn");
 let deleteGroupBtn = document.getElementById("delete-grp-btn");
 let groupParticipantsBtn = document.getElementById("group-select-ppt-btn");
 let hideAllLowerThirdsBtn = document.getElementById("hide-all-lower-thirds-btn");
@@ -774,39 +782,6 @@ function mapSelectParticipantsToInputGroups() {
     return group.querySelector(".check");
   });
   return arr;
-}
-
-function onEnableParticipantVideoByDefaultClick() {
-  unityFetch(`/enableOutputVideoByDefault?enable=${!appStatus.autoShowParticipantEnabled}`, {method: "PUT"})
-    .then((resp) => {
-      if (resp.ok) {
-        console.log("Success: Auto show on join toggled");
-      } else {
-        console.log("Error: Auto show on join toggle failed");
-      }
-    });
-}
-
-function onEnableParticipantAudioByDefaultClick() {
-  unityFetch(`/enableOutputAudioByDefault?enable=${appStatus.autoMuteParticipantEnabled}`, { method: "PUT" })
-    .then((resp) => {
-      if (resp.ok) {
-        console.log("Success: Auto mute on join toggled");
-      }else{
-        console.log("Error: Auto mute on join toggle failed");
-      }
-    });
-}
-
-function onEnableScreenShareAudioByDefaultClick() {
-  unityFetch(`/enableOutputScreenShareAudioByDefault?enable=${appStatus.autoMuteScreenShareEnabled}`, { method: "PUT" })
-    .then((resp) => {
-      if (resp.ok) {
-        console.log("Success: Auto mute screen share toggled");
-      }else{
-        console.log("Error: Auto mute screen share toggle failed");
-      }
-    });
 }
 
 function onDeleteGroupBtnClicked() {
@@ -999,9 +974,6 @@ function validateParticipantInputGroups() {
 }
 
 // => EVENT LISTENERS
-enableParticipantVideoByDefault.addEventListener("click", onEnableParticipantVideoByDefaultClick);
-enableParticipantAudioByDefault.addEventListener("click", onEnableParticipantAudioByDefaultClick);
-enableScreenShareAudioByDefault.addEventListener("click", onEnableScreenShareAudioByDefaultClick);
 deleteGroupBtn.addEventListener("click", onDeleteGroupBtnClicked);
 hideAllLowerThirdsBtn.addEventListener("click", onHideAllLowerThirdsClick);
 participantsGroupLabelInput.addEventListener("input", validateGroupLabel);
@@ -1093,7 +1065,6 @@ let layoutDropdown = document.getElementById("layout-dropdown");
 let lowerThirdStyleDropdown = document.getElementById("lower-thirds-style-dropdown");
 let textSizeDropdown = document.getElementById("text-size-dropdown");
 let screenShareSizeDropdown = document.getElementById("screen-share-size-dropdown");
-let enableAutoShowScreenShareBtn = document.getElementById("enable-auto-show-screen-share-btn");
 let cropScreenShareBtn = document.getElementById("crop-screen-share-btn");
 let cropScreenShareApplyBtn = document.getElementById("crop-screen-share-apply-btn");
 let cropScreenShareCloseBtn = document.getElementById("crop-screen-share-close-btn");
@@ -1148,15 +1119,6 @@ function onEditStyleSelectClicked() {
       editStyleSelect.removeEventListener("click", onEditStyleSelectClicked)
     }
   });
-}
-
-function toggleAutoShowScreenShare() {
-  unityFetch(`/enableOutputScreenShareByDefault?enable=${!appStatus.autoShowScreenShareEnabled}`, { method: "PUT" })
-    .then(resp => {
-      if (resp.ok) {
-        console.log("auto show screen share toggled");
-      }
-    });
 }
 
 function onCropScreenShareApplyBtnClicked() {
@@ -1240,7 +1202,6 @@ function updateCurrentTextSize(textSize)
 cropScreenShareBtn.addEventListener("click", onCropScreenShareBtnClicked);
 cropScreenShareApplyBtn.addEventListener("click", onCropScreenShareApplyBtnClicked);
 editStyleSelect.addEventListener("click", onEditStyleSelectClicked);
-enableAutoShowScreenShareBtn.addEventListener("click", toggleAutoShowScreenShare);
 
 cropScreenSharePreview.onload = function () {
   cropWidget.mainElement.style.display = "block";
@@ -2482,11 +2443,10 @@ navRecordingTabBtn.addEventListener("click", () => { navRecordingTabBtn.scrollIn
 /* ADVANCED SETTINGS */
 // => DOM ELEMENTS
 let advancedSettingsToggle = document.getElementById("advancedSettingsToggle");
-let participantAutoShowBtnGrp = document.getElementById("participant-autoshow-btn-grp");
 
 // => METHODS
 function enableAdvancedSettings() {
-  onEnableAdvancedSettings(advancedSettingsToggle, navZoomTabBtn, streamAuthSettings, participantAutoShowBtnGrp, navLayoutTabBtn, navLogTabBtn);
+  onEnableAdvancedSettings(advancedSettingsToggle, navZoomTabBtn, streamAuthSettings, navLayoutTabBtn, navLogTabBtn);
   localStorage.setItem("advancedSettingsEnabled", advancedSettingsToggle.checked);
 }
 // => EVENT LISTENERS
@@ -2515,10 +2475,6 @@ function appStatusReceived(json) {
   zoomVolumeLevel.innerHTML = getVolumeLevel(volumeRangeZoom.value);
 
   generalStatBar.innerHTML = `Zoom Local Recording: ${appStatus.canRecordLocalFiles ? "Allowed" : "Not Allowed"}`;
-  enableAutoShowScreenShareBtn.innerHTML = appStatus.autoShowScreenShareEnabled ? "Disable Auto Show Screen Share" : "Enable Auto Show Screen Share";
-  enableScreenShareAudioByDefault.innerHTML = appStatus.autoMuteScreenShareEnabled ? "Disable Auto Mute Screen Share" : "Enable Auto Mute Screen Share";
-  enableParticipantVideoByDefault.innerHTML = appStatus.autoShowParticipantEnabled ? "Disable Auto Show" : "Enable Auto Show";
-  enableParticipantAudioByDefault.innerHTML = appStatus.autoMuteParticipantEnabled ? "Disable Auto Mute" : "Enable Auto Mute";
   updateCurrentLayout(appStatus.currentLayout, appStatus.currentLayoutPreset);
   updateCurrentTextSize(appStatus.lowerThirdDisplayOption);
   updateCurrentLowerThirdStyle(appStatus.currentLowerThirdStyle, appStatus.currentLowerThirdPreset);
