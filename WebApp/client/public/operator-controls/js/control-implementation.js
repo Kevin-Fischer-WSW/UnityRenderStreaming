@@ -36,18 +36,31 @@ function onAlert(data) {
   let type = data.type;
   let message = data.message;
   switch (type) {
-    case "error":
-      Feedback.alertDanger(message);
-      break;
-    case "warning":
-      Feedback.alertWarning(message);
-      break;
-    case "info":
-      Feedback.alertInfo(message);
-      break;
-    case "success":
-      Feedback.alertSuccess(message);
-      break;
+      case "error":
+          Feedback.alertDanger(message);
+          break;
+      case "warning":
+          Feedback.alertWarning(message);
+          break;
+      case "info":
+          Feedback.alertInfo(message);
+          break;
+      case "success":
+          Feedback.alertSuccess(message);
+          break;
+      case "reboot":
+          // Clear body and display reboot message
+          document.body.innerHTML = `<div class="d-flex justify-content-center align-items-center h-100">
+        <div class="text-center text-white">
+          <h1 class="display-1">Rebooting...</h1>
+          <p class="lead">Please wait while the system reboots. You will be redirected to login.</p>
+        </div>
+      </div>`;
+          // Ping server until it responds.
+          setInterval(() => {
+              extend();
+          }, 10000);
+          break;
   }
 }
 

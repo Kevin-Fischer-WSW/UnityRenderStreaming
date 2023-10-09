@@ -111,6 +111,7 @@ export class RenderStreaming {
             log(LogLevel.error, stderr);
           }
           wss.alertmsg('info', 'Server is rebooting.');
+          wss.alertmsg('reboot', '');
           res.status(200).send('Rebooting');
         });
       });
