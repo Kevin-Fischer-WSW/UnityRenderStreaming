@@ -324,6 +324,8 @@ let autoMuteScreenShareCheckbox = document.getElementById("auto-mute-screen-shar
 let saveSettingsBtn = document.getElementById("save-settings-btn");
 let streamSettingsBtn = document.getElementById("stream-settings");
 
+let confirmRebootBtn = document.getElementById("confirm-reboot-btn");
+
 // => PRIMITIVE AND OTHER TYPES
 var clipboard = new ClipboardJS(copyBtn, {
   container: streamPrefModal,
@@ -424,6 +426,10 @@ async function updateSettings() {
   }
 }
 
+function reboot() {
+  fetch("/reboot", { method: "PUT" });
+}
+
 // => EVENT LISTENERS
 pwd.addEventListener("input", flagStreamPrefChange);
 saveSettingsBtn.addEventListener("click", saveSettings);
@@ -432,6 +438,8 @@ streamKey.addEventListener("input", flagStreamPrefChange);
 streamingServerAdd.addEventListener("input", flagStreamPrefChange);
 streamSettingsBtn.addEventListener("click", updateSettings);
 uname.addEventListener("input", flagStreamPrefChange);
+
+confirmRebootBtn.addEventListener("click", reboot);
 
 clipboard.on('success', function (e) {
   var btnIcon = copyBtn.querySelector('.bi.bi-check');

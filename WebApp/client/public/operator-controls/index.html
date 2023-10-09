@@ -251,6 +251,8 @@
                 </label>
               </div>
             </fieldset>
+            <!-- Reboot button -->
+            <button id="reboot-btn" class="btn btn-warning mt-4" type="button" title="Reboot" data-bs-toggle="modal" data-bs-target="#reboot-confirmation-modal">Reboot Server</button>
             <!-- stream pref alert container -->
             <div id="stream-pref-alerts" class="sticky-lg-bottom"></div>
           </div>
@@ -265,6 +267,26 @@
               changes</button>
             <button type="button" class="btn btn-secondary float-end" data-bs-dismiss="modal"
               title="Close">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reboot confirmation Modal -->
+    <div class="modal fade" id="reboot-confirmation-modal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-light">
+            <h5 class="modal-title">Reboot Server</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" title="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p>Are you sure you want to reboot the server? This will disrupt ongoing streams, uploads, and downloads.</p>
+          </div>
+          <div class="modal-footer">
+            <button id="confirm-reboot-btn" type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+              title="Reboot">Reboot</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" title="Close">Close</button>
           </div>
         </div>
       </div>

@@ -62,4 +62,8 @@ export default class WSSignaling {
   alert(alert : any): void {
     handler.alert(alert);
   }
+
+  alertmsg(type: string, message: string): void {
+    handler.alertmsg(type, message);
+  }
 }

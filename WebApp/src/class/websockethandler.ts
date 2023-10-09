@@ -156,4 +156,8 @@ function alert(alert : any): void {
   });
 }
 
-export { reset, add, remove, onConnect, onDisconnect, onOffer, onAnswer, onCandidate, alert };
+function alertmsg(type: string, message: string): void {
+  alert({ type: type, message: message })
+}
+
+export { reset, add, remove, onConnect, onDisconnect, onOffer, onAnswer, onCandidate, alert, alertmsg };

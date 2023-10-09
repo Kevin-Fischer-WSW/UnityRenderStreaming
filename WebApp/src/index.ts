@@ -9,6 +9,8 @@ import { AddressInfo } from 'net';
 import WSSignaling from './websocket';
 import Options from './class/options';
 import * as path from "path";
+import {exec} from "child_process";
+import {log, LogLevel} from "./log";
 
 export class RenderStreaming {
   public static run(argv: string[]): RenderStreaming {
@@ -97,6 +99,20 @@ export class RenderStreaming {
         else {
           res.sendStatus(403);
         }
+      });
+      this.app.put('/reboot', function(req, res, next) {
+        // Reboot the server.
+        const exec = require('child_process').exec;
+        exec('shutdown /r /t 0', (error, stdout, stderr) => {
+          if (error) {
+            log(LogLevel.error, error);
+          }
+          if (stderr) {
+            log(LogLevel.error, stderr);
+          }
+          wss.alertmsg('info', 'Server is rebooting.');
+          res.status(200).send('Rebooting');
+        });
       });
     }
 
