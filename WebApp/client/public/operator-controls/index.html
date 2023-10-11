@@ -405,6 +405,10 @@
           role="tab" aria-controls="nav-slide" aria-selected="false"
           title="Manage/Preview/Stream uploaded slide(s)">Slides
         </button>
+        <button class="nav-link" id="nav-audio-tab" data-bs-toggle="tab" data-bs-target="#nav-audio" type="button"
+                role="tab" aria-controls="nav-audio" aria-selected="false"
+                title="Manage audio levels from the app.">Audio
+        </button>
         <button class="nav-link" id="nav-music-tab" data-bs-toggle="tab" data-bs-target="#nav-music" type="button"
           role="tab" aria-controls="nav-music" aria-selected="false" title="Manage/Preview/Stream uploaded music">Music
         </button>
@@ -441,18 +445,6 @@
           </fieldset>
           <button id="join-meeting-btn" class="btn btn-light" type="button" title="Join">Join</button>
           <button id="leave-meeting-btn" class="btn btn-light" type="button" title="Leave">Leave</button>
-          <legend class="title text-white mt-2">Zoom Call Audio</legend>
-          <fieldset id="zoom-audio-settings">
-            <div class="input-group w-25">
-              <div class="input-group-prepend">
-                <label class="text-white" for="volume-range-zoom">Volume</label>
-              </div>
-              <input type="range" class="custom-range w-100" min="0" max="1" step="0.01" id="volume-range-zoom">
-              <span id="zoom-volume-level" class="text-white"></span>
-            </div>
-            <button id="toggle-zoom-audio-mute-btn" class="btn btn-light mt-1" type="button" title="Mute/Unmute audio">Mute
-              Audio</button>
-          </fieldset>
         </fieldset>
       </div>
       <!-- Participant controls -->
@@ -651,6 +643,42 @@
                 class="bi bi-people-fill"></i><i class="bi bi-volume-mute"></i></button>
             </div>
           </div>
+        </fieldset>
+      </div>
+      <!-- Audio controls -->
+      <div class="tab-pane fade" id="nav-audio" role="tabpanel" aria-labelledby="nav-audio-tab">
+        <fieldset id="audio-fieldset">
+          <legend class="title text-white mt-2">Audio Controls</legend>
+          <div class="container">
+            <div class="row">
+              <div class="col-sm">
+                <div class="input-group w-100">
+                  <div class="input-group-prepend">
+                    <label class="text-white" for="volume-range-music">Zoom Volume Level</label>
+                  </div>
+                  <input type="range" class="custom-range w-100" min="0" max="1" step="0.01" id="volume-range-zoom">
+                  <span id="zoom-volume-level" class="text-white"></span>
+                </div>
+                <button id="toggle-zoom-audio-mute-btn" class="btn btn-light mt-4" type="button" title="Mute/Unmute audio">
+                  Mute
+                </button>
+              </div>
+              <div class="col-sm">
+                <div class="input-group w-100">
+                  <div class="input-group-prepend">
+                    <label class="text-white" for="volume-range-music">Master Volume Level</label>
+                  </div>
+                  <input type="range" class="custom-range w-100" min="0" max="1" step="0.01" id="volume-range-master">
+                  <span id="master-volume-level" class="text-white"></span>
+                </div>
+                <button id="toggle-master-audio-mute-btn" class="btn btn-light mt-4" type="button" title="Mute/Unmute audio">
+                  Mute
+                </button>
+              </div>
+
+            </div>
+          </div>
+
         </fieldset>
       </div>
       <!-- Hold Music controls -->
