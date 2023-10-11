@@ -601,9 +601,6 @@ let joinMeetingBtn = document.getElementById("join-meeting-btn");
 let leaveMeetingBtn = document.getElementById("leave-meeting-btn");
 let meetingNumberInput = document.getElementById("meeting-number-input");
 let meetingPasswordInput = document.getElementById("meeting-password-input");
-let toggleZoomAudioMuteBtn = document.getElementById("toggle-zoom-audio-mute-btn");
-let volumeRangeZoom = document.getElementById("volume-range-zoom");
-let zoomVolumeLevel = document.getElementById("zoom-volume-level");
 
 // => METHODS
 function onJoinClick() {
@@ -637,19 +634,6 @@ function onRegistrationUrlReceived(url) {
   $('#registration-url-modal').modal('show');
 }
 
-function onToggleZoomAudioMuteClicked() {
-  if (appStatus.zoomAudioMuted) {
-    unityFetch(`/unmuteZoomAudio`, { method: "PUT" });
-  } else {
-    unityFetch(`/muteZoomAudio`, { method: "PUT" });
-  }
-}
-
-function onVolumeRangeZoomChanged(){
-  let str = volumeRangeZoom.value;
-  sendStringSubmitEvent(myVideoPlayer, OperatorControls._SetZoomAudioVolume, str);
-}
-
 function onWrongPasswordNotification() {
   Feedback.alertDanger("Meeting password is incorrect.");
 }
@@ -657,8 +641,6 @@ function onWrongPasswordNotification() {
 // => EVENT LISTENERS
 joinMeetingBtn.addEventListener('click', onJoinClick);
 leaveMeetingBtn.addEventListener("click", onLeaveClicked);
-toggleZoomAudioMuteBtn.addEventListener("click", onToggleZoomAudioMuteClicked);
-volumeRangeZoom.addEventListener("input", onVolumeRangeZoomChanged);
 
 
 /* PARTICIPANTS TAB */
@@ -1501,6 +1483,49 @@ function convertSecondsToTimestamp(sec) {
 function getVolumeLevel(value) {
   return String(Number(Math.round(parseFloat(value) * 100))) + "%";
 }
+
+/* AUDIO TAB */
+// => DOM ELEMENTS
+let audioFieldset = document.getElementById("audio-fieldset");
+let volumeRangeZoom = document.getElementById("volume-range-zoom");
+let volumeRangeMaster = document.getElementById("volume-range-master");
+let zoomVolumeLevel = document.getElementById("zoom-volume-level");
+let masterVolumeLevel = document.getElementById("master-volume-level");
+let toggleZoomAudioMuteBtn = document.getElementById("toggle-zoom-audio-mute-btn");
+let toggleMasterAudioMuteBtn = document.getElementById("toggle-master-audio-mute-btn");
+
+// => METHODS
+function onToggleZoomAudioMuteClicked() {
+  if (appStatus.zoomAudioMuted) {
+    unityFetch(`/unmuteZoomAudio`, { method: "PUT" });
+  } else {
+    unityFetch(`/muteZoomAudio`, { method: "PUT" });
+  }
+}
+
+function onToggleMasterAudioMuteClicked() {
+  if (appStatus.masterAudioMuted) {
+    unityFetch(`/muteMasterAudio?mute=false`, { method: "PUT" });
+  } else {
+    unityFetch(`/muteMasterAudio?mute=true`, { method: "PUT" });
+  }
+}
+
+function onVolumeRangeZoomChanged(){
+  let str = volumeRangeZoom.value;
+  sendStringSubmitEvent(myVideoPlayer, OperatorControls._SetZoomAudioVolume, str);
+}
+
+function onVolumeRangeMasterChanged(){
+  let str = volumeRangeMaster.value;
+  sendStringSubmitEvent(myVideoPlayer, OperatorControls._SetMasterAudioVolume, str);
+}
+
+// => EVENT LISTENERS
+toggleZoomAudioMuteBtn.addEventListener("click", onToggleZoomAudioMuteClicked);
+volumeRangeZoom.addEventListener("input", onVolumeRangeZoomChanged);
+toggleMasterAudioMuteBtn.addEventListener("click", onToggleMasterAudioMuteClicked);
+volumeRangeMaster.addEventListener("input", onVolumeRangeMasterChanged);
 
 
 /* MUSIC TAB */
@@ -2473,6 +2498,9 @@ function appStatusReceived(json) {
   toggleZoomAudioMuteBtn.innerHTML = appStatus.zoomAudioMuted ? "Unmute Zoom Audio" : "Mute Zoom Audio";
   volumeRangeZoom.value = appStatus.currentZoomAudioVolume;
   zoomVolumeLevel.innerHTML = getVolumeLevel(volumeRangeZoom.value);
+  toggleMasterAudioMuteBtn.innerHTML = appStatus.masterAudioMuted ? "Unmute Master Audio" : "Mute Master Audio";
+  volumeRangeMaster.value = appStatus.masterVolume;
+  masterVolumeLevel.innerHTML = getVolumeLevel(volumeRangeMaster.value);
 
   generalStatBar.innerHTML = `Zoom Local Recording: ${appStatus.canRecordLocalFiles ? "Allowed" : "Not Allowed"}`;
   updateCurrentLayout(appStatus.currentLayout, appStatus.currentLayoutPreset);
