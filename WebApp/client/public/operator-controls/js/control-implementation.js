@@ -511,10 +511,12 @@ function updatestreamActivityBarInfo(appStatus) {
   let audioInfo = [];
 
   /* check audio sources */
-  if (appStatus.isAnyParticipantAudible) audioInfo.push("Presenter");
-  if (appStatus.playingHoldingMusic && appStatus.holdingMusicVolume) audioInfo.push("Holding music");
-  if (appStatus.playingVideo && appStatus.currentVideoVolume) audioInfo.push("Video playback");
-  if (appStatus.isScreenShareAudible) audioInfo.push("ScreenShare");
+  if (!appStatus.masterAudioMuted && appStatus.masterVolume > 0.01) {
+    if (appStatus.isAnyParticipantAudible) audioInfo.push("Presenter");
+    if (appStatus.playingHoldingMusic && appStatus.holdingMusicVolume) audioInfo.push("Holding music");
+    if (appStatus.playingVideo && appStatus.currentVideoVolume) audioInfo.push("Video playback");
+    if (appStatus.isScreenShareAudible) audioInfo.push("ScreenShare");
+  }
 
   /* check video sources */
   if (appStatus.holdingSlide !== "none") videoInfo.push(appStatus.holdingSlide.charAt(0).toUpperCase() + appStatus.holdingSlide.slice(1));
