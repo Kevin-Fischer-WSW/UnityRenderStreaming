@@ -500,17 +500,15 @@ export const createServer = (config: Options): express.Application => {
   });
 
   app.get('/streamkeys', (req, res) => {
-    if (!req.session.authorized) {
-      return res.status(401).redirect('/');
-    }
     res.status(200).json({streamkeys: streamkey.getStreamkeys()});
   });
 
   app.put('/streamkeys', (req, res) => {
-    if (!req.session.authorized) {
-      return res.status(401).redirect('/');
+    if (req.query.streamkeys === undefined){
+        res.status(400).json({message: "Invalid request"});
+        return;
     }
-    streamkey.setStreamkeys(req.body.streamkeys);
+    streamkey.setStreamkeys(req.query.streamkeys as string);
     res.status(200).json({streamkeys: streamkey.getStreamkeys()});
   });
 

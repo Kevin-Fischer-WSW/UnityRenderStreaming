@@ -7,6 +7,7 @@ import { sendClickEvent, sendStringSubmitEvent } from "/videoplayer/js/register-
 import { myVideoPlayer, mainNotifications } from "/operator-controls/js/control-main.js";
 import { ValidateClonesWithJsonArray } from "/operator-controls/js/validation-helper.js";
 import * as Style from "/operator-controls/js/style-helper.js";
+import * as SelectHelper from "../../js/select-helper.js";
 import { unityFetch, unityPutJson } from "../../js/unity-fetch.js";
 import { getVideoThumb } from "../../js/video-thumbnail.js";
 import { createUploadProgressTracker } from "../../js/progresstracker.js";
@@ -317,7 +318,8 @@ const copyData = document.getElementById('kt_clipboard_4');
 let boardData = document.getElementById('kt_clipboard_4');
 let pwd = document.getElementById("password-input");
 let serverAddressSelect = document.getElementById('serverAddressSelect');
-let streamKey = document.getElementById("stream-key-input");
+let streamKeyInput = document.getElementById("stream-key-input");
+let streamKeySelect = document.getElementById("stream-key-select");
 let streamAuthSettings = document.getElementById("stream-auth-settings");
 let streamPrefModal = document.getElementById("stream-pref-modal");
 let streamPrefAlerts = document.getElementById("stream-pref-alerts");
@@ -373,7 +375,7 @@ async function saveSettings() {
 
 async function saveStreamPref() {
   saveStreamPrefFlag = false;
-  if (streamKey.value === "") {
+  if (streamKeySelect.value === "custom" && streamKeyInput.value === "") {
     Feedback.alertDanger("You must provide a value for stream key.", streamPrefAlerts);
     return;
   }
@@ -393,9 +395,10 @@ async function saveStreamPref() {
     Feedback.alertDanger("You must select a value for streaming server address.", streamPrefAlerts);
     return;
   }
+  let streamKey = streamKeySelect.value === "custom" ? streamKeyInput.value : streamKeySelect.value;
   let resp = await unityFetch("/setStreamServiceSettings?" +
     "serverUrl=" + `rtmp://${streamingServerAdd.value}.wsw.com/${streamingApp.value}/` +
-    "&streamKey=" + streamKey.value +
+    "&streamKey=" + streamKey +
     "&username=" + uname.value +
     "&password=" + pwd.value,
     { method: "PUT" });
@@ -406,7 +409,16 @@ async function saveStreamPref() {
 }
 
 async function updateSettings() {
-  let resp = await unityFetch("/getStreamServiceSettings");
+  let resp = await fetch("/streamkeys");
+  let data = await resp.json();
+  streamKeySelect.innerHTML = "";
+  for (let i = 0; i < data.streamkeys.length; i++) {
+    let streamKeyOption = SelectHelper.createOption(data.streamkeys[i], data.streamkeys[i]);
+    streamKeySelect.appendChild(streamKeyOption);
+  }
+  let customOption = SelectHelper.createOption("custom", "Custom")
+  streamKeySelect.appendChild(customOption);
+  resp = await unityFetch("/getStreamServiceSettings");
   if (!resp.ok) {
     Feedback.alertDanger("Could not get stream service settings.", streamPrefAlerts);
   } else {
@@ -415,7 +427,10 @@ async function updateSettings() {
     let url = data.streamServiceSettings.server.split(reg);
     streamingServerAdd.value = url[3];
     streamingApp.value = url[6];
-    streamKey.value = data.streamServiceSettings.key;
+    let hasOption = SelectHelper.selectHasOption(streamKeySelect, data.streamServiceSettings.key);
+    streamKeySelect.value = hasOption ? data.streamServiceSettings.key : "custom";
+    streamKeyInput.value = data.streamServiceSettings.key;
+    streamKeyInput.parentElement.style.display = hasOption ? "none" : "block";
     uname.value = data.streamServiceSettings.username;
     pwd.value = data.streamServiceSettings.password;
     boardData.innerHTML = url[3] === "none" ? "" : data.streamServiceSettings.server + data.streamServiceSettings.key;
@@ -443,11 +458,22 @@ function reboot() {
   fetch("/reboot", { method: "PUT" });
 }
 
+function onStreamKeySelectChanged() {
+  if (streamKeySelect.value === "custom") {
+    streamKeyInput.parentElement.style.display = "block";
+    streamKeyInput.focus();
+  } else {
+    streamKeyInput.parentElement.style.display = "none";
+  }
+  flagStreamPrefChange();
+}
+
 // => EVENT LISTENERS
 pwd.addEventListener("input", flagStreamPrefChange);
 saveSettingsBtn.addEventListener("click", saveSettings);
 streamingApp.addEventListener("input", flagStreamPrefChange);
-streamKey.addEventListener("input", flagStreamPrefChange);
+streamKeyInput.addEventListener("input", flagStreamPrefChange);
+streamKeySelect.addEventListener("change", onStreamKeySelectChanged);
 streamingServerAdd.addEventListener("input", flagStreamPrefChange);
 streamSettingsBtn.addEventListener("click", updateSettings);
 uname.addEventListener("input", flagStreamPrefChange);
@@ -2440,7 +2466,7 @@ function handleRecordingDownload() {
 
 async function listAvailableRecordings() {
   await updateSettings();
-  let resp = await fetch("/listRecordings/" + streamKey.value);
+  let resp = await fetch("/listRecordings/" + streamKeyInput.value);
   let files = await resp.json();
 
   if (listFileOptions.childElementCount > files.length + 1) {
