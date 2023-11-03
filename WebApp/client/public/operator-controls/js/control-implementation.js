@@ -133,10 +133,9 @@ function setupParticipantOnVidCtrl(node, idx) {
     if (currentlyDraggedPov !== node) {
       let currentIdx = participantOnVidCtrls.indexOf(currentlyDraggedPov);
       let droppedIdx = participantOnVidCtrls.indexOf(node);
-      let p1 = participantJsonParsed[currentIdx];
-      let p2 = participantJsonParsed[droppedIdx];
-      let str = p1.id + "," + p2.id;
-      sendStringSubmitEvent(myVideoPlayer, OperatorControls._SwapParticipantsButton, str);
+      let p1 = participantJsonParsed[currentIdx].id;
+      let p2 = participantJsonParsed[droppedIdx].id;
+      unityFetch(`/swapParticipants?participantId1=${p1}&participantId2=${p2}`, { method: "PUT" });
     }
   }
 
@@ -916,10 +915,9 @@ function setupParticipantInputGroup(node) {
           droppedIdx = i;
         }
       }
-      let p1 = participantJsonParsed[currentIdx];
-      let p2 = participantJsonParsed[droppedIdx];
-      let str = p1.id + "," + p2.id;
-      sendStringSubmitEvent(myVideoPlayer, OperatorControls._SwapParticipantsButton, str);
+      let p1 = participantJsonParsed[currentIdx].id;
+      let p2 = participantJsonParsed[droppedIdx].id;
+      unityFetch(`/swapParticipants?participantId1=${p1}&participantId2=${p2}`, { method: "PUT" });
     }
   }
 
