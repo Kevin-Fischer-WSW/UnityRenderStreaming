@@ -327,9 +327,6 @@ let streamingApp = document.getElementById("serverAppSelect");
 let streamingServerAdd = document.getElementById("serverAddressSelect");
 let uname = document.getElementById("username-input");
 
-let zoomAudioMethodMixedBtn = document.getElementById("zoom-audio-method-mixed");
-let zoomAudioMethodSeparateBtn = document.getElementById("zoom-audio-method-separate");
-
 let autoShowCheckbox = document.getElementById("auto-show-checkbox");
 let autoMuteCheckbox = document.getElementById("auto-mute-checkbox");
 let autoShowScreenShareCheckbox = document.getElementById("auto-show-screen-share-checkbox");
@@ -359,11 +356,7 @@ async function saveSettings() {
   if (saveStreamPrefFlag === true){
     await saveStreamPref();
   }
-  if (zoomAudioMethodMixedBtn.checked){
-    unityFetch("/setZoomAudioMethod?method=mixed", { method: "PUT" });
-  } else if (zoomAudioMethodSeparateBtn.checked){
-    unityFetch("/setZoomAudioMethod?method=oneway", { method: "PUT" });
-  }
+
   unityFetch(`/enableOutputVideoByDefault?enable=${autoShowCheckbox.checked}`, {method: "PUT"});
   unityFetch(`/enableOutputAudioByDefault?enable=${!autoMuteCheckbox.checked}`, {method: "PUT"});
   unityFetch(`/enableOutputScreenShareByDefault?enable=${autoShowScreenShareCheckbox.checked}`, {method: "PUT"});
@@ -433,15 +426,6 @@ async function updateSettings() {
     uname.value = data.streamServiceSettings.username;
     pwd.value = data.streamServiceSettings.password;
     boardData.innerHTML = url[3] === "none" ? "" : data.streamServiceSettings.server + data.streamServiceSettings.key;
-  }
-  resp = await unityFetch("/getZoomAudioMethod");
-  if (resp.ok){
-    let data = await resp.text()
-    if (data === "mixed"){
-      zoomAudioMethodMixedBtn.checked = true;
-    } else if (data === "oneway"){
-      zoomAudioMethodSeparateBtn.checked = true;
-    }
   }
   resp = await unityFetch("/getAutomationSettings");
   if (resp.ok) {

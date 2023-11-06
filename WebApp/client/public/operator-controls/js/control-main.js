@@ -123,9 +123,10 @@ function Play() {
   muteOutputButton.addEventListener('click', function () {
     elementPreviewVideo.muted = false;
     let audioTracks = myVideoPlayer.videoAudioTracks;
-    if (audioTracks.length !== 2) return;
-    // Toggle first audio track.
+    if (audioTracks.length !== 3) return;
+    // Toggle first and third audio track.
     audioTracks[0].enabled = !audioTracks[0].enabled;
+    audioTracks[2].enabled = audioTracks[0].enabled;
     muteOutputIcon.classList.add(audioTracks[0].enabled ? "bi-volume-up" : "bi-volume-mute")
     muteOutputIcon.classList.remove(audioTracks[0].enabled ? "bi-volume-mute" : "bi-volume-up")
     muteOutputSlider.classList.add(audioTracks[0].enabled ? "d-block" : "d-none")
@@ -154,7 +155,7 @@ function Play() {
   muteInputButton.addEventListener('click', function () {
     elementPreviewVideo.muted = false;
     let audioTracks = myVideoPlayer.videoAudioTracks;
-    if (audioTracks.length !== 2) return;
+    if (audioTracks.length !== 3) return;
     // Toggle second audio track.
     audioTracks[1].enabled = !audioTracks[1].enabled;
     muteInputIcon.classList.add(audioTracks[1].enabled ? "bi-volume-up" : "bi-volume-mute")
@@ -166,14 +167,10 @@ function Play() {
     ev.stopPropagation();
   })
   muteOutputSlider.addEventListener('input', function () {
-    let audioTracks = myVideoPlayer.videoAudioTracks;
-    if (audioTracks.length !== 2) return;
     elementPreviewVideo.volume = muteOutputSlider.value / 100;
     muteInputSlider.value = muteOutputSlider.value;
   });
   muteInputSlider.addEventListener('input', function () {
-    let audioTracks = myVideoPlayer.videoAudioTracks;
-    if (audioTracks.length !== 2) return;
     elementPreviewVideo.volume = muteInputSlider.value / 100;
     muteOutputSlider.value = muteInputSlider.value;
   });
