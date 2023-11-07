@@ -2519,6 +2519,10 @@ function appStatusReceived(json) {
 
   appStatus = JSON.parse(json);
 
+  if (appStatus.sessionTitle && appStatus.sessionTitle !== ""){
+    document.title = appStatus.sessionTitle;
+  }
+
   ActivateButtonHelper(pendingBtn, false);
   ActivateButtonHelper(technicalDiffBtn, false);
   ActivateButtonHelper(liveBtn, false);
