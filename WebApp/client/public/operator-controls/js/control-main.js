@@ -182,14 +182,9 @@ async function setupVideoPlayer(previewElement, outputElement) {
   let selectedCodecs = null;
 
   await videoPlayer.setupConnection(useWebSocket, selectedCodecs);
-  videoPlayer.onconnect = onConnect;
-  videoPlayer.ondisconnect = onDisconnect;
+  videoPlayer.pc.addEventListener("disconnect", onDisconnect);
 
   return videoPlayer;
-}
-
-async function onConnect() {
-  document.getElementById("general-status-bar").innerHTML = "Connection State: Connected"
 }
 
 async function onDisconnect(message) {
@@ -205,6 +200,5 @@ async function onDisconnect(message) {
   //showPlayButton();
   document.getElementById("meeting-number-input-field").disabled = false;
   document.getElementById("join-meeting-btn").disabled = false;
-  document.getElementById("general-status-bar").innerHTML = "Connection State: Disconnected"
   Play();
 }

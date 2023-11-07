@@ -11,8 +11,9 @@ function uuid4() {
   return uuid.split(/[:/]/g).pop().toLowerCase(); // remove prefixes
 }
 
-export class VideoPlayer {
+export class VideoPlayer extends EventTarget {
   constructor(elements) {
+    super();
     const _this = this;
     this.pc = null;
     this.channel = null;
@@ -38,9 +39,6 @@ export class VideoPlayer {
     this.videoTrackList = [];
     this.maxVideoTrackLength = 2;
     this.videosAdded = false;
-
-    this.ondisconnect = function () { };
-    this.onconnect = function () { };
   }
 
   async setupConnection(useWebSocket) {
@@ -64,9 +62,7 @@ export class VideoPlayer {
     // Create peerConnection with proxy server and set up handlers
     const config = getRTCConfiguration();
     this.pc = new Peer(this.connectionId, true, config);
-    this.pc.addEventListener('disconnect', () => {
-      _this.ondisconnect();
-    });
+
     this.pc.addEventListener('trackevent', (e) => {
       const data = e.detail;
       if (data.track.kind === 'video') {
@@ -97,13 +93,6 @@ export class VideoPlayer {
       _this.signaling.sendCandidate(candidate.connectionId, candidate.candidate, candidate.sdpMid, candidate.sdpMLineIndex);
     });
 
-    this.signaling.addEventListener('disconnect', async (e) => {
-      const data = e.detail;
-      if (_this.pc != null && _this.pc.connectionId == data.connectionId) {
-        _this.ondisconnect();
-      }
-    });
-
     this.signaling.addEventListener('offer', async (e) => {
       const offer = e.detail;
       const desc = new RTCSessionDescription({ sdp: offer.sdp, type: "offer" });
@@ -132,13 +121,14 @@ export class VideoPlayer {
     // Create data channel with proxy server and set up handlers
     this.channel = this.pc.createDataChannel(this.connectionId, 'data');
     this.channel.onopen = function () {
-      _this.onconnect();
+      _this.dispatchEvent(new CustomEvent("dataChannelOpen"));
       Logger.log('Datachannel connected.');
     };
     this.channel.onerror = function (e) {
       Logger.log("The error " + e.error.message + " occurred\n while handling data with proxy server.");
     };
     this.channel.onclose = function () {
+      _this.dispatchEvent(new CustomEvent("dataChannelClose"));
       Logger.log('Datachannel disconnected.');
     };
     this.channel.onmessage = async (msg) => {
@@ -238,12 +228,14 @@ export class VideoPlayer {
     }
     switch (this.channel.readyState) {
       case 'connecting':
+        this.dispatchEvent(new CustomEvent("dataChannelConnecting"));
         Logger.log('Connection not ready');
         break;
       case 'open':
         this.channel.send(msg);
         break;
       case 'closing':
+        this.dispatchEvent(new CustomEvent("dataChannelClosing"));
         Logger.log('Attempt to sendMsg message while closing');
         break;
       case 'closed':

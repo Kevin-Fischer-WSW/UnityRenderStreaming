@@ -31,6 +31,13 @@ mainNotifications.addEventListener('setup', function () {
   myVideoPlayer.signaling.addEventListener("message", async (e) => {
     onAlert(e.detail);
   });
+  myVideoPlayer.addEventListener("dataChannelOpen", updateGeneralStatBar);
+  myVideoPlayer.addEventListener("dataChannelClose", () => {
+    appStatus = undefined;
+    updateGeneralStatBar();
+  });
+  myVideoPlayer.addEventListener("dataChannelConnecting", updateGeneralStatBar);
+  myVideoPlayer.addEventListener("dataChannelClosing", updateGeneralStatBar);
 });
 
 function onAlert(data) {
@@ -493,6 +500,21 @@ streamPrefModal.addEventListener('shown.bs.modal', function () {
 /* GENERAL STATUS BAR */
 // => DOM ELEMENTS
 let generalStatBar = document.getElementById("general-status-bar");
+
+// => METHODS
+function updateGeneralStatBar() {
+  if (appStatus !== undefined) {
+      generalStatBar.innerHTML = `Session: ${appStatus.sessionTitle} |`;
+      generalStatBar.innerHTML += ` In Meeting: ${appStatus.inMeeting ? appStatus.meetingId : "No"} |`;
+      generalStatBar.innerHTML += ` Zoom Local Recording: ${appStatus.canRecordLocalFiles ? "Allowed" : "Not Allowed"}`;
+  } else {
+    generalStatBar.innerHTML = `Connection State: ${myVideoPlayer.channel.readyState}`;
+    if (myVideoPlayer.channel.readyState === "open"){
+      setTimeout(updateGeneralStatBar, 1000);
+      sendClickEvent(myVideoPlayer, OperatorControls._GetAppStatus);
+    }
+  }
+}
 
 /* STREAM ACTIVITY BAR */
 // => DOM ELEMENTS
@@ -2523,6 +2545,8 @@ function appStatusReceived(json) {
     document.title = appStatus.sessionTitle;
   }
 
+  updateGeneralStatBar();
+
   ActivateButtonHelper(pendingBtn, false);
   ActivateButtonHelper(technicalDiffBtn, false);
   ActivateButtonHelper(liveBtn, false);
@@ -2537,7 +2561,6 @@ function appStatusReceived(json) {
   volumeRangeMaster.value = appStatus.masterVolume;
   masterVolumeLevel.innerHTML = getVolumeLevel(volumeRangeMaster.value);
 
-  generalStatBar.innerHTML = `Zoom Local Recording: ${appStatus.canRecordLocalFiles ? "Allowed" : "Not Allowed"}`;
   updateCurrentLayout(appStatus.currentLayout, appStatus.currentLayoutPreset);
   updateCurrentTextSize(appStatus.lowerThirdDisplayOption);
   updateCurrentLowerThirdStyle(appStatus.currentLowerThirdStyle, appStatus.currentLowerThirdPreset);
@@ -2591,7 +2614,6 @@ function appStatusReceived(json) {
 
   } else {
     resetStreamButtonsOnLeaveOrEnd();
-    generalStatBar.innerHTML = "Connection State: Connected";
     meetingNoInputField.disabled = false;
     joinMeetingBtn.disabled = false;
     holdMusicFieldset.disabled = true;
