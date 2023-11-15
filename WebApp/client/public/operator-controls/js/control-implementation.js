@@ -35,6 +35,7 @@ mainNotifications.addEventListener('setup', function () {
   myVideoPlayer.addEventListener("dataChannelClose", () => {
     appStatus = undefined;
     updateGeneralStatBar();
+    updateStreamActivityBarInfo(appStatus)
   });
   myVideoPlayer.addEventListener("dataChannelConnecting", updateGeneralStatBar);
   myVideoPlayer.addEventListener("dataChannelClosing", updateGeneralStatBar);
@@ -523,9 +524,27 @@ let onAirInfoText = document.getElementById("on-air-info-text");
 let streamActivityBar = document.getElementById("stream-activity-bar");
 
 // => METHODS
-function updatestreamActivityBarInfo(appStatus) {
+function updateStreamActivityBarInfo(_appStatus) {
+  if (_appStatus === undefined) {
+    _appStatus = {
+      streaming: false,
+      isAnyParticipantAudible: false,
+      isScreenShareAudible: false,
+      playingHoldingMusic: false,
+      playingVideo: false,
+      recording: false,
+      holdingMusicVolume: 0,
+      currentVideoVolume: 0,
+      masterVolume: 0,
+      masterAudioMuted: false,
+      holdingSlide: "none",
+      videoIsShowing: false,
+      isAnyParticipantVisible: false,
+      isScreenShareVisible: false,
+    }
+  }
   /* update aesthetics */
-  if (appStatus.streaming) {
+  if (_appStatus.streaming) {
     streamActivityBar.style.backgroundColor = "#2ecc71";
     onAirText.style.color = onAirIndicator.style.color = "red";
     onAirInfoText.style.color = "black";
@@ -537,29 +556,37 @@ function updatestreamActivityBarInfo(appStatus) {
   }
 
 
-  let videoInfo = [];
-  let audioInfo = [];
+  let videoSources = [];
+  let audioSources = [];
+  let audioConflict = false;
 
   /* check audio sources */
-  if (!appStatus.masterAudioMuted && appStatus.masterVolume > 0.01) {
-    if (appStatus.isAnyParticipantAudible) audioInfo.push("Presenter");
-    if (appStatus.playingHoldingMusic && appStatus.holdingMusicVolume) audioInfo.push("Holding music");
-    if (appStatus.playingVideo && appStatus.currentVideoVolume) audioInfo.push("Video playback");
-    if (appStatus.isScreenShareAudible) audioInfo.push("ScreenShare");
+  if (!_appStatus.masterAudioMuted && _appStatus.masterVolume > 0.01) {
+    if (_appStatus.isAnyParticipantAudible) audioSources.push("Presenter");
+    if (_appStatus.isScreenShareAudible) audioSources.push("Screen Share");
+    if (_appStatus.playingHoldingMusic && _appStatus.holdingMusicVolume > 0) {
+      audioConflict = audioSources.length >= 1;
+      audioSources.push("Holding music");
+    }
+    if (_appStatus.playingVideo && _appStatus.currentVideoVolume > 0) {
+      audioConflict = audioSources.length >= 1;
+      audioSources.push("Video playback");
+    }
   }
 
   /* check video sources */
-  if (appStatus.holdingSlide !== "none") videoInfo.push(appStatus.holdingSlide.charAt(0).toUpperCase() + appStatus.holdingSlide.slice(1));
-  else if (appStatus.videoIsShowing && appStatus.holdingSlide) videoInfo.push("Video playback");
+  if (_appStatus.holdingSlide !== "none") videoSources.push(_appStatus.holdingSlide.charAt(0).toUpperCase() + _appStatus.holdingSlide.slice(1));
+  else if (_appStatus.videoIsShowing && _appStatus.holdingSlide) videoSources.push("Video playback");
   else {
-    if (appStatus.isAnyParticipantVisible && !appStatus.videoIsShowing && appStatus.holdingSlide === "none") videoInfo.push("Presenter");
-    if (appStatus.isScreenShareVisible && !appStatus.videoIsShowing && appStatus.holdingSlide === "none") videoInfo.push("Screen Share");
+    if (_appStatus.isAnyParticipantVisible && !_appStatus.videoIsShowing && _appStatus.holdingSlide === "none") videoSources.push("Presenter");
+    if (_appStatus.isScreenShareVisible && !_appStatus.videoIsShowing && _appStatus.holdingSlide === "none") videoSources.push("Screen Share");
   }
 
   /* update information */
-  onAirInfoText.innerHTML = `Audio: ${audioInfo.length > 0 ? audioInfo.join(", ") : "None"}
-    <br> Video: ${videoInfo.length > 0 ? videoInfo.join(", ") : "None"}
-    <br> Recording: ${appStatus.recording ? "Active" : "Inactive"}`;
+  let warning = `<i class="bi bi-exclamation-triangle" title="Music/Video is playing over Presenters."></i>`
+  onAirInfoText.innerHTML = `Audio: ${audioConflict ? warning : ""} ${audioSources.length > 0 ? audioSources.join(", ") : "None"}
+    <br> Video: ${videoSources.length > 0 ? videoSources.join(", ") : "None"}
+    <br> Recording: ${_appStatus.recording ? "Active" : "Inactive"}`;
 }
 
 /* STREAM BUTTONS */
@@ -2581,7 +2608,7 @@ function appStatusReceived(json) {
     videoProgress.max = Math.round(appStatus.currentVideoDuration);
     videoPlayPauseBtn.innerHTML = appStatus.playingVideo ? '<i class="bi bi-pause"></i>' : '<i class="bi bi-play"></i>';
 
-    updatestreamActivityBarInfo(appStatus);
+    updateStreamActivityBarInfo(appStatus);
     if (appStatus.streaming) {
       updateStreamButtons();
 
