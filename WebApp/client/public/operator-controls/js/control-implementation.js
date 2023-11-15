@@ -396,7 +396,7 @@ async function saveStreamPref() {
   }
   let streamKey = streamKeySelect.value === "custom" ? streamKeyInput.value : streamKeySelect.value;
   let resp = await unityFetch("/setStreamServiceSettings?" +
-    "serverUrl=" + `rtmp://${streamingServerAdd.value}.wsw.com/${streamingApp.value}/` +
+    "serverUrl=" + `rtmp://${streamingServerAdd.value}/${streamingApp.value}/` +
     "&streamKey=" + streamKey +
     "&username=" + uname.value +
     "&password=" + pwd.value,
@@ -422,10 +422,9 @@ async function updateSettings() {
     Feedback.alertDanger("Could not get stream service settings.", streamPrefAlerts);
   } else {
     let data = await resp.json();
-    let reg = new RegExp("[:/.]");
-    let url = data.streamServiceSettings.server.split(reg);
-    streamingServerAdd.value = url[3];
-    streamingApp.value = url[6];
+    let url = data.streamServiceSettings.server.split("/");
+    streamingServerAdd.value = url[2];
+    streamingApp.value = url[3];
     let hasOption = SelectHelper.selectHasOption(streamKeySelect, data.streamServiceSettings.key);
     streamKeySelect.value = hasOption ? data.streamServiceSettings.key : "custom";
     streamKeyInput.value = data.streamServiceSettings.key;
