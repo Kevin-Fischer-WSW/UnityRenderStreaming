@@ -1915,7 +1915,8 @@ let extensionToMethod = {
   "music": ["mp3", "ogg", "wav"],
   "ppt": ["ppt", "pptm", "pptx"],
   "slide": ["png", "jpg", "jpeg"],
-  "video": ["mp4", "mov"], "pdf": ["pdf"],
+  "video": ["mp4", "mov"],
+  "pdf": ["pdf"],
 };
 let formInput = [];
 let typeToKeyWords = {
@@ -1936,35 +1937,16 @@ let typeToKeyWords = {
 
 // => METHODS
 function batchFileInputChanged() {
-  clearFormInput();
-  uploadDescriptor.innerHTML = ""; // Clear upload descriptor.
-  let [slideFiles, musicFiles, videoFiles, pdfFiles, pptFiles]
-    = SortFilesByExtension(batchSlideFileInput.files); // Sort files into categories.
-  CategorizeSlideFilesByKeywordForUpload(slideFiles); // Categorize slides by keywords upload.
+  // Sort files into categories.
+  let [slideFiles, musicFiles, videoFiles, pdfFiles, pptFiles, unknownFiles] = SortFilesByExtension(batchSlideFileInput.files);
+  // Categorize slides by keywords for upload.
+  let [introSlide, techDiffSlide, conclusionSlide, customSlides] = CategorizeSlideFilesByKeywordForUpload(slideFiles);
+  repopulateFormInputAndUploadDescriptor(introSlide, techDiffSlide, conclusionSlide, customSlides, musicFiles, videoFiles, pdfFiles, pptFiles, unknownFiles);
+}
 
-  // Simply push music and videos.
-  for (let musicFile of musicFiles) {
-    pushFormInput(musicFile, "music");
-  }
-  uploadDescriptor.innerHTML += `${musicFiles.length} music file(s), `;
-
-  for (let videoFile of videoFiles) {
-    pushFormInput(videoFile, "slide");
-  }
-  uploadDescriptor.innerHTML += `${pdfFiles.length} pdf file(s), `;
-
-  for (let pdfFile of pdfFiles) {
-    pushFormInput(pdfFile, "pdf");
-  }
-  uploadDescriptor.innerHTML += `${pptFiles.length} ppt file(s), `;
-
-  for (let pptFile of pptFiles) {
-    pushFormInput(pptFile, "ppt");
-  }
-  uploadDescriptor.innerHTML += ` and ${videoFiles.length} video file(s).`;
-  uploadDescriptor.innerHTML += `${pdfFiles.length > 0 || pptFiles.length > 0 ?
-    "<br><strong>Note: PDF/PPT files will be converted into slides, and will take longer to process.</strong>" : ""}`;
-  editSlideBtn.style.display = "block"; // Show edit button.
+function clearFormInputAndUploadDescriptor() {
+  formInput = [];
+  uploadDescriptor.innerHTML = "";
 }
 
 function editSlideBtnClicked() {
@@ -1976,40 +1958,38 @@ function editSlideBtnClicked() {
     }
     // Create option for every slide.
     for (let i = 0; i < formInput.length; i++) {
-      // Skip if not a video/slide.
+      // Skip if not a slide.
       if (formInput[i].type !== "slide") continue;
       let option = document.createElement("option");
-      option.value = formInput[i].ogName;
+      option.value = i.toString();
       option.innerText = formInput[i].ogName;
       select.appendChild(option);
       // Select option if it's name matches the slide type.
-      if (formInput[i].assignTo === select.dataset.type) {
+      if (formInput[i].assignTo.includes(select.dataset.type)) {
         select.selectedIndex = i + 1;
       }
     }
   }
+  // Update previews.
+  updateEditSlideAssignmentPreviewElement(introSelect, modalIntroPreview, modalIntroCaption);
+  updateEditSlideAssignmentPreviewElement(techDiffSelect, modalTechDiffPreview, modalTechDiffCaption);
+  updateEditSlideAssignmentPreviewElement(conclusionSelect, modalConclusionPreview, modalConclusionCaption);
 }
 
 function editSlideSaveBtnClicked() {
-  clearFormInput();
-  resetEditSlideAssignmentPreviewElements();
-  // Clear descriptor
-  uploadDescriptor.innerHTML = "";
-  let [slideFiles, musicFiles, videoFiles] = SortFilesByExtension(batchSlideFileInput.files);
-  // Combine video and slide files.
-  slideFiles = slideFiles.concat(videoFiles);
-  CategorizeSlideFilesBySlideTypeSelects(slideFiles);
-  // Simply push music files.
-  for (let musicFile of musicFiles) {
-    pushFormInput(musicFile, "music");
-  }
-  uploadDescriptor.innerHTML += `${musicFiles.length} music file(s), `;
-  uploadDescriptor.innerHTML += ` and ${videoFiles.length} video file(s).`;
+  // Sort files into categories.
+  let [slideFiles, musicFiles, videoFiles, pdfFiles, pptFiles, unknownFiles] = SortFilesByExtension(batchSlideFileInput.files);
+  // Categorize slides by slide type selects.
+  let [introSlide, techDiffSlide, conclusionSlide, customSlides] = CategorizeSlideFilesBySlideTypeSelects(slideFiles);
+  repopulateFormInputAndUploadDescriptor(introSlide, techDiffSlide, conclusionSlide, customSlides, musicFiles, videoFiles, pdfFiles, pptFiles, unknownFiles);
 }
 
 function CategorizeSlideFilesByKeywordForUpload(files) {
+  let introSlide = undefined;
+  let techDiffSlide = undefined;
+  let conclusionSlide = undefined;
+  let customSlides = [];
   let accountedSlides = [];
-  let customSlideCount = 0;
 
   for (let i = 0; i < files.length; i++) {
     let file = files[i];
@@ -2023,60 +2003,140 @@ function CategorizeSlideFilesByKeywordForUpload(files) {
 
       // Search for keywords in file name.
       if (keywords.some(keyword => file.name.toLowerCase().includes(keyword))) {
-        pushFormInput(file, "slide", tKey); // Append to form input. Will be assigned as found type after upload.
-        uploadDescriptor.innerHTML += `'${file.name}' will be used as your ${tKey} slide.<br>`;
         accountedSlides.push(tKey);
+        switch (tKey) {
+          case "intro":
+            introSlide = file;
+            break;
+          case "technicalDifficulty":
+            techDiffSlide = file;
+            break;
+          case "conclusion":
+            conclusionSlide = file;
+            break;
+        }
         return true;
       }
       return false; // keep looking.
     })) {
-      pushFormInput(file, "slide"); // Type could not be identified. Will upload as custom slide.
-      customSlideCount++;
+      // Type could not be identified. Will upload as custom slide.
+      customSlides.push(file);
     }
   }
-  uploadDescriptor.innerHTML += `You will be uploading ${customSlideCount} custom slide(s), `;
+  return [introSlide, techDiffSlide, conclusionSlide, customSlides];
 }
 
 function CategorizeSlideFilesBySlideTypeSelects(files) {
-  let customSlideCount = 0;
+  let introSlide = undefined;
+  let techDiffSlide = undefined;
+  let conclusionSlide = undefined;
+  let customSlides = [];
 
   // Iterate through files from batch slide file input.
   for (let i = 0; i < files.length; i++) {
     let file = files[i];
     let select = slideTypeSelects.filter(select => {
-      return file.name === select.value; // Check if file name matches select value.
+      // Check if file name matches select value.
+      let idx = parseInt(select.value);
+      return file.name === formInput[idx].ogName;
     }); // Find slide type from select.
 
     if (select !== []) {
-      let arr = [];
-
       // if assigned to multiple types, find all types.
       for (let i = 0; i < select.length; i++) {
-        arr.push(select[i].dataset.type);
+        switch (select[i].dataset.type) {
+          case "intro":
+            introSlide = file;
+            break;
+          case "technicalDifficulty":
+            techDiffSlide = file;
+            break;
+          case "conclusion":
+            conclusionSlide = file;
+            break;
+        }
       }
 
-      pushFormInput(file, "slide", arr); // Type identified. Append to form input. Will be uploaded as found type.
-      uploadDescriptor.innerHTML += `'${file.name}' will be used as your ${arr.join(", ")} slide.<br>`;
     } else {
-      // Type could not be identified. Will upload as custom slide.
-      pushFormInput(file, "slide");
-      customSlideCount++;
+      // Slide was not assigned with any select. Will upload as custom slide.
+      customSlides.push(file);
     }
   }
-  uploadDescriptor.innerHTML += `You will be uploading ${customSlideCount} custom slide(s), `;
+  return [introSlide, techDiffSlide, conclusionSlide, customSlides];
 }
 
-function clearFormInput() {
-  formInput = [];
+function repopulateFormInputAndUploadDescriptor(introSlide, techDiffSlide, conclusionSlide, customSlides, musicFiles, videoFiles, pdfFiles, pptFiles, unknownFiles) {
+  clearFormInputAndUploadDescriptor();
+  if (unknownFiles.length > 0) {
+    // Print "Unknown file(s) file1, file2, file3, etc. will not be uploaded."
+    uploadDescriptor.innerHTML += `${unknownFiles.length} unknown file(s) `;
+    for (let i = 0; i < unknownFiles.length; i++) {
+      uploadDescriptor.innerHTML += `'${unknownFiles[i].name}'`;
+      if (i !== unknownFiles.length - 1) {
+        uploadDescriptor.innerHTML += ", ";
+      }
+    }
+    uploadDescriptor.innerHTML += " will not be uploaded.<br>";
+  }
+  // Push intro slide.
+  if (introSlide) {
+    pushFormInput(introSlide, "slide", ["intro"]);
+    uploadDescriptor.innerHTML += `'${introSlide.name}' will be used as your Intro Slide.<br>`;
+  }
+  // Push tech diff slide.
+  if (techDiffSlide) {
+    pushFormInput(techDiffSlide, "slide", ["technicalDifficulty"]);
+    uploadDescriptor.innerHTML += `'${techDiffSlide.name}' will be used as your Technical Difficulty Slide.<br>`;
+  }
+
+  // Push conclusion slide.
+  if (conclusionSlide) {
+    pushFormInput(conclusionSlide, "slide", ["conclusion"]);
+    uploadDescriptor.innerHTML += `'${conclusionSlide.name}' will be used as your Conclusion Slide.<br>`;
+  }
+
+  // Push custom slides.
+  uploadDescriptor.innerHTML += "You will be uploading ";
+  PushToFormInputAndAppendUploadDescriptor("slide", customSlides, "custom slide");
+  PushToFormInputAndAppendUploadDescriptor("music", musicFiles, "music");
+  PushToFormInputAndAppendUploadDescriptor("slide", videoFiles, "video");
+  PushToFormInputAndAppendUploadDescriptor("pdf", pdfFiles, "pdf");
+  PushToFormInputAndAppendUploadDescriptor("ppt", pptFiles, "ppt");
+
+  // Append note if pdf/ppt files are uploaded.
+  uploadDescriptor.innerHTML += `${pdfFiles.length > 0 || pptFiles.length > 0 ?
+    "<br><strong>Note: PDF/PPT files will be converted into slides, and will take longer to process.</strong>" : ""}`;
+  editSlideBtn.style.display = "block"; // Show edit button.
+
+  function PushToFormInputAndAppendUploadDescriptor(type, files, descriptor) {
+    for (let file of files) {
+      pushFormInput(file, type);
+    }
+    uploadDescriptor.innerHTML += `${files.length} ${descriptor} file(s), `;
+  }
+}
+
+function updateEditSlideAssignmentPreviewElement(selectEl, previewEl, captionEl) {
+  if (selectEl.selectedIndex === 0) {
+    captionEl.innerHTML = "No slide selected to preview";
+    previewEl.src = "...";
+    previewEl.classList.add("d-none");
+  } else {
+    let idx = parseInt(selectEl.value);
+    let input = formInput[idx];
+    captionEl.innerHTML = `${input.ogName} will be used as your ${selectEl.dataset.type} slide.`;
+    previewEl.classList.remove("d-none");
+    fileReaderHelper(previewEl, input.file);
+  }
 }
 
 // loads file preview based on user selection
-function fileReaderHelper(previewEl, selection) {
+function fileReaderHelper(previewEl, file) {
   const fileReader = new FileReader();
   fileReader.onload = e => {
     previewEl.src = e.target.result;
   }
-  fileReader.readAsDataURL(formInput[selection.selectedIndex - 1].file);
+  fileReader.readAsDataURL(file);
 }
 
 function FetchAllUploadedMediaAndUpdateDash() {
@@ -2086,6 +2146,14 @@ function FetchAllUploadedMediaAndUpdateDash() {
 }
 
 function pushFormInput(file, type, assignTo = []) {
+  // Check if file is already in form input.
+  for (let i = 0; i < formInput.length; i++) {
+    if (formInput[i].file.name === file.name) {
+      // Union assignTo arrays.
+      formInput[i].assignTo = [...new Set([...formInput[i].assignTo, ...assignTo])];
+      return;
+    }
+  }
   formInput.push({
     type: type,
     assignTo: assignTo,
@@ -2094,24 +2162,13 @@ function pushFormInput(file, type, assignTo = []) {
   });
 }
 
-// reset preview elements upon modal close or save.
-function resetEditSlideAssignmentPreviewElements() {
-  modalIntroCaption.innerHTML = modalTechDiffCaption.innerHTML = modalConclusionCaption.innerHTML
-    = "No slide selected to preview";
-
-  modalIntroPreview.src = modalTechDiffPreview.src = modalConclusionPreview.src = "...";
-
-  modalIntroPreview.classList.add("d-none");
-  modalTechDiffPreview.classList.add("d-none");
-  modalConclusionPreview.classList.add("d-none");
-}
-
 function SortFilesByExtension(files) {
   let slideFiles = [];
   let musicFiles = [];
   let videoFiles = [];
   let pdfFiles = [];
   let pptFiles = [];
+  let unknownFiles = [];
 
   for (let i = 0; i < files.length; i++) {
     let file = files[i];
@@ -2127,10 +2184,10 @@ function SortFilesByExtension(files) {
     } else if (extensionToMethod["ppt"].includes(extension)) {
       pptFiles.push(file);
     } else {
-      uploadDescriptor.innerHTML += `Unknown file type: ${file.name}<br>`;
+      unknownFiles.push(file);
     }
   }
-  return [slideFiles, musicFiles, videoFiles, pdfFiles, pptFiles];
+  return [slideFiles, musicFiles, videoFiles, pdfFiles, pptFiles, unknownFiles];
 }
 
 function UpdateBrowsePreviewElement(lmtRoute, element, select, srcRoute) {
@@ -2206,7 +2263,7 @@ function uploadCustomSlideClicked() {
     if (uploads.length > 0) {
       batchSlideFileInput.value = "";
       uploadDescriptor.innerHTML = "Click browse to look for files to upload.";
-      clearFormInput();
+      clearFormInputAndUploadDescriptor();
       Feedback.alertSuccess("Upload complete!");
       FetchAllUploadedMediaAndUpdateDash();
       FetchAssignedHoldingSlidesAndUpdatePreviews();
@@ -2218,25 +2275,20 @@ function uploadCustomSlideClicked() {
 batchSlideFileInput.addEventListener("change", batchFileInputChanged); // todo make this function less specific to slide uploads.
 batchSlideUploadBtn.addEventListener("click", uploadCustomSlideClicked);
 editSlideBtn.addEventListener("click", editSlideBtnClicked);
-editSlideCloseBtn.addEventListener("click", resetEditSlideAssignmentPreviewElements);
 editSlideSaveBtn.addEventListener("click", editSlideSaveBtnClicked);
 videoSelect.addEventListener("change", UpdateVideoBrowsePreviewElement);
 
 
 conclusionSelect.addEventListener("change", () => {
-  modalConclusionCaption.innerHTML = conclusionSelect.value + " will be assigned as your conclusion slide.";
-  fileReaderHelper(modalConclusionPreview, conclusionSelect);
-  modalConclusionPreview.classList.remove("d-none");
+  updateEditSlideAssignmentPreviewElement(conclusionSelect, modalConclusionPreview, modalConclusionCaption);
 });
+
 introSelect.addEventListener("change", () => {
-  modalIntroCaption.innerHTML = introSelect.value + " will be assigned as your intro slide.";
-  fileReaderHelper(modalIntroPreview, introSelect);
-  modalIntroPreview.classList.remove("d-none");
+  updateEditSlideAssignmentPreviewElement(introSelect, modalIntroPreview, modalIntroCaption);
 });
+
 techDiffSelect.addEventListener("change", () => {
-  modalTechDiffCaption.innerHTML = techDiffSelect.value + " will be assigned as your tech diff slide.";
-  fileReaderHelper(modalTechDiffPreview, techDiffSelect);
-  modalTechDiffPreview.classList.remove("d-none");
+  updateEditSlideAssignmentPreviewElement(techDiffSelect, modalTechDiffPreview, modalTechDiffCaption);
 });
 
 // => INIT(S)
