@@ -2036,12 +2036,14 @@ function CategorizeSlideFilesBySlideTypeSelects(files) {
   for (let i = 0; i < files.length; i++) {
     let file = files[i];
     let select = slideTypeSelects.filter(select => {
+      if (select.selectedIndex === 0) return false; // Skip if no option selected.
       // Check if file name matches select value.
       let idx = parseInt(select.value);
+      if (isNaN(idx)) return false;
       return file.name === formInput[idx].ogName;
     }); // Find slide type from select.
 
-    if (select !== []) {
+    if (select.length > 0) {
       // if assigned to multiple types, find all types.
       for (let i = 0; i < select.length; i++) {
         switch (select[i].dataset.type) {
@@ -2123,6 +2125,7 @@ function updateEditSlideAssignmentPreviewElement(selectEl, previewEl, captionEl)
     previewEl.classList.add("d-none");
   } else {
     let idx = parseInt(selectEl.value);
+    if (isNaN(idx)) return;
     let input = formInput[idx];
     captionEl.innerHTML = `${input.ogName} will be used as your ${selectEl.dataset.type} slide.`;
     previewEl.classList.remove("d-none");
