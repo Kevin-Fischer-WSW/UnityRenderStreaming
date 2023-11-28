@@ -338,7 +338,6 @@ let uname = document.getElementById("username-input");
 let autoShowCheckbox = document.getElementById("auto-show-checkbox");
 let autoMuteCheckbox = document.getElementById("auto-mute-checkbox");
 let autoShowScreenShareCheckbox = document.getElementById("auto-show-screen-share-checkbox");
-let autoMuteScreenShareCheckbox = document.getElementById("auto-mute-screen-share-checkbox");
 
 let saveSettingsBtn = document.getElementById("save-settings-btn");
 let streamSettingsBtn = document.getElementById("stream-settings");
@@ -368,7 +367,6 @@ async function saveSettings() {
   unityFetch(`/enableOutputVideoByDefault?enable=${autoShowCheckbox.checked}`, {method: "PUT"});
   unityFetch(`/enableOutputAudioByDefault?enable=${!autoMuteCheckbox.checked}`, {method: "PUT"});
   unityFetch(`/enableOutputScreenShareByDefault?enable=${autoShowScreenShareCheckbox.checked}`, {method: "PUT"});
-  unityFetch(`/enableOutputScreenShareAudioByDefault?enable=${!autoMuteScreenShareCheckbox.checked}`, {method: "PUT"});
   await updateSettings();
   Feedback.alertSuccess("Settings saved.", streamPrefAlerts);
 }
@@ -440,7 +438,6 @@ async function updateSettings() {
     autoShowCheckbox.checked = data.autoShowParticipantEnabled;
     autoMuteCheckbox.checked = data.autoMuteParticipantEnabled;
     autoShowScreenShareCheckbox.checked = data.autoShowScreenShareEnabled;
-    autoMuteScreenShareCheckbox.checked = data.autoMuteScreenShareEnabled;
   }
 }
 
