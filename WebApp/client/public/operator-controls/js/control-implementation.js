@@ -2646,6 +2646,7 @@ function appStatusReceived(json) {
   if (appStatus.inMeeting || appStatus.meetingSimulated) {
     validateTracksInPlaylist(appStatus.playlist, appStatus.currentlyPlayingIndex);
     meetingNoInputField.disabled = true;
+    meetingNumberInput.value = appStatus.meetingId;
     joinMeetingBtn.disabled = true;
     holdMusicFieldset.disabled = false;
     musicPlayStopBtn.innerHTML = appStatus.playingHoldingMusic ? '<i class="bi bi-stop"></i>' : '<i class="bi bi-play"></i>';
