@@ -65,11 +65,20 @@ function onAlert(data) {
           <p class="lead">Please wait while the system reboots. You will be redirected to login.</p>
         </div>
       </div>`;
-          // Ping server until it responds.
-          setInterval(() => {
-              extend();
-          }, 10000);
-          break;
+      // Ping server until it responds.
+      setTimeout(extendUntilRebooted, 10000);
+
+    async function extendUntilRebooted() {
+      let result = await extend();
+      if (!result.valid && result.exception === undefined) {
+        alert("The system has rebooted! You're being redirected...");
+        window.location = window.location.origin;
+      } else {
+        setTimeout(extendUntilRebooted, 1000);
+      }
+    }
+
+      break;
   }
 }
 
@@ -95,17 +104,26 @@ signOutModal.addEventListener('shown.bs.modal', function () {
 /* EXTEND (TEMPORARY) */
 document.body.addEventListener("click", function () {
 
-  setTimeout(function () {
-    extend();
+  setTimeout(async function () {
+    let result = await extend();
+    if (!result.valid && result.exception === undefined) {
+      alert("Your session has expired! You're being redirected...");
+      window.location = window.location.origin;
+    }
   }, 700)
 });
 
 async function extend() {
-  let resp = await fetch("/extend");
-  let data = await resp.json();
-  if (!data.valid) {
-    alert("Your session has expired! You're being redirected...");
-    window.location = window.location.origin;
+  try {
+    let resp = await fetch("/extend");
+    if (resp.ok) {
+      return await resp.json();
+    } else {
+      return {valid: false};
+    }
+  }
+  catch (e) {
+    return {valid: false, exception: e};
   }
 }
 
