@@ -649,7 +649,7 @@ function onPendingClick() {
         Feedback.alertInfo(response.statusText);
       } else {
         sendClickEvent(myVideoPlayer, OperatorControls._LiveButton);
-        Feedback.alertDanger("Failed: Could not start stream, please check settings.");
+        Feedback.alertDanger("OBS failed to start the stream. Please check your settings and try again.");
       }
     });
 }
