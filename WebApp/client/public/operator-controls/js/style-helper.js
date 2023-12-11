@@ -21,3 +21,13 @@ export function IterateListAndSetItemBold(listElement, predicate){
     }
   }
 }
+
+export function ActivateButtonHelper(btn, active) {
+  if (active) {
+    btn.classList.remove("deactivated");
+    btn.classList.add("activated");
+  } else {
+    btn.classList.remove("activated");
+    btn.classList.add("deactivated");
+  }
+}

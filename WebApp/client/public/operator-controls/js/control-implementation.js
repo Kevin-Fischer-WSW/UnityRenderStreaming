@@ -6,7 +6,6 @@ import { OperatorControls } from "/operator-controls/js/control-map.gen.js";
 import { sendClickEvent, sendStringSubmitEvent } from "/videoplayer/js/register-events.js";
 import { myVideoPlayer, mainNotifications } from "/operator-controls/js/control-main.js";
 import { ValidateClonesWithJsonArray } from "/operator-controls/js/validation-helper.js";
-import * as Style from "/operator-controls/js/style-helper.js";
 import * as SelectHelper from "../../js/select-helper.js";
 import { unityFetch, unityPutJson } from "../../js/unity-fetch.js";
 import { getVideoThumb } from "../../js/video-thumbnail.js";
@@ -2643,10 +2642,10 @@ function appStatusReceived(json) {
 
   updateGeneralStatBar();
 
-  ActivateButtonHelper(pendingBtn, false);
-  ActivateButtonHelper(technicalDiffBtn, false);
-  ActivateButtonHelper(liveBtn, false);
-  ActivateButtonHelper(archiveBtn, false);
+  StyleHelper.ActivateButtonHelper(pendingBtn, false);
+  StyleHelper.ActivateButtonHelper(technicalDiffBtn, false);
+  StyleHelper.ActivateButtonHelper(liveBtn, false);
+  StyleHelper.ActivateButtonHelper(archiveBtn, false);
 
   addParticipantSelectCheckEventListener(); // adds event listeners to each select checkbox
 
@@ -2685,22 +2684,18 @@ function appStatusReceived(json) {
 
       if (appStatus.holdingSlide === "intro") {
         pendingBtn.innerHTML = `Intro Slide <i class="bi bi-broadcast"></i>`;
-        ActivateButtonHelper(pendingBtn, true);
+         StyleHelper.ActivateButtonHelper(pendingBtn, true);
       } else if (appStatus.holdingSlide === "technicalDifficulties") {
         technicalDiffBtn.innerHTML = `Techincal Difficulties <i class="bi bi-broadcast"></i>`;
-        ActivateButtonHelper(technicalDiffBtn, true);
+         StyleHelper.ActivateButtonHelper(technicalDiffBtn, true);
       } else if (appStatus.holdingSlide === "none" || appStatus.isCustomSlide) {
         liveBtn.innerHTML = `Live <i class="bi bi-broadcast"></i>`;
-        ActivateButtonHelper(liveBtn, true);
+         StyleHelper.ActivateButtonHelper(liveBtn, true);
       } else if (appStatus.holdingSlide === "conclusion") {
-        ActivateButtonHelper(archiveBtn, true);
+         StyleHelper.ActivateButtonHelper(archiveBtn, true);
       }
     } else {
       resetStreamButtonsOnLeaveOrEnd();
-      // todo: This causes a custom slide named "conclusion" to immediately be dismissed.
-      // if (jsonParsed.holdingSlide === "endOfStream" || jsonParsed.holdingSlide === "conclusion") {
-      //   sendClickEvent(myVideoPlayer, OperatorControls._LiveButton);
-      // }
     }
 
     if (appStatus.secondClickEndsStream) {
@@ -2715,15 +2710,5 @@ function appStatusReceived(json) {
     joinMeetingBtn.disabled = false;
     holdMusicFieldset.disabled = true;
     //videoFieldsetBar.disabled = true;
-  }
-
-  function ActivateButtonHelper(btn, active) {
-    if (active) {
-      btn.classList.remove("deactivated");
-      btn.classList.add("activated");
-    } else {
-      btn.classList.remove("activated");
-      btn.classList.add("deactivated");
-    }
   }
 }
