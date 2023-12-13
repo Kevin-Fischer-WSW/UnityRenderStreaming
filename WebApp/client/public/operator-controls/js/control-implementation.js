@@ -319,6 +319,7 @@ meetingNoInput.value = localStorage.getItem("urlOrNumber");
 /* RESET APP SETTINGS */
 // => DOM ELEMENTS
 let resetModal = document.getElementById("reset-modal");
+let resetModalBtn = document.getElementById("reset-to-default")
 let resetAppSettingsBtn = document.getElementById("resetAppSettings");
 
 // => METHODS
@@ -2619,7 +2620,7 @@ let advancedSettingsToggle = document.getElementById("advancedSettingsToggle");
 
 // => METHODS
 function enableAdvancedSettings() {
-  onEnableAdvancedSettings(advancedSettingsToggle, navZoomTabBtn, streamAuthSettings, navLogTabBtn);
+  onEnableAdvancedSettings(advancedSettingsToggle, navZoomTabBtn, streamAuthSettings, navLogTabBtn, resetModalBtn);
   localStorage.setItem("advancedSettingsEnabled", advancedSettingsToggle.checked);
 }
 // => EVENT LISTENERS
