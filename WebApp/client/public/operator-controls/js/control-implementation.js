@@ -342,7 +342,6 @@ const copyData = document.getElementById('kt_clipboard_4');
 
 let boardData = document.getElementById('kt_clipboard_4');
 let pwd = document.getElementById("password-input");
-let serverAddressSelect = document.getElementById('serverAddressSelect');
 let streamKeyInput = document.getElementById("stream-key-input");
 let streamKeySelect = document.getElementById("stream-key-select");
 let streamAuthSettings = document.getElementById("stream-auth-settings");
@@ -401,14 +400,6 @@ async function saveStreamPref() {
   }
   if (pwd.value === "") {
     Feedback.alertDanger("You must provide a value for password.", streamPrefAlerts);
-    return;
-  }
-  if (streamingApp.value === "none") {
-    Feedback.alertDanger("You must select a value for streaming app.", streamPrefAlerts);
-    return;
-  }
-  if (streamingServerAdd.value === "none") {
-    Feedback.alertDanger("You must select a value for streaming server address.", streamPrefAlerts);
     return;
   }
   let streamKey = streamKeySelect.value === "custom" ? streamKeyInput.value : streamKeySelect.value;
@@ -509,7 +500,7 @@ clipboard.on('success', function (e) {
 });
 
 streamPrefModal.addEventListener('shown.bs.modal', function () {
-  serverAddressSelect.focus();
+  streamingServerAdd.focus();
 })
 
 /* GENERAL STATUS BAR */
