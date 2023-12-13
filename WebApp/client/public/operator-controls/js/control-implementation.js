@@ -2619,7 +2619,7 @@ let advancedSettingsToggle = document.getElementById("advancedSettingsToggle");
 
 // => METHODS
 function enableAdvancedSettings() {
-  onEnableAdvancedSettings(advancedSettingsToggle, navZoomTabBtn, streamAuthSettings, navLayoutTabBtn, navLogTabBtn);
+  onEnableAdvancedSettings(advancedSettingsToggle, navZoomTabBtn, streamAuthSettings, navLogTabBtn);
   localStorage.setItem("advancedSettingsEnabled", advancedSettingsToggle.checked);
 }
 // => EVENT LISTENERS
