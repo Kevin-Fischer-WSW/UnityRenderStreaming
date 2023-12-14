@@ -743,13 +743,11 @@ let deleteGroupBtn = document.getElementById("delete-grp-btn");
 let groupParticipantsBtn = document.getElementById("group-select-ppt-btn");
 let hideAllLowerThirdsBtn = document.getElementById("hide-all-lower-thirds-btn");
 let hideSelectParticipantBtn = document.getElementById("hide-select-ppt-btn");
-let muteSelectParticipantBtn = document.getElementById("mute-select-ppt-btn");
 let participantsGroupLabelSubmitBtn = document.getElementById("ppt-grp-label-submit");
 let removeParticipantsBtn = document.getElementById("remove-select-ppt-btn");
 let selectAllParticipantBtn = document.getElementById("check-uncheck-all-ppt-btn");
 let showAllLowerThirdsBtn = document.getElementById("show-all-lower-thirds-btn");
 let showSelectParticipantBtn = document.getElementById("show-select-ppt-btn");
-let unmuteSelectParticipantBtn = document.getElementById("unmute-select-ppt-btn");
 
 // => PRIMITIVE AND OTHER TYPES
 let participantInputGroups = [];
@@ -929,7 +927,6 @@ function setupParticipantInputGroup(node) {
   let idx = participantInputGroups.length - 1;
   let renameBtn = document.querySelector("div#" + node.id + " .rename-btn");
   let visibilityBtn = document.querySelector("div#" + node.id + " .visibility-btn");
-  let audibilityBtn = document.querySelector("div#" + node.id + " .audibility-btn");
   let lowerThirdBtn = document.querySelector("div#" + node.id + " .show-lower-third-btn");
 
   node.ondragstart = (ev) => {
@@ -963,16 +960,6 @@ function setupParticipantInputGroup(node) {
     let p = participantJsonParsed[idx];
     let str = p.id + "," + !p.visible;
     sendStringSubmitEvent(myVideoPlayer, OperatorControls._ToggleParticipantVisibilityButton, str);
-  })
-
-  audibilityBtn.addEventListener("click", function () {
-    let p = participantJsonParsed[idx];
-    unityFetch(`/muteParticipantAudioSource?participantId=${p.id}&mute=${!p.mutedAudioSource}`, { method: "PUT" })
-      .then(resp => {
-        if (resp.ok) {
-          console.log("audibility toggled");
-        }
-      });
   })
 
   lowerThirdBtn.addEventListener("click", function () {
@@ -1024,12 +1011,10 @@ function validateGroupLabel() {
 function validateParticipantInputGroups() {
   let validateParticipantInputGroup = function (clone, data) {
     let visibilityBtn = document.querySelector(`#${clone.id} .visibility-btn`);
-    let audibilityBtn = document.querySelector(`#${clone.id} .audibility-btn`);
     let lowerThirdBtn = document.querySelector(`#${clone.id} .show-lower-third-btn`);
     let nameSpan = document.querySelector(`#${clone.id} .name-span`);
 
     visibilityBtn.firstChild.className = data.visible ? "bi bi-eye-fill" : "bi bi-eye-slash";
-    audibilityBtn.firstChild.className = data.mutedAudioSource ? "bi bi-ear" : "bi bi-ear-fill";
     lowerThirdBtn.firstChild.className = data.lowerThirdShowing ? "bi bi-person-vcard-fill" : "bi bi-person-vcard";
     if (data.title === "") {
       nameSpan.innerHTML = `<b>${data.name}</b>`;
@@ -1066,16 +1051,6 @@ hideSelectParticipantBtn.addEventListener("click", () => {
   }
 });
 
-muteSelectParticipantBtn.addEventListener("click", () => {
-  let selectedParticipants = mapSelectParticipantsToInputGroups();
-  for (let i = 0; i < selectedParticipants.length; i++) {
-    if (selectedParticipants[i].checked && !participantInputGroups[i].classList.contains('d-none')) {
-      let p = participantJsonParsed[i];
-      unityFetch(`/muteParticipantAudioSource?participantId=${p.id}&mute=true`, { method: "PUT" });
-    }
-  }
-});
-
 selectAllParticipantBtn.addEventListener("click", () => {
 
   if (selectAllParticipantBtn.innerHTML === "Select All") {
@@ -1103,16 +1078,6 @@ showSelectParticipantBtn.addEventListener("click", () => {
       let p = participantJsonParsed[i];
       let str = p.id + ",true";
       sendStringSubmitEvent(myVideoPlayer, OperatorControls._ToggleParticipantVisibilityButton, str);
-    }
-  }
-})
-
-unmuteSelectParticipantBtn.addEventListener("click", () => {
-  let selectedParticipants = mapSelectParticipantsToInputGroups();
-  for (let i = 0; i < selectedParticipants.length; i++) {
-    if (selectedParticipants[i].checked && !participantInputGroups[i].classList.contains('d-none')) {
-      let p = participantJsonParsed[i];
-      unityFetch(`/muteParticipantAudioSource?participantId=${p.id}&mute=false`, { method: "PUT" });
     }
   }
 })
