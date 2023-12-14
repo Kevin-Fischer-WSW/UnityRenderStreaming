@@ -76,7 +76,6 @@ export class CropWidget {
           boundingRect.width,
           boundingRect.height);
     }
-    // todo add a delegate that returns the bounding rectangle.
     makeResizableDiv(this.mainElement, this.mainElement.querySelectorAll('.resizer'), getBoundingRect);
   }
 
@@ -97,10 +96,12 @@ export class CropWidget {
     let bottomNormalized = (boundingRect.bottom - mainBoundingRect.bottom) / boundingRect.height;
     let leftNormalized = (mainBoundingRect.left - boundingRect.left) / boundingRect.width;
     let widthNormalized = mainBoundingRect.width / boundingRect.width;
+    let heightNormalized = mainBoundingRect.height / boundingRect.height;
     return {
       bottom: bottomNormalized,
       left: leftNormalized,
-      width: widthNormalized
+      width: widthNormalized,
+      height: heightNormalized
     };
   }
 }

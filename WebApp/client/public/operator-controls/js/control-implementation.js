@@ -1155,7 +1155,7 @@ function onEditStyleSelectClicked() {
 
 function onCropScreenShareApplyBtnClicked() {
   let crop = cropWidget.getNormalizedCrop();
-  unityFetch(`/cropScreenShare?x=${crop.left}&y=${crop.bottom}&scale=${crop.width}`, { method: "PUT" })
+  unityFetch(`/cropScreenShare?x=${crop.left}&y=${crop.bottom}&w=${crop.width}&h=${crop.height}`, { method: "PUT" })
     .then(resp => {
       if (resp.ok) {
         console.log("crop applied");
