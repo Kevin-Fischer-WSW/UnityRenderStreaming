@@ -988,7 +988,6 @@ function updateSelectParticipantBtnText() {
   }
 
   if (counter === selectedParticipants.length) {
-    groupParticipantsBtn.disabled = true;
     selectAllParticipantBtn.innerHTML = "Unselect All";
   } else {
     selectAllParticipantBtn.innerHTML = "Select All";
@@ -1055,6 +1054,7 @@ selectAllParticipantBtn.addEventListener("click", () => {
 
   if (selectAllParticipantBtn.innerHTML === "Select All") {
     selectAllParticipantBtn.innerHTML = "Unselect All";
+    groupParticipantsBtn.disabled = false;
     let selectedParticipants = mapSelectParticipantsToInputGroups();
 
     for (let i = 0; i < selectedParticipants.length; i++) {
