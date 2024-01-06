@@ -50,6 +50,29 @@ export const createServer = (config: Options): express.Application => {
     next();
   });
 
+  app.all('/uapp/v2/*', function(req, res, next) {
+    // Make a http request to the endpoint at http://localhost:4444/endpoint
+    // and return the response to the client.
+    const http = require('http');
+    const endpoint = req.url.split('/uapp')[1];
+    const options = {
+      hostname: 'localhost',
+      port: 46000,
+      path: `${endpoint}`,
+      method: req.method,
+      headers: req.headers,
+    };
+    const request = http.request(options, (response) => {
+      res.writeHead(response.statusCode, response.statusMessage, response.headers);
+      response.pipe(res);
+    });
+    request.on('error', (error) => {
+      log(LogLevel.error, error);
+      res.status(500).send(error);
+    });
+    req.pipe(request);
+  });
+
   app.all('/uapp/:endpoint', function(req, res, next) {
     // Make a http request to the endpoint at http://localhost:4444/endpoint
     // and return the response to the client.
