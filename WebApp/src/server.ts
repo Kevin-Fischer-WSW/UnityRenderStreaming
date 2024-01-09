@@ -394,7 +394,7 @@ export const createServer = (config: Options): express.Application => {
   });
 
   //list recordings
-  app.get("/listRecordings/:skey", async (req, res) => {
+  app.get("/listRecordings", async (req, res) => {
 
     let data = [];
 
@@ -403,7 +403,8 @@ export const createServer = (config: Options): express.Application => {
     const files = fs.readdirSync(config.recordingsDir)
     for (let i = 0; i < files.length; i++){
       const file = files[i];
-      if (file.split("__")[0] === req.params.skey) {
+      // Check query for 'duration' flag.
+      if (req.query.duration !== undefined){
         // Get duration of recording using fluent-ffmpeg.
         let filePath = path.join(config.recordingsDir, file);
         let duration = 0;
@@ -413,6 +414,8 @@ export const createServer = (config: Options): express.Application => {
         }).catch((err) => {
           console.log(err);
         });
+      } else {
+        data.push({file: file});
       }
     }
     res.status(200).json(data);

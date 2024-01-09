@@ -2522,7 +2522,7 @@ function handleRecordingDownload() {
 
 async function listAvailableRecordings() {
   await updateSettings();
-  let resp = await fetch("/listRecordings/" + streamKeyInput.value);
+  let resp = await fetch("/listRecordings");
   let files = await resp.json();
 
   if (listFileOptions.childElementCount > files.length + 1) {

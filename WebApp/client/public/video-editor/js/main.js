@@ -16,26 +16,23 @@ videoPlayer.addEventListener('timeupdate', () => {
 let clips = [];
 
 async function GetClips() {
-  let resp1 = await unityFetch('/getStreamServiceSettings')
-  let data1 = await resp1.json()
-  if (resp1.ok) {
-    let resp2 = await fetch(`/listRecordings/${data1.streamServiceSettings.key}`)
-    let data2 = await resp2.json()
-    if (resp2.ok) {
-      clips = data2;
-      for (let i = 0; i < clips.length; i++) {
-        clipDropdown.innerHTML += `<li value="${i}"><button class="dropdown-item">${clips[i].file}</button></li>`;
-      }
-      clipDropdown.addEventListener('click', (event) => {
-        let clipIndex = event.target.parentElement.value;
-        if (addAndNotInsertButtonPressedLast) {
-          timeline.createClip(clips[clipIndex].file, clips[clipIndex].duration);
-        } else {
-          timeline.insertClip(clips[clipIndex].file, clips[clipIndex].duration, timeline.selectedClipIndex);
-        }
-      });
+  let resp2 = await fetch(`/listRecordings?duration`)
+  let data2 = await resp2.json()
+  if (resp2.ok) {
+    clips = data2;
+    for (let i = 0; i < clips.length; i++) {
+      clipDropdown.innerHTML += `<li value="${i}"><button class="dropdown-item">${clips[i].file}</button></li>`;
     }
+    clipDropdown.addEventListener('click', (event) => {
+      let clipIndex = event.target.parentElement.value;
+      if (addAndNotInsertButtonPressedLast) {
+        timeline.createClip(clips[clipIndex].file, clips[clipIndex].duration);
+      } else {
+        timeline.insertClip(clips[clipIndex].file, clips[clipIndex].duration, timeline.selectedClipIndex);
+      }
+    });
   }
+
 }
 
 let projectDropdownBtn = document.getElementById('project-dropdown-btn');
