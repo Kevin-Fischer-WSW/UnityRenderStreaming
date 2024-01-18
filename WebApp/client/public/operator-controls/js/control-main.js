@@ -50,6 +50,55 @@ async function setup() {
   showWarningIfNeeded(res.startupMode);
   //showPlayButton();
   Play();
+
+  // setup mute buttons
+  let muteOutputButton = document.getElementById('mute-output-btn');
+  let muteInputButton = document.getElementById('mute-input-btn');
+  let muteOutputSlider = document.getElementById('mute-output-slider');
+  let muteInputSlider = document.getElementById('mute-input-slider');
+  let muteOutputIcon = document.getElementById('mute-output-icon');
+  let muteInputIcon = document.getElementById('mute-input-icon');
+  muteOutputButton.removeEventListener('click', function () { });
+  muteOutputButton.addEventListener('click', function () {
+    let elementPreviewVideo = document.getElementById('preview-video');
+    elementPreviewVideo.muted = false;
+    let audioTracks = myVideoPlayer.videoAudioTracks;
+    if (audioTracks.length !== 3) return;
+    // Toggle first and third audio track.
+    audioTracks[0].enabled = !audioTracks[0].enabled;
+    audioTracks[2].enabled = audioTracks[0].enabled;
+    muteOutputIcon.classList.add(audioTracks[0].enabled ? "bi-volume-up" : "bi-volume-mute")
+    muteOutputIcon.classList.remove(audioTracks[0].enabled ? "bi-volume-mute" : "bi-volume-up")
+    muteOutputSlider.classList.add(audioTracks[0].enabled ? "d-block" : "d-none")
+    muteOutputSlider.classList.remove(audioTracks[0].enabled ? "d-none" : "d-block")
+  });
+  muteOutputSlider.addEventListener('click', function (ev) {
+    ev.stopPropagation();
+  })
+
+  muteInputButton.addEventListener('click', function () {
+    let elementPreviewVideo = document.getElementById('preview-video');
+    elementPreviewVideo.muted = false;
+    let audioTracks = myVideoPlayer.videoAudioTracks;
+    if (audioTracks.length !== 3) return;
+    // Toggle second audio track.
+    audioTracks[1].enabled = !audioTracks[1].enabled;
+    muteInputIcon.classList.add(audioTracks[1].enabled ? "bi-volume-up" : "bi-volume-mute")
+    muteInputIcon.classList.remove(audioTracks[1].enabled ? "bi-volume-mute" : "bi-volume-up")
+    muteInputSlider.classList.add(audioTracks[1].enabled ? "d-block" : "d-none")
+    muteInputSlider.classList.remove(audioTracks[1].enabled ? "d-none" : "d-block")
+  });
+  muteInputSlider.addEventListener('click', function (ev) {
+    ev.stopPropagation();
+  })
+  muteOutputSlider.addEventListener('input', function () {
+    elementPreviewVideo.volume = muteOutputSlider.value / 100;
+    muteInputSlider.value = muteOutputSlider.value;
+  });
+  muteInputSlider.addEventListener('input', function () {
+    elementPreviewVideo.volume = muteInputSlider.value / 100;
+    muteOutputSlider.value = muteInputSlider.value;
+  });
 }
 
 function showWarningIfNeeded(startupMode) {
@@ -104,77 +153,6 @@ function Play() {
     // Notify the control implementation that the video player is ready.
     mainNotifications.notifyVideoSetup();
   });
-
-  // add mute button (mutes audio from the preview video)
-  const muteOutputButton = document.createElement('button');
-  muteOutputButton.title = "Mute/Unmute output audio"
-  muteOutputButton.id = 'mute-output-btn';
-  muteOutputButton.classList.add('btn');
-  muteOutputButton.classList.add('btn-secondary');
-  muteOutputButton.classList.add('btn-sm');
-  // Make the button position relative to the bottom left of the playerDiv.
-  muteOutputButton.style.position = 'absolute';
-  muteOutputButton.style.bottom = '0.5em';
-  muteOutputButton.style.left = '1.5em';
-  muteOutputButton.innerHTML = 'Output Audio <i class="bi bi-volume-mute"></i> <input type="range" class="custom-range d-none" value="100">';
-  let muteOutputIcon = muteOutputButton.getElementsByTagName('i')[0];
-  let muteOutputSlider = muteOutputButton.getElementsByTagName('input')[0];
-  muteOutputSlider.style.margin = "8px";
-  muteOutputButton.addEventListener('click', function () {
-    elementPreviewVideo.muted = false;
-    let audioTracks = myVideoPlayer.videoAudioTracks;
-    if (audioTracks.length !== 3) return;
-    // Toggle first and third audio track.
-    audioTracks[0].enabled = !audioTracks[0].enabled;
-    audioTracks[2].enabled = audioTracks[0].enabled;
-    muteOutputIcon.classList.add(audioTracks[0].enabled ? "bi-volume-up" : "bi-volume-mute")
-    muteOutputIcon.classList.remove(audioTracks[0].enabled ? "bi-volume-mute" : "bi-volume-up")
-    muteOutputSlider.classList.add(audioTracks[0].enabled ? "d-block" : "d-none")
-    muteOutputSlider.classList.remove(audioTracks[0].enabled ? "d-none" : "d-block")
-  });
-  muteOutputSlider.addEventListener('click', function (ev) {
-    ev.stopPropagation();
-  })
-  outputColDiv.appendChild(muteOutputButton);
-
-  // add second mute button (mutes zoom call audio)
-  const muteInputButton = document.createElement('button');
-  muteInputButton.title = "Mute/Unmute input audio"
-  muteInputButton.id = 'mute-input-btn';
-  muteInputButton.classList.add('btn');
-  muteInputButton.classList.add('btn-secondary');
-  muteInputButton.classList.add('btn-sm');
-  // Make the button position relative to the bottom left of the playerDiv.
-  muteInputButton.style.position = 'absolute';
-  muteInputButton.style.bottom = '0.5em';
-  muteInputButton.style.left = '1.5em';
-  muteInputButton.innerHTML = 'Input Audio <i class="bi bi-volume-mute"></i> <input type="range" class="custom-range d-none" value="100">';
-  let muteInputIcon = muteInputButton.getElementsByTagName('i')[0];
-  let muteInputSlider = muteInputButton.getElementsByTagName('input')[0];
-  muteInputSlider.style.margin = "8px";
-  muteInputButton.addEventListener('click', function () {
-    elementPreviewVideo.muted = false;
-    let audioTracks = myVideoPlayer.videoAudioTracks;
-    if (audioTracks.length !== 3) return;
-    // Toggle second audio track.
-    audioTracks[1].enabled = !audioTracks[1].enabled;
-    muteInputIcon.classList.add(audioTracks[1].enabled ? "bi-volume-up" : "bi-volume-mute")
-    muteInputIcon.classList.remove(audioTracks[1].enabled ? "bi-volume-mute" : "bi-volume-up")
-    muteInputSlider.classList.add(audioTracks[1].enabled ? "d-block" : "d-none")
-    muteInputSlider.classList.remove(audioTracks[1].enabled ? "d-none" : "d-block")
-  });
-  muteInputSlider.addEventListener('click', function (ev) {
-    ev.stopPropagation();
-  })
-  muteOutputSlider.addEventListener('input', function () {
-    elementPreviewVideo.volume = muteOutputSlider.value / 100;
-    muteInputSlider.value = muteOutputSlider.value;
-  });
-  muteInputSlider.addEventListener('input', function () {
-    elementPreviewVideo.volume = muteInputSlider.value / 100;
-    muteOutputSlider.value = muteInputSlider.value;
-  });
-  previewColDiv.appendChild(muteInputButton);
 }
 
 async function setupVideoPlayer(previewElement, outputElement) {
@@ -191,9 +169,7 @@ async function onDisconnect(message) {
   // Clear generated elements.
   //playerDiv.removeChild(document.getElementById('playButtonElement'));
   outputDiv.removeChild(document.getElementById('output-video'));
-  outputColDiv.removeChild(document.getElementById('mute-output-btn'));
   previewDiv.removeChild(document.getElementById('preview-video'));
-  previewColDiv.removeChild(document.getElementById('mute-input-btn'));
   await myVideoPlayer.stop();
   myVideoPlayer = null;
 

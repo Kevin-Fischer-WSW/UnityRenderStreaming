@@ -8,6 +8,7 @@ import { myVideoPlayer, mainNotifications } from "/operator-controls/js/control-
 import { ValidateClonesWithJsonArray } from "/operator-controls/js/validation-helper.js";
 import * as SelectHelper from "../../js/select-helper.js";
 import { unityFetch, unityPutJson } from "../../js/unity-fetch.js";
+import * as v2api from "../../js/v2api.js";
 import { getVideoThumb } from "../../js/video-thumbnail.js";
 import { createUploadProgressTracker } from "../../js/progresstracker.js";
 import { CropWidget } from "../../js/crop-widget.js";
@@ -278,6 +279,29 @@ function validateScreenShareOnVidCtrl(){
 
 // => INIT(S)
 setupScreenShareOnVidCtrl();
+
+/* OUTPUT VIDEO CONTAINER CONTROLS */
+// => DOM ELEMENTS
+let toggleOutputPreviewBtn = document.getElementById("toggle-output-preview-btn");
+
+// => METHODS
+function onToggleOutputPreviewClick() {
+  let on = appStatus.outputPreviewed;
+  v2api.put('/previewPanel', {MimicOutputPanel: !on});
+}
+
+function updateToggleOutputPreviewBtn(appStatus) {
+  if (appStatus.holdingSlide !== "none" || appStatus.videoIsShowing || appStatus.outputPreviewed) {
+    let on = appStatus.outputPreviewed;
+    toggleOutputPreviewBtn.classList.remove("d-none");
+    toggleOutputPreviewBtn.innerHTML = on ? `Output Preview <i class="bi bi-eye"></i>` : `Output Preview <i class="bi bi-eye-slash"></i>`;
+  } else {
+    toggleOutputPreviewBtn.classList.add("d-none");
+  }
+}
+
+// => EVENT LISTENERS
+toggleOutputPreviewBtn.addEventListener("click", onToggleOutputPreviewClick);
 
 /* RENAME MODAL */
 // => DOM ELEMENTS
@@ -2598,6 +2622,7 @@ function appStatusReceived(json) {
   }
 
   updateGeneralStatBar();
+  updateToggleOutputPreviewBtn(appStatus)
 
   StyleHelper.ActivateButtonHelper(pendingBtn, false);
   StyleHelper.ActivateButtonHelper(technicalDiffBtn, false);

@@ -1,3 +1,12 @@
+#output-video-container-controls, #preview-video-container-controls {
+  position: absolute;
+  left: 0.5em;
+  bottom: 0.5em;
+  z-index: 1; }
+
+#mute-output-btn .custom-range, #mute-input-btn .custom-range {
+  margin: 8px; }
+
 #progress, .progressupload {
   height: 20px;
   display: flex;

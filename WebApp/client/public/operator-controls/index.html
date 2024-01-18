@@ -347,12 +347,26 @@
             <div class="participant-on-vid-eye" title="Hide/Unhide screen share"></div>
 <!--            <div class="participant-on-vid-ear" title="Mute/Unmute screen share;Set screen share volume"></div>-->
           </div>
-
+          <div id="preview-video-container-controls">
+            <button id="mute-input-btn" class="btn btn-secondary btn-sm" title="Mute/Unmute preview audio">
+              Preview Audio <i id="mute-input-icon" class="bi bi-volume-mute"></i>
+              <input id="mute-input-slider" type="range" class="custom-range d-none" value="100">
+            </button>
+          </div>
         </div>
       </div>
       <div id="output-container-col" class="col">
         <div id="output-video-container" class="video-container">
           <!-- Video element will be generated and placed here -->
+        </div>
+        <div id="output-video-container-controls">
+          <button id="mute-output-btn" class="btn btn-secondary btn-sm" title="Mute/Unmute output audio">
+            Output Audio <i id="mute-output-icon" class="bi bi-volume-mute"></i>
+            <input id="mute-output-slider" type="range" class="custom-range d-none" value="100">
+          </button>
+          <button id="toggle-output-preview-btn" class="btn btn-secondary btn-sm" title="Toggle output preview">
+            Output Preview <i class="bi bi-eye-slash"></i>
+          </button>
         </div>
       </div>
     </div>
