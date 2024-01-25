@@ -28,6 +28,7 @@ mainNotifications.addEventListener('setup', function () {
   myVideoPlayer.onVideoPlaybackTimeReceived = onVideoPlaybackTimeReceived;
   myVideoPlayer.onWrongPasswordNotification = onWrongPasswordNotification;
   myVideoPlayer.onRegistrationUrlReceived = onRegistrationUrlReceived;
+  myVideoPlayer.onDbLevelNotification = onDbLevelNotification;
   myVideoPlayer.signaling.addEventListener("message", async (e) => {
     onAlert(e.detail);
   });
@@ -299,6 +300,63 @@ function updateToggleOutputPreviewBtn(appStatus) {
     toggleOutputPreviewBtn.classList.add("d-none");
   }
 }
+
+/* DB LEVEL METERING */
+// => DOM ELEMENTS
+let outputDbLevelMeter = document.getElementById("output-db-meter");
+let inputDbLevelMeter = document.getElementById("zoom-db-meter");
+let outputGreenSegment = outputDbLevelMeter.querySelector(".green-meter-segment");
+let outputYellowSegment = outputDbLevelMeter.querySelector(".yellow-meter-segment");
+let outputRedSegment = outputDbLevelMeter.querySelector(".red-meter-segment");
+let inputGreenSegment = inputDbLevelMeter.querySelector(".green-meter-segment");
+let inputYellowSegment = inputDbLevelMeter.querySelector(".yellow-meter-segment");
+let inputRedSegment = inputDbLevelMeter.querySelector(".red-meter-segment");
+
+// => PRIMITIVE AND OTHER TYPES
+let greenFillMax = 0.75;
+let yellowFillMax = greenFillMax + 0.125;
+let redFillMax = 1.0;
+let decayRate = 0.5;
+
+let peakOutput = -80.0;
+let peakInput = -80.0;
+
+// => METHODS
+function onDbLevelNotification(data) {
+  let split = data.split(",");
+  let master = parseInt(split[0]);
+  let zoom = parseInt(split[1]);
+  if (master > peakOutput) peakOutput = master;
+  if (zoom > peakInput) peakInput = zoom;
+}
+
+function updateDbLevels(){
+  let masterFill = 1.0 - peakOutput / -80.0;
+  let zoomFill = 1.0 - peakInput / -80.0;
+
+  let masterGreenFill = Math.min(masterFill, greenFillMax);
+  let masterYellowFill = Math.min(masterFill, yellowFillMax);
+  let masterRedFill = Math.min(masterFill, redFillMax);
+
+  let zoomGreenFill = Math.min(zoomFill, greenFillMax);
+  let zoomYellowFill = Math.min(zoomFill, yellowFillMax);
+  let zoomRedFill = Math.min(zoomFill, redFillMax);
+
+  outputGreenSegment.style.top = `${100.0 - masterGreenFill * 100.0}%`;
+  outputYellowSegment.style.top = `${100.0 - masterYellowFill * 100.0}%`;
+  outputRedSegment.style.top = `${100.0 - masterRedFill * 100.0}%`;
+
+  inputGreenSegment.style.top = `${100.0 - zoomGreenFill * 100.0}%`;
+  inputYellowSegment.style.top = `${100.0 - zoomYellowFill * 100.0}%`;
+  inputRedSegment.style.top = `${100.0 - zoomRedFill * 100.0}%`;
+}
+
+// => INIT(S)
+setInterval(function () {
+  peakOutput = Math.max(peakOutput - decayRate, -80.0);
+  peakInput = Math.max(peakInput - decayRate, -80.0);
+  updateDbLevels();
+}, 12);
 
 // => EVENT LISTENERS
 toggleOutputPreviewBtn.addEventListener("click", onToggleOutputPreviewClick);

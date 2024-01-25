@@ -1,5 +1,45 @@
 $body-bg: #616161;
 
+#zoom-db-meter {
+  position: absolute;
+  top: 0;
+  left: -0.5em;
+  width: 0.5em;
+  bottom: 0;
+}
+
+#output-db-meter {
+  position: absolute;
+  top: 0;
+  right: -0.5em;
+  width: 0.5em;
+  bottom: 0;
+}
+
+.green-meter-segment {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #2ecc71;
+}
+
+.yellow-meter-segment {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #f1c40f;
+}
+
+.red-meter-segment {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #e74c3c;
+}
+
 #output-video-container-controls, #preview-video-container-controls {
   position: absolute;
   left: 0.5em;

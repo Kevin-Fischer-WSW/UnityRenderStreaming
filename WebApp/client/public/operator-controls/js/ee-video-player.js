@@ -182,6 +182,11 @@ export class VideoPlayer extends EventTarget {
             _this.onRegistrationUrlReceived.call(_this, msgContents);
           }
           break;
+        case MessageTypes._DbLevelNotification:
+          if (_this.onDbLevelNotification){
+            _this.onDbLevelNotification.call(_this, msgContents);
+          }
+          break;
       }
     };
   }
