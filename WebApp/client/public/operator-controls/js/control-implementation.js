@@ -1867,7 +1867,7 @@ function validateVideoSwitchBtns(videos) {
         .then(response => {
           if (response.ok) {
             console.log("Zoom Audio Muted.");
-            prepareVideo(img);
+            setHoldingSlide(img);
           }
         })
     });
@@ -1876,17 +1876,17 @@ function validateVideoSwitchBtns(videos) {
         .then(response => {
           if (response.ok) {
             console.log("Zoom Audio Unmuted.");
-            prepareVideo(img);
+            setHoldingSlide(img);
           }
         })
     });
-    img.addEventListener("click", _ => prepareVideo(img));
+    img.addEventListener("click", _ => setHoldingSlide(img));
 
-    function prepareVideo(img) {
-      unityFetch("/prepareVideo?url=" + img.alt, { method: "PUT" })
+    function setHoldingSlide(img) {
+      unityFetch("/setHoldingSlide?url=" + img.alt, { method: "PUT" })
         .then(response => {
           if (response.ok) {
-            console.log("Slide set");
+            console.log("Video set.");
           }
         });
     }
