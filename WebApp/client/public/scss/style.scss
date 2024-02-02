@@ -3,16 +3,16 @@ $body-bg: #616161;
 #zoom-db-meter {
   position: absolute;
   top: 0;
-  left: -0.5em;
-  width: 0.5em;
+  left: -1.5em;
+  width: 1.5em;
   bottom: 0;
 }
 
 #output-db-meter {
   position: absolute;
   top: 0;
-  right: -0.5em;
-  width: 0.5em;
+  right: -1.5em;
+  width: 1.5em;
   bottom: 0;
 }
 
@@ -211,6 +211,7 @@ $body-bg: #616161;
 
 #video-players{
   position: relative;
+  width: 99%;
 }
 
 #playButton {
