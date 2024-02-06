@@ -17,305 +17,309 @@
 </head>
 
 <body>
-  <!-- Title -->
-  <div class="container mb-2">
-    <h1 class="display-5 border-bottom text-white d-inline-block w-100">Operator Dashboard
-      <button id="logout" class="btn border-0 m-0" data-bs-toggle="modal" data-bs-target="#signout-modal"
-        title="Logout"><i class="bi bi-box-arrow-right"></i></button>
-      <button id="stream-settings" class="btn border-0 m-0" data-bs-toggle="modal" data-bs-target="#stream-pref-modal"
-        title="Settings"><i class="bi bi-gear-fill"></i></button>
-    </h1>
 
-    <!-- Alert svgs -->
-    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
-      <symbol id="check-circle-fill" fill="currentColor" viewBox="0 0 16 16">
-        <path
-          d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
-      </symbol>
-      <symbol id="exclamation-triangle-fill" fill="currentColor" viewBox="0 0 16 16">
-        <path
-          d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
-      </symbol>
-      <symbol id="info-fill" fill="currentColor" viewBox="0 0 16 16">
-        <path
-          d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
-      </symbol>
-    </svg>
+  <!-- Alert svgs -->
+  <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+    <symbol id="check-circle-fill" fill="currentColor" viewBox="0 0 16 16">
+      <path
+        d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+    </symbol>
+    <symbol id="exclamation-triangle-fill" fill="currentColor" viewBox="0 0 16 16">
+      <path
+        d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+    </symbol>
+    <symbol id="info-fill" fill="currentColor" viewBox="0 0 16 16">
+      <path
+        d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+    </symbol>
+  </svg>
+  <!-- Logout Modal -->
+  <div class="modal fade" id="signout-modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Log Out</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" title="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to sign out?</p>
+        </div>
+        <div class="modal-footer">
+          <form action="/signout" method="get">
+            <input type="submit" class="btn btn-secondary" value="Leave"></input>
+          </form>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" title="Stay">Stay</button>
 
-    <!-- Logout Modal -->
-    <div class="modal fade" id="signout-modal" tabindex="-1">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Log Out</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" title="Close"></button>
-          </div>
-          <div class="modal-body">
-            <p>Are you sure you want to sign out?</p>
-          </div>
-          <div class="modal-footer">
-            <form action="/signout" method="get">
-              <input type="submit" class="btn btn-secondary" value="Leave"></input>
-            </form>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" title="Stay">Stay</button>
-
-          </div>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Reset settings to default -->
-    <div class="modal fade" id="reset-modal" tabindex="-1">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Reset Settings</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" title="Close"></button>
-          </div>
-          <div class="modal-body">
-            <p>Are you sure you want to reset settings? <b>Note:</b> This will erase all uploaded media.</p>
-          </div>
-          <div class="modal-footer">
-            <button id="resetAppSettings" type="button" class="btn btn-secondary" data-bs-dismiss="modal"
-              title="Reset">Reset</button>
-          </div>
+  <!-- Reset settings to default -->
+  <div class="modal fade" id="reset-modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Reset Settings</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" title="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to reset settings? <b>Note:</b> This will erase all uploaded media.</p>
+        </div>
+        <div class="modal-footer">
+          <button id="resetAppSettings" type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                  title="Reset">Reset</button>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- stream confirmation prompt -->
-    <div class="modal fade" id="stream-confirmation-modal" tabindex="-1">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Go Live</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" title="Close"></button>
-          </div>
-          <div class="modal-body">
-            <p>Please confirm below to start the stream.</p>
-            <figure class="figure">
-              <figcaption id="modal-img-caption" class="figure-caption">No slide assigned. Placeholder slide will be
-                used.</figcaption>
-              <img id="modal-img-preview" src="..." class="img-fluid d-none" alt="...">
-            </figure>
-          </div>
-          <div class="modal-footer">
-            <button id="stream-confirmation-btn" type="button" class="btn btn-secondary" data-bs-dismiss="modal"
-              title="Confirm">Confirm</button>
-          </div>
+  <!-- stream confirmation prompt -->
+  <div class="modal fade" id="stream-confirmation-modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Go Live</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" title="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Please confirm below to start the stream.</p>
+          <figure class="figure">
+            <figcaption id="modal-img-caption" class="figure-caption">No slide assigned. Placeholder slide will be
+              used.</figcaption>
+            <img id="modal-img-preview" src="..." class="img-fluid d-none" alt="...">
+          </figure>
+        </div>
+        <div class="modal-footer">
+          <button id="stream-confirmation-btn" type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                  title="Confirm">Confirm</button>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- rename modal -->
-    <div class="modal fade" id="rename-modal" tabindex="-1">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Rename Participant</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" title="Close"></button>
-          </div>
-          <div class="modal-body">
-            <label for="participant-rename-name">Name</label>
-            <input id="participant-rename-name" type="text" class="form-control">
-            <label for="participant-rename-title">Title</label>
-            <input id="participant-rename-title" type="text" class="form-control">
-          </div>
-          <div class="modal-footer">
-            <button id="rename-btn" class="btn btn-secondary" type="button" data-bs-dismiss="modal"
-              title="Rename">Rename</button>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" title="Close">Close</button>
-          </div>
+  <!-- rename modal -->
+  <div class="modal fade" id="rename-modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Rename Participant</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" title="Close"></button>
+        </div>
+        <div class="modal-body">
+          <label for="participant-rename-name">Name</label>
+          <input id="participant-rename-name" type="text" class="form-control">
+          <label for="participant-rename-title">Title</label>
+          <input id="participant-rename-title" type="text" class="form-control">
+        </div>
+        <div class="modal-footer">
+          <button id="rename-btn" class="btn btn-secondary" type="button" data-bs-dismiss="modal"
+                  title="Rename">Rename</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" title="Close">Close</button>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- StreamPref Modal -->
-    <div class="modal fade" id="stream-pref-modal" tabindex="-1" aria-labelledby="stream-pref-label" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="stream-pref-label">Settings</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" title="Close"></button>
-          </div>
+  <!-- StreamPref Modal -->
+  <div class="modal fade" id="stream-pref-modal" tabindex="-1" aria-labelledby="stream-pref-label" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="stream-pref-label">Settings</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" title="Close"></button>
+        </div>
 
-          <!-- Modal Body -->
-          <div class="modal-body">
-            <fieldset id="stream-settings-fieldset">
-              <h6>Stream Info</h6>
-              <!-- stream server dropdown -->
+        <!-- Modal Body -->
+        <div class="modal-body">
+          <fieldset id="stream-settings-fieldset">
+            <h6>Stream Info</h6>
+            <!-- stream server dropdown -->
+            <div class="form-floating">
+              <select class="form-select" id="serverAddressSelect">
+                <option selected value="wz4-linux.wwwprod.wsw.com">wz4-linux.wwwprod</option>
+              </select>
+              <label for="serverAddressSelect">Streaming Server Address</label>
+            </div>
+
+            <!-- stream application dropdown -->
+            <div class="form-floating">
+              <select class="form-select" id="serverAppSelect">
+                <option selected value="training">training</option>
+                <option value="preshow">preshow</option>
+                <option value="liveorigin">liveorigin</option>
+              </select>
+              <label for="serverAppSelect">Streaming Application</label>
+            </div>
+
+            <!-- stream key input group div -->
+
+            <div class="form-floating">
+              <select class="form-select" id="stream-key-select">
+                <option selected value="custom">Custom</option>
+                <option value="eebot1">eebot1</option>
+                <option value="eebot2">eebot2</option>
+              </select>
+              <label for="stream-key-select">Streaming Key</label>
+            </div>
+            <div class="form-floating">
+              <input type="text" class="form-control streamInput" id="stream-key-input" placeholder="key">
+              <label for="stream-key-input">Custom Stream Key</label>
+            </div>
+            <fieldset id="stream-auth-settings" class="d-none">
+              <h6>Authentication Info</h6>
+              <!-- stream username -->
               <div class="form-floating">
-                <select class="form-select" id="serverAddressSelect">
-                  <option selected value="wz4-linux.wwwprod.wsw.com">wz4-linux.wwwprod</option>
-                </select>
-                <label for="serverAddressSelect">Streaming Server Address</label>
+                <input type="text" class="form-control streamInput" id="username-input" placeholder="Username"
+                       value="encoder_eagleeye">
+                <label for="username-input">Username</label>
               </div>
-
-              <!-- stream application dropdown -->
+              <!-- stream user password -->
               <div class="form-floating">
-                <select class="form-select" id="serverAppSelect">
-                  <option selected value="training">training</option>
-                  <option value="preshow">preshow</option>
-                  <option value="liveorigin">liveorigin</option>
-                </select>
-                <label for="serverAppSelect">Streaming Application</label>
+                <input type="password" class="form-control streamInput" id="password-input" placeholder="Password">
+                <label for="password-input">Password</label>
               </div>
-
-              <!-- stream key input group div -->
-
-              <div class="form-floating">
-                <select class="form-select" id="stream-key-select">
-                  <option selected value="custom">Custom</option>
-                  <option value="eebot1">eebot1</option>
-                  <option value="eebot2">eebot2</option>
-                </select>
-                <label for="stream-key-select">Streaming Key</label>
-              </div>
-              <div class="form-floating">
-                <input type="text" class="form-control streamInput" id="stream-key-input" placeholder="key">
-                <label for="stream-key-input">Custom Stream Key</label>
-              </div>
-              <fieldset id="stream-auth-settings" class="d-none">
-                <h6>Authentication Info</h6>
-                <!-- stream username -->
-                <div class="form-floating">
-                  <input type="text" class="form-control streamInput" id="username-input" placeholder="Username"
-                    value="encoder_eagleeye">
-                  <label for="username-input">Username</label>
-                </div>
-                <!-- stream user password -->
-                <div class="form-floating">
-                  <input type="password" class="form-control streamInput" id="password-input" placeholder="Password">
-                  <label for="password-input">Password</label>
-                </div>
-              </fieldset>
             </fieldset>
+          </fieldset>
 
-            <!-- clipboard to copy url -->
-            <div class="card card-bordered">
-              <div class="card-body">
-                <div class="d-flex align-items-center flex-wrap">
-                  <div id="kt_clipboard_4" class="me-5"></div>
-                  <button id="clip" class="btn btn-icon btn-sm btn-light" data-clipboard-target="#kt_clipboard_4">
+          <!-- clipboard to copy url -->
+          <div class="card card-bordered">
+            <div class="card-body">
+              <div class="d-flex align-items-center flex-wrap">
+                <div id="kt_clipboard_4" class="me-5"></div>
+                <button id="clip" class="btn btn-icon btn-sm btn-light" data-clipboard-target="#kt_clipboard_4">
                     <span class="svg-icon svg-icon-2">
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path opacity="0.5"
-                          d="M18 2H9C7.34315 2 6 3.34315 6 5H8C8 4.44772 8.44772 4 9 4H18C18.5523 4 19 4.44772 19 5V16C19 16.5523 18.5523 17 18 17V19C19.6569 19 21 17.6569 21 16V5C21 3.34315 19.6569 2 18 2Z"
-                          fill="currentColor"></path>
+                              d="M18 2H9C7.34315 2 6 3.34315 6 5H8C8 4.44772 8.44772 4 9 4H18C18.5523 4 19 4.44772 19 5V16C19 16.5523 18.5523 17 18 17V19C19.6569 19 21 17.6569 21 16V5C21 3.34315 19.6569 2 18 2Z"
+                              fill="currentColor"></path>
                         <path fill-rule="evenodd" clip-rule="evenodd"
-                          d="M14.7857 7.125H6.21429C5.62255 7.125 5.14286 7.6007 5.14286 8.1875V18.8125C5.14286 19.3993 5.62255 19.875 6.21429 19.875H14.7857C15.3774 19.875 15.8571 19.3993 15.8571 18.8125V8.1875C15.8571 7.6007 15.3774 7.125 14.7857 7.125ZM6.21429 5C4.43908 5 3 6.42709 3 8.1875V18.8125C3 20.5729 4.43909 22 6.21429 22H14.7857C16.5609 22 18 20.5729 18 18.8125V8.1875C18 6.42709 16.5609 5 14.7857 5H6.21429Z"
-                          fill="currentColor"></path>
+                              d="M14.7857 7.125H6.21429C5.62255 7.125 5.14286 7.6007 5.14286 8.1875V18.8125C5.14286 19.3993 5.62255 19.875 6.21429 19.875H14.7857C15.3774 19.875 15.8571 19.3993 15.8571 18.8125V8.1875C15.8571 7.6007 15.3774 7.125 14.7857 7.125ZM6.21429 5C4.43908 5 3 6.42709 3 8.1875V18.8125C3 20.5729 4.43909 22 6.21429 22H14.7857C16.5609 22 18 20.5729 18 18.8125V8.1875C18 6.42709 16.5609 5 14.7857 5H6.21429Z"
+                              fill="currentColor"></path>
                       </svg>
                     </span>
-                  </button>
-                </div>
+                </button>
               </div>
             </div>
-            <!-- Automation toggles -->
-            <fieldset id="auto-show-toggles" class="mt-4">
-              <h6>Automation</h6>
-                <!-- Auto show participant checkbox -->
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="" id="auto-show-checkbox">
-                <label class="form-check-label" for="auto-show-checkbox">
-                  Auto show participants
-                </label>
-              </div>
-                <!-- Auto mute participant checkbox -->
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="auto-mute-checkbox">
-                <label class="form-check-label" for="auto-mute-checkbox">
-                  Auto mute participants
-                </label>
-              </div>
-                <!-- Auto show screen share checkbox -->
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="auto-show-screen-share-checkbox">
-                <label class="form-check-label" for="auto-show-screen-share-checkbox">
-                  Auto show screen share
-                </label>
-              </div>
-            </fieldset>
-            <!-- Reboot button -->
-            <button id="reboot-btn" class="btn btn-warning mt-4" type="button" title="Reboot" data-bs-toggle="modal" data-bs-target="#reboot-confirmation-modal">Reboot Server</button>
-            <!-- stream pref alert container -->
-            <div id="stream-pref-alerts" class="sticky-lg-bottom"></div>
           </div>
-          <div class="modal-footer justify-content-center text-align-center gap-3">
-            <button id="reset-to-default" class="btn border-0 m-0 d-none" data-bs-toggle="modal" data-bs-target="#reset-modal"
-              title="Reset app to default settings"><i class="bi bi-bootstrap-reboot fs-5"></i></button>
-            <div class="form-check form-switch mt-2" title="Toggle to view advanced settings">
-              <input class="form-check-input" type="checkbox" role="switch" id="advancedSettingsToggle">
-              <label class="form-check-label" for="advancedSettingsToggle">Advanced Settings</label>
+          <!-- Automation toggles -->
+          <fieldset id="auto-show-toggles" class="mt-4">
+            <h6>Automation</h6>
+            <!-- Auto show participant checkbox -->
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="auto-show-checkbox">
+              <label class="form-check-label" for="auto-show-checkbox">
+                Auto show participants
+              </label>
             </div>
-            <button type="button" id="save-settings-btn" class="btn btn-secondary float-end" title="Save changed settings">Save
-              changes</button>
-            <button type="button" class="btn btn-secondary float-end" data-bs-dismiss="modal"
-              title="Close">Close</button>
+            <!-- Auto mute participant checkbox -->
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="auto-mute-checkbox">
+              <label class="form-check-label" for="auto-mute-checkbox">
+                Auto mute participants
+              </label>
+            </div>
+            <!-- Auto show screen share checkbox -->
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="auto-show-screen-share-checkbox">
+              <label class="form-check-label" for="auto-show-screen-share-checkbox">
+                Auto show screen share
+              </label>
+            </div>
+          </fieldset>
+          <!-- Reboot button -->
+          <button id="reboot-btn" class="btn btn-warning mt-4" type="button" title="Reboot" data-bs-toggle="modal" data-bs-target="#reboot-confirmation-modal">Reboot Server</button>
+          <!-- stream pref alert container -->
+          <div id="stream-pref-alerts" class="sticky-lg-bottom"></div>
+        </div>
+        <div class="modal-footer justify-content-center text-align-center gap-3">
+          <button id="reset-to-default" class="btn border-0 m-0 d-none" data-bs-toggle="modal" data-bs-target="#reset-modal"
+                  title="Reset app to default settings"><i class="bi bi-bootstrap-reboot fs-5"></i></button>
+          <div class="form-check form-switch mt-2" title="Toggle to view advanced settings">
+            <input class="form-check-input" type="checkbox" role="switch" id="advancedSettingsToggle">
+            <label class="form-check-label" for="advancedSettingsToggle">Advanced Settings</label>
           </div>
+          <button type="button" id="save-settings-btn" class="btn btn-secondary float-end" title="Save changed settings">Save
+            changes</button>
+          <button type="button" class="btn btn-secondary float-end" data-bs-dismiss="modal"
+                  title="Close">Close</button>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Reboot confirmation Modal -->
-    <div class="modal fade" id="reboot-confirmation-modal" tabindex="-1">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header bg-light">
-            <h5 class="modal-title">Reboot Server</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" title="Close"></button>
-          </div>
-          <div class="modal-body">
-            <p>Are you sure you want to reboot the server? This will disrupt ongoing streams, uploads, and downloads.</p>
-          </div>
-          <div class="modal-footer">
-            <button id="confirm-reboot-btn" type="button" class="btn btn-secondary" data-bs-dismiss="modal"
-              title="Reboot">Reboot</button>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" title="Close">Close</button>
-          </div>
+  <!-- Reboot confirmation Modal -->
+  <div class="modal fade" id="reboot-confirmation-modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-light">
+          <h5 class="modal-title">Reboot Server</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" title="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to reboot the server? This will disrupt ongoing streams, uploads, and downloads.</p>
+        </div>
+        <div class="modal-footer">
+          <button id="confirm-reboot-btn" type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                  title="Reboot">Reboot</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" title="Close">Close</button>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Registration URL received modal -->
-    <div class="modal fade" id="registration-url-modal" tabindex="-1" aria-labelledby="registration-url-modal-label"
-      aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content">
-          <div class="modal-header bg-light">
-            <h5 class="modal-title" id="registration-url-modal-label">Registration URL Received</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" title="Close"></button>
-          </div>
-
-          <!-- Registration URL received modal body -->
-          <div class="modal-body">
-            <p>This webinar requires you to register. Please follow this link and enter your credentials.</p>
-            <p>Registration URL: <a id="registration-url" target="_blank" class="text-black"></a></p>
-            <p>After registering, open your email, and find your invitation. Find your join link, and copy paste this
-              link into the join box.</p>
-          </div>
-
-          <!-- Registration URL received modal footer -->
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" title="Close">Close</button>
-          </div>
-
+  <!-- Registration URL received modal -->
+  <div class="modal fade" id="registration-url-modal" tabindex="-1" aria-labelledby="registration-url-modal-label"
+       aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header bg-light">
+          <h5 class="modal-title" id="registration-url-modal-label">Registration URL Received</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" title="Close"></button>
         </div>
+
+        <!-- Registration URL received modal body -->
+        <div class="modal-body">
+          <p>This webinar requires you to register. Please follow this link and enter your credentials.</p>
+          <p>Registration URL: <a id="registration-url" target="_blank" class="text-black"></a></p>
+          <p>After registering, open your email, and find your invitation. Find your join link, and copy paste this
+            link into the join box.</p>
+        </div>
+
+        <!-- Registration URL received modal footer -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" title="Close">Close</button>
+        </div>
+
       </div>
     </div>
+  </div>
 
-    <div id="stream-activity-bar" class="rounded mb-2" title="Stream Activity">
-      <p id="on-air-text" class="">On Air</p>
-      <div id="on-air-indicator"><i id="on-air-indicator-icon" class="bi bi-broadcast bi-broadcast-lg"></i></div>
-      <p id="on-air-info-text" class="">
-        Audio: None<br>
-        Video: None<br>
-        Recording: Inactive
-      </p>
-    </div>
+  <!-- Sign out modal -->
+  <div class="bg-secondary text-white rounded-bottom flex-shrink-0">
+    <button id="logout" class="btn border-0 m-0" data-bs-toggle="modal" data-bs-target="#signout-modal"
+            title="Logout"><i class="bi bi-box-arrow-right"></i></button>
+    <button id="stream-settings" class="btn border-0 m-0" data-bs-toggle="modal" data-bs-target="#stream-pref-modal"
+            title="Settings"><i class="bi bi-gear-fill"></i></button>
+  </div>
 
-    <div id="general-status-bar" title="General Status">
-      Status Unknown.
+  <!-- Title -->
+  <div class="w-100 mb-2">
+    <div class="d-flex">
+      <div class="bg-secondary text-white rounded-bottom flex-grow-1 me-2 p-2 d-flex">
+        <div id="stat-session-title" class="flex-grow-1 ms-1 me-1 ">Session: My Session</div>
+        <div id="stat-stream-key" class="flex-grow-1 border-start  ms-1 me-1 ps-1">Stream Key: test.1234</div>
+        <div id="stat-meeting" class="flex-shrink-1 border-start  ms-1 me-1 ps-1">In Meeting: 1234567890</div>
+      </div>
+      <div id="stat-on-air" class="bg-secondary text-white rounded-bottom flex-grow-0 p-2"><i id="on-air-indicator-icon"
+                                                                             class="bi bi-broadcast"></i> On Air
+      </div>
+      <div class="bg-secondary text-white rounded-bottom flex-grow-1 ms-2 me-2 p-2 d-flex">
+        <div id="stat-recording" class="flex-shrink-1">Recording: Inactive</div>
+        <div id="stat-audio" class="flex-grow-1 border-start  ms-1 me-1 ps-1">Audio: Presenters</div>
+        <div id="stat-video" class="flex-grow-1 border-start  ms-1 me-1 ps-1">Video: Presenters</div>
+        <div id="stat-scene" class="flex-grow-1 border-start  ms-1 me-1 ps-1">Scene: Test</div>
+      </div>
     </div>
   </div>
 

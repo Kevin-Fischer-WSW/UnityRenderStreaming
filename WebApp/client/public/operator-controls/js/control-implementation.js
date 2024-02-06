@@ -36,7 +36,6 @@ mainNotifications.addEventListener('setup', function () {
   myVideoPlayer.addEventListener("dataChannelClose", () => {
     appStatus = undefined;
     updateGeneralStatBar();
-    updateStreamActivityBarInfo(appStatus)
   });
   myVideoPlayer.addEventListener("dataChannelConnecting", updateGeneralStatBar);
   myVideoPlayer.addEventListener("dataChannelClosing", updateGeneralStatBar);
@@ -587,94 +586,69 @@ streamPrefModal.addEventListener('shown.bs.modal', function () {
 
 /* GENERAL STATUS BAR */
 // => DOM ELEMENTS
-let generalStatBar = document.getElementById("general-status-bar");
+let statSessionTitle = document.getElementById("stat-session-title");
+let statStreamKey = document.getElementById("stat-stream-key");
+let statInMeeting = document.getElementById("stat-meeting");
+let statOnAir = document.getElementById("stat-on-air");
+let statRecording = document.getElementById("stat-recording");
+let statAudio = document.getElementById("stat-audio");
+let statVideo = document.getElementById("stat-video");
+let statScene = document.getElementById("stat-scene");
 
 // => METHODS
 function updateGeneralStatBar() {
   if (appStatus !== undefined) {
-      generalStatBar.innerHTML = `Session: ${appStatus.sessionTitle} |`;
-      generalStatBar.innerHTML += ` In Meeting: ${appStatus.inMeeting ? appStatus.meetingId : "No"} |`;
-      generalStatBar.innerHTML += ` Zoom Local Recording: ${appStatus.canRecordLocalFiles ? "Allowed" : "Not Allowed"}`;
+    statSessionTitle.innerHTML = `Session: ${appStatus.sessionTitle}`;
+    statStreamKey.innerHTML = `Stream Key: ${appStatus.streamKey}`;
+    statInMeeting.innerHTML = `In Meeting: ${appStatus.inMeeting ? appStatus.meetingId : "No"}`;
+    statOnAir.innerHTML = `On Air: ${appStatus.streaming}`;
+    statRecording.innerHTML = `Recording: ${appStatus.recording ? "Active" : "Inactive"}`;
+
+    let videoSources = [];
+    let audioSources = [];
+    let audioConflict = false;
+
+    /* check audio sources */
+    if (!appStatus.masterAudioMuted && appStatus.masterVolume > 0.01) {
+      if (appStatus.isAnyParticipantAudible) audioSources.push("Presenter");
+      if (appStatus.isScreenShareAudible) audioSources.push("Screen Share");
+      if (appStatus.playingHoldingMusic && appStatus.holdingMusicVolume > 0) {
+        audioConflict = audioSources.length >= 1;
+        audioSources.push("Holding music");
+      }
+      if (appStatus.playingVideo && appStatus.currentVideoVolume > 0) {
+        audioConflict = audioSources.length >= 1;
+        audioSources.push("Video playback");
+      }
+    }
+
+    /* check video sources */
+    if (appStatus.holdingSlide !== "none") videoSources.push(appStatus.holdingSlide.charAt(0).toUpperCase() + appStatus.holdingSlide.slice(1));
+    else if (appStatus.videoIsShowing && appStatus.holdingSlide) videoSources.push("Video playback");
+    else {
+      if (appStatus.isAnyParticipantVisible && !appStatus.videoIsShowing && appStatus.holdingSlide === "none") videoSources.push("Presenter");
+      if (appStatus.isScreenShareVisible && !appStatus.videoIsShowing && appStatus.holdingSlide === "none") videoSources.push("Screen Share");
+    }
+
+    /* update information */
+    let warning = `<i class="bi bi-exclamation-triangle" title="Music/Video is playing over Presenters."></i>`
+    statAudio.innerHTML = `Audio: ${audioConflict ? warning : ""} ${audioSources.length > 0 ? audioSources.join(", ") : "None"}`;
+    statVideo.innerHTML = `Video: ${videoSources.length > 0 ? videoSources.join(", ") : "None"}`;
+    //statScene.innerHTML = `Scene: ${appStatus.holdingSlide}`;
   } else {
-    generalStatBar.innerHTML = `Connection State: ${myVideoPlayer.channel.readyState}`;
+    statSessionTitle.innerHTML = `Session: `;
+    statStreamKey.innerHTML = `Stream Key: `;
+    statInMeeting.innerHTML = `In Meeting: `;
+    statOnAir.innerHTML = `Connection: ${myVideoPlayer.channel.readyState}`;
+    statRecording.innerHTML = `Recording: `;
+    statAudio.innerHTML = `Audio: `;
+    statVideo.innerHTML = `Video: `;
+    statScene.innerHTML = `Scene: `;
     if (myVideoPlayer.channel.readyState === "open"){
       setTimeout(updateGeneralStatBar, 1000);
       sendClickEvent(myVideoPlayer, OperatorControls._GetAppStatus);
     }
   }
-}
-
-/* STREAM ACTIVITY BAR */
-// => DOM ELEMENTS
-let onAirText = document.getElementById("on-air-text");
-let onAirIndicator = document.getElementById("on-air-indicator-icon");
-let onAirInfoText = document.getElementById("on-air-info-text");
-let streamActivityBar = document.getElementById("stream-activity-bar");
-
-// => METHODS
-function updateStreamActivityBarInfo(_appStatus) {
-  if (_appStatus === undefined) {
-    _appStatus = {
-      streaming: false,
-      isAnyParticipantAudible: false,
-      isScreenShareAudible: false,
-      playingHoldingMusic: false,
-      playingVideo: false,
-      recording: false,
-      holdingMusicVolume: 0,
-      currentVideoVolume: 0,
-      masterVolume: 0,
-      masterAudioMuted: false,
-      holdingSlide: "none",
-      videoIsShowing: false,
-      isAnyParticipantVisible: false,
-      isScreenShareVisible: false,
-    }
-  }
-  /* update aesthetics */
-  if (_appStatus.streaming) {
-    streamActivityBar.style.backgroundColor = "#2ecc71";
-    onAirText.style.color = onAirIndicator.style.color = "red";
-    onAirInfoText.style.color = "black";
-    onAirText.innerHTML = "On Air";
-  } else {
-    streamActivityBar.style.backgroundColor = "#4c4c4c";
-    onAirText.style.color = onAirIndicator.style.color = onAirInfoText.style.color = "grey";
-    onAirText.innerHTML = "Off Air";
-  }
-
-
-  let videoSources = [];
-  let audioSources = [];
-  let audioConflict = false;
-
-  /* check audio sources */
-  if (!_appStatus.masterAudioMuted && _appStatus.masterVolume > 0.01) {
-    if (_appStatus.isAnyParticipantAudible) audioSources.push("Presenter");
-    if (_appStatus.isScreenShareAudible) audioSources.push("Screen Share");
-    if (_appStatus.playingHoldingMusic && _appStatus.holdingMusicVolume > 0) {
-      audioConflict = audioSources.length >= 1;
-      audioSources.push("Holding music");
-    }
-    if (_appStatus.playingVideo && _appStatus.currentVideoVolume > 0) {
-      audioConflict = audioSources.length >= 1;
-      audioSources.push("Video playback");
-    }
-  }
-
-  /* check video sources */
-  if (_appStatus.holdingSlide !== "none") videoSources.push(_appStatus.holdingSlide.charAt(0).toUpperCase() + _appStatus.holdingSlide.slice(1));
-  else if (_appStatus.videoIsShowing && _appStatus.holdingSlide) videoSources.push("Video playback");
-  else {
-    if (_appStatus.isAnyParticipantVisible && !_appStatus.videoIsShowing && _appStatus.holdingSlide === "none") videoSources.push("Presenter");
-    if (_appStatus.isScreenShareVisible && !_appStatus.videoIsShowing && _appStatus.holdingSlide === "none") videoSources.push("Screen Share");
-  }
-
-  /* update information */
-  let warning = `<i class="bi bi-exclamation-triangle" title="Music/Video is playing over Presenters."></i>`
-  onAirInfoText.innerHTML = `Audio: ${audioConflict ? warning : ""} ${audioSources.length > 0 ? audioSources.join(", ") : "None"}
-    <br> Video: ${videoSources.length > 0 ? videoSources.join(", ") : "None"}
-    <br> Recording: ${_appStatus.recording ? "Active" : "Inactive"}`;
 }
 
 /* STREAM BUTTONS */
@@ -2816,7 +2790,6 @@ function appStatusReceived(json) {
     videoProgress.max = Math.round(appStatus.currentVideoDuration);
     videoPlayPauseBtn.innerHTML = appStatus.playingVideo ? '<i class="bi bi-pause"></i>' : '<i class="bi bi-play"></i>';
 
-    updateStreamActivityBarInfo(appStatus);
     if (appStatus.streaming) {
       updateStreamButtons();
     } else {
