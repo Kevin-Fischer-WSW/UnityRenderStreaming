@@ -50,9 +50,9 @@
   width: 50%;
   max-width: 100%; }
 
-#intro-preview, #techdiff-preview, #conc-preview, #slide-clear-btn {
+#intro-preview, #late-preview, #techdiff-preview, #conc-preview, #slide-clear-btn {
   height: 150px;
-  max-width: 25%;
+  max-width: 20%;
   border: 2px solid #3D3D3D; }
 
 #ppt-group-select {
@@ -60,7 +60,7 @@
   max-width: 25%;
   background-color: #4c4c4c; }
 
-#intro-preview, #techdiff-preview, #conc-preview {
+#intro-preview, #late-preview, #techdiff-preview, #conc-preview {
   background-size: cover;
   background-blend-mode: multiply;
   padding: 0;
@@ -120,6 +120,13 @@
 
 #pending-btn {
   background-color: #fff000;
+  height: 70px;
+  width: 150px;
+  font-size: 20px;
+  cursor: pointer; }
+
+#late-btn {
+  background-color: #fcc112;
   height: 70px;
   width: 150px;
   font-size: 20px;

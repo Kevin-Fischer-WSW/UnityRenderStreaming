@@ -60,9 +60,9 @@ $body-bg: #616161;
   max-width: 100%;
 }
 
-#intro-preview, #techdiff-preview, #conc-preview, #slide-clear-btn {
+#intro-preview, #late-preview, #techdiff-preview, #conc-preview, #slide-clear-btn {
   height: 150px;
-  max-width: 25%;
+  max-width: 20%;
   border: 2px solid #3D3D3D;
 }
 
@@ -72,7 +72,7 @@ $body-bg: #616161;
   background-color: #4c4c4c;
 }
 
-#intro-preview, #techdiff-preview, #conc-preview {
+#intro-preview, #late-preview, #techdiff-preview, #conc-preview {
   background-size: cover;
   background-blend-mode: multiply;
   padding: 0;
@@ -146,6 +146,15 @@ $body-bg: #616161;
 
 #pending-btn {
   background-color: #fff000;
+  //border: 2px solid #3D3D3D;
+  height: 70px;
+  width: 150px;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+#late-btn {
+  background-color: #fcc112;
   //border: 2px solid #3D3D3D;
   height: 70px;
   width: 150px;

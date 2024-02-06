@@ -387,6 +387,8 @@
     <button id="pending-btn" class="btn btn-lg text-black rounded" data-bs-toggle="modal"
       data-bs-target="#stream-confirmation-modal" title="Begin live stream with introduction slide">Start
       Stream</button>
+    <button id="late-btn" class="btn btn-lg text-black d-none"
+      title="Stream late slide">Late</button>
     <button id="live-btn" class="btn btn-lg text-black d-none"
       title="Go live with presenters&#013;Clear any presentation slide or video from output">Live</button>
     <button id="technical-diff-btn" class="btn btn-lg text-black d-none" title="Stream tech diff slide">Technical
@@ -615,6 +617,8 @@
             <button id="intro-preview" type="button" class="btn btn-light" data-bs-toggle="modal"
               data-bs-target="#stream-confirmation-modal" title="Intro slide preview"><span
                 class="bg-dark text-light p-1">Intro</span></button>
+            <button id="late-preview" type="button" class="btn btn-light" title="Late slide preview"><span
+                class="bg-dark text-light p-1">Late</span></button>
             <button id="techdiff-preview" type="button" class="btn btn-light" title="Tech diff slide preview"><span
                 class="bg-dark text-light p-1">Technical Difficulty</span></button>
             <button id="conc-preview" type="button" class="btn btn-light" title="Conclusion slide preview"><span
@@ -635,6 +639,7 @@
               <ul class="dropdown-menu">
                 Set As
                 <li><a target="action-set-as-intro" class="dropdown-item">Intro</a></li>
+                <li><a target="action-set-as-late" class="dropdown-item">Late</a></li>
                 <li><a target="action-set-as-techdiff" class="dropdown-item">Technical Difficulty</a></li>
                 <li><a target="action-set-as-conclusion" class="dropdown-item">Conclusion</a></li>
               </ul>
@@ -881,6 +886,17 @@
                     <figcaption id="modal-intro-caption" class="figure-caption">No slide selected to preview.
                     </figcaption>
                     <img id="modal-intro-preview" src="..." class="img-fluid d-none" alt="...">
+                  </figure>
+                  <!-- Change slide that will be used for late type -->
+                  <h6>Late slide</h6>
+                  <select data-type="late" id="late-slide-type-select" class="form-select mb-2" aria-label="Slide type">
+                    <option>No slide selected. Slide will not update.</option>
+                    <!-- Further options will be generated -->
+                  </select>
+                  <figure class="figure">
+                    <figcaption id="modal-late-caption" class="figure-caption">No slide selected to preview.
+                    </figcaption>
+                    <img id="modal-late-preview" src="..." class="img-fluid d-none" alt="...">
                   </figure>
                   <!-- Change slide that will be used for technicalDifficulty type -->
                   <h6>Tech difficulty slide</h6>

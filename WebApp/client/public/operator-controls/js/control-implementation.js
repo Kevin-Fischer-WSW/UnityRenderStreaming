@@ -684,6 +684,7 @@ let previewIntroImgCaption = document.getElementById("modal-img-caption");
 let streamBtnGrp = document.getElementById("stream-btn-grp");
 
 let archiveBtn = document.getElementById("archive-btn");
+let lateBtn = document.getElementById("late-btn");
 let liveBtn = document.getElementById("live-btn");
 let pendingBtn = document.getElementById("pending-btn");
 let streamConfBtn = document.getElementById("stream-confirmation-btn");
@@ -691,44 +692,81 @@ let technicalDiffBtn = document.getElementById("technical-diff-btn");
 
 archiveBtn.addEventListener("click", onArchiveClick);
 liveBtn.addEventListener("click", onLiveClick);
+lateBtn.addEventListener("click", onLateClick);
 streamConfBtn.addEventListener("click", onPendingClick);
 technicalDiffBtn.addEventListener("click", onTechnicalDiff);
 
 
 // => METHODS
 function onArchiveClick() {
-  unityFetch("/stopStreamAndDisplayConclusionSlide", { method: "PUT" })
-    .then((response) => {
-      if (response.ok && response.status === 200) {
-        Feedback.alertSuccess("Success: Stream stopped.");
-      } else if (response.ok && response.status === 201) {
-        Feedback.alertInfo(response.statusText);
-      } else {
-        Feedback.alertDanger("Failed: " + response.statusText);
-      }
-    });
+  let sceneId = appStatus.holdingSlide !== "Conclusion" ? "outro" : "end";
+  loadScene(sceneId).then((result) => {
+    if (result.success && sceneId === "end") {
+      Feedback.alertSuccess("Success: Stream ended.");
+    }
+  });
+}
+
+function onLateClick() {
+  let sceneId = appStatus.holdingSlide !== "Late" ? "late" : "live";
+  loadScene(sceneId).then((result) => {
+    console.log(`Load late scene result: ${result}`);
+  });
 }
 
 function onLiveClick() {
-  sendClickEvent(myVideoPlayer, OperatorControls._LiveButton);
+  loadScene("live").then((result) => {
+    console.log(`Load live scene result: ${result}`);
+  });
 }
 
 function onPendingClick() {
-  unityFetch("/startStreamAndDisplayIntroSlide", { method: "PUT" })
-    .then((response) => {
-      if (response.ok && response.status === 200) {
-        Feedback.alertSuccess("Success: Stream started.");
-      } else if (response.ok && response.status === 201) {
-        Feedback.alertInfo(response.statusText);
-      } else {
-        sendClickEvent(myVideoPlayer, OperatorControls._LiveButton);
-        Feedback.alertDanger("OBS failed to start the stream. Please check your settings and try again.");
-      }
-    });
+  let sceneId = appStatus.holdingSlide !== "Intro" ? "intro" : "live";
+  loadScene(sceneId).then((result) => {
+    if (result.success && sceneId === "live") {
+      Feedback.alertSuccess("Success: Stream started.");
+    }
+  });
 }
 
 function onTechnicalDiff() {
-  sendClickEvent(myVideoPlayer, OperatorControls._TechnicalDifficultiesButton);
+  let sceneId = appStatus.holdingSlide !== "TechnicalDifficulties" ? "techdiff" : "live";
+  loadScene(sceneId).then((result) => {
+    console.log(`Load technical difficulties scene result: ${result}`);
+  });
+}
+
+async function loadScene(sceneId) {
+  let result = {
+    success: false,
+  }
+  v2api.put(`/scene/${sceneId}/load`).then((response) => {
+    if (response.ok) {
+      response.json().then((data) => {
+        if (v2api.checkErrorCode(0)) {
+          result.success = true;
+        } else if (v2api.checkErrorCode(16)) {
+          Feedback.alertDanger("OBS failed to start the stream. Please check your settings and try again.");
+        } else {
+          let errors = v2api.getErrorMessagesAndResolutions(data);
+          for (let i = 0; i < errors.errorMessages.length; i++) {
+            Feedback.alertDanger(`${errors.errorMessages[i]} ${errors.resolutions[i]}`);
+          }
+        }
+      });
+    } else{
+      response.json().then((data) => {
+        console.log(data);
+        let errors = v2api.getErrorMessagesAndResolutions(data);
+        for (let i = 0; i < errors.errorMessages.length; i++) {
+          Feedback.alertDanger(`${errors.errorMessages[i]} ${errors.resolutions[i]}`);
+        }
+      }).catch((e) => {
+        console.log(e);
+      });
+    }
+  });
+  return result;
 }
 
 function resetStreamButtonsOnLeaveOrEnd() {
@@ -737,6 +775,7 @@ function resetStreamButtonsOnLeaveOrEnd() {
   if (streamBtnGrp.classList.contains("w-100")) streamBtnGrp.classList.remove("w-100");
   if (!pendingBtn.classList.contains("rounded")) pendingBtn.classList.add("rounded");
   if (!liveBtn.classList.contains("d-none")) liveBtn.classList.add("d-none");
+  if (!lateBtn.classList.contains("d-none")) lateBtn.classList.add("d-none");
   if (!technicalDiffBtn.classList.contains("d-none")) technicalDiffBtn.classList.add("d-none");
   if (!archiveBtn.classList.contains("d-none")) archiveBtn.classList.add("d-none");
   if (!pendingBtn.hasAttribute("data-bs-toggle")) pendingBtn.setAttribute("data-bs-toggle", "modal");
@@ -749,17 +788,43 @@ function updateStreamButtons() {
   streamSettingsFieldset.disabled = true;
   pendingBtn.innerHTML = "Intro Slide";
   liveBtn.innerHTML = "Live";
+  lateBtn.innerHTML = "Late";
   technicalDiffBtn.innerHTML = "Technical Difficulties";
   archiveBtn.innerHTML = "Conclusion Slide";
   streamBtnGrp.classList.add("w-100");
   pendingBtn.classList.remove("rounded");
   liveBtn.classList.remove("d-none");
+  lateBtn.classList.remove("d-none");
   technicalDiffBtn.classList.remove("d-none");
   archiveBtn.classList.remove("d-none");
   pendingBtn.removeAttribute("data-bs-toggle");
   pendingBtn.addEventListener("click", onPendingClick);
   intro_preview.removeAttribute("data-bs-toggle");
   intro_preview.addEventListener("click", onPendingClick);
+
+  if (appStatus.holdingSlide === "Intro") {
+    pendingBtn.innerHTML = `Intro Slide <i class="bi bi-broadcast"></i>`;
+    StyleHelper.ActivateButtonHelper(pendingBtn, true);
+  } else if (appStatus.holdingSlide === "Late") {
+    lateBtn.innerHTML = `Late <i class="bi bi-broadcast"></i>`;
+    StyleHelper.ActivateButtonHelper(lateBtn, true);
+  } else if (appStatus.holdingSlide === "TechnicalDifficulties") {
+    technicalDiffBtn.innerHTML = `Technical Difficulties <i class="bi bi-broadcast"></i>`;
+    StyleHelper.ActivateButtonHelper(technicalDiffBtn, true);
+  } else if (appStatus.holdingSlide === "none" || appStatus.isCustomSlide) {
+    liveBtn.innerHTML = `Live <i class="bi bi-broadcast"></i>`;
+    StyleHelper.ActivateButtonHelper(liveBtn, true);
+  } else if (appStatus.holdingSlide === "Conclusion") {
+    StyleHelper.ActivateButtonHelper(archiveBtn, true);
+  } else {
+    resetStreamButtonsOnLeaveOrEnd();
+  }
+
+  if (appStatus.secondClickEndsStream) {
+    archiveBtn.innerHTML = `End Stream <i class="bi bi-broadcast"></i>`;
+  } else {
+    archiveBtn.innerHTML = "Conclusion Slide";
+  }
 }
 
 
@@ -1411,6 +1476,7 @@ JSONEditor.defaults.options.disable_properties = true;
 // => DOM ELEMENTS
 let conc_preview = document.getElementById("conc-preview");
 let intro_preview = document.getElementById("intro-preview");
+let late_preview = document.getElementById("late-preview");
 let slideBtnContainer = document.getElementById("slide-btn-container");
 let slideFieldset = document.getElementById("slide-fieldset");
 let techdiff_preview = document.getElementById("techdiff-preview");
@@ -1428,6 +1494,7 @@ function FetchAssignedHoldingSlidesAndUpdatePreviews() {
     .then(json => {
       // todo set to placeholder image instead of clearing.
       intro_preview.style.backgroundImage = "";
+      late_preview.style.backgroundImage = "";
       techdiff_preview.style.backgroundImage = "";
       conc_preview.style.backgroundImage = "";
       previewIntroImg.src = "...";
@@ -1452,6 +1519,9 @@ function FetchAssignedHoldingSlidesAndUpdatePreviews() {
             previewIntroImg.classList.remove("d-none");
             previewIntroImgCaption.innerHTML = "This will be used as your Intro Slide.";
           }
+          if (slideInfo.assignedTo.includes("late")) {
+            late_preview.style.backgroundImage = `url("${url}")`;
+          }
           if (slideInfo.assignedTo.includes("technicalDifficulties")) {
             techdiff_preview.style.backgroundImage = `url("${url}")`;
           }
@@ -1470,10 +1540,6 @@ function onSlideTabClicked() {
       validateSlideSwitchBtns(json);
     });
   FetchAssignedHoldingSlidesAndUpdatePreviews();
-}
-
-function onSlideClearClicked() {
-  sendClickEvent(myVideoPlayer, OperatorControls._LiveButton);
 }
 
 // slide delete pill button.
@@ -1511,12 +1577,22 @@ function setupDeleteButton(owner, route, elementWithFilename, onDeleteConfirmed)
 
 function setupSlideSetAsOptionsButton(owner) {
   let slideSetAsIntro = document.querySelector(`div#${owner.id} a[target="action-set-as-intro"]`);
+  let slideSetAsLate = document.querySelector(`div#${owner.id} a[target="action-set-as-late"]`);
   let slideSetAsTechDiff = document.querySelector(`div#${owner.id} a[target="action-set-as-techdiff"]`);
   let slideSetAsConclusion = document.querySelector(`div#${owner.id} a[target="action-set-as-conclusion"]`);
   let img = document.querySelector(`div#${owner.id} img`);
 
   slideSetAsIntro.addEventListener("click", (e) => {
     unityFetch(`/assignIntroSlide?url=${img.alt}`, { method: "PUT" })
+      .then(resp => {
+        if (resp.ok) {
+          FetchAssignedHoldingSlidesAndUpdatePreviews();
+        }
+      });
+  });
+
+  slideSetAsLate.addEventListener("click", (e) => {
+    unityFetch(`/assignLateSlide?url=${img.alt}`, { method: "PUT" })
       .then(resp => {
         if (resp.ok) {
           FetchAssignedHoldingSlidesAndUpdatePreviews();
@@ -1596,7 +1672,8 @@ function validateSlideSwitchBtns(slides) {
 
 // => EVENT LISTENERS
 conc_preview.addEventListener("click", onArchiveClick);
-slideClearBtn.addEventListener("click", onSlideClearClicked);
+late_preview.addEventListener("click", onLateClick);
+slideClearBtn.addEventListener("click", onLiveClick);
 techdiff_preview.addEventListener("click", onTechnicalDiff);
 
 // => INIT(S)
@@ -1825,9 +1902,6 @@ let disableVideoProgressUpdates = false;
 let videoSwitchBtns = [];
 
 // => METHODS
-function onVideoClearClicked() {
-  sendClickEvent(myVideoPlayer, OperatorControls._LiveButton);
-}
 
 function onVideoPlaybackTimeReceived(time) {
   time = Math.round(time);
@@ -1909,7 +1983,7 @@ function validateVideoSwitchBtns(videos) {
 }
 
 // => EVENT LISTENERS
-videoClearBtn.addEventListener("click", onVideoClearClicked);
+videoClearBtn.addEventListener("click", onLiveClick);
 
 videoProgress.addEventListener("input", function () {
   disableVideoProgressUpdates = true;
@@ -1950,6 +2024,9 @@ let conclusionSelect = document.getElementById("conclusion-slide-type-select");
 let introSelect = document.getElementById("intro-slide-type-select");
 let modalIntroCaption = document.getElementById("modal-intro-caption");
 let modalIntroPreview = document.getElementById("modal-intro-preview");
+let lateSelect = document.getElementById("late-slide-type-select");
+let modalLateCaption = document.getElementById("modal-late-caption");
+let modalLatePreview = document.getElementById("modal-late-preview");
 let modalConclusionCaption = document.getElementById("modal-conclusion-caption");
 let modalConclusionPreview = document.getElementById("modal-conclusion-preview");
 let modalTechDiffCaption = document.getElementById("modal-techdiff-caption");
@@ -1963,7 +2040,7 @@ let editSlideCloseBtn = document.getElementById("edit-slide-close-btn");
 let editSlideSaveBtn = document.getElementById("edit-slide-save-btn");
 
 // => PRIMITIVE AND OTHER TYPES
-let slideTypeSelects = [introSelect, techDiffSelect, conclusionSelect];
+let slideTypeSelects = [introSelect, lateSelect, techDiffSelect, conclusionSelect];
 let extensionToMethod = {
   "music": ["mp3", "ogg", "wav"],
   "ppt": ["ppt", "pptm", "pptx"],
@@ -1974,6 +2051,7 @@ let extensionToMethod = {
 let formInput = [];
 let typeToKeyWords = {
   "intro": ["intro"],
+  "late" : ["late"],
   "conclusion": ["conclusion"],
   "technicalDifficulty": ["technical difficulty",
     "technical difficulties",
@@ -1993,8 +2071,8 @@ function batchFileInputChanged() {
   // Sort files into categories.
   let [slideFiles, musicFiles, videoFiles, pdfFiles, pptFiles, unknownFiles] = SortFilesByExtension(batchSlideFileInput.files);
   // Categorize slides by keywords for upload.
-  let [introSlide, techDiffSlide, conclusionSlide, customSlides] = CategorizeSlideFilesByKeywordForUpload(slideFiles);
-  repopulateFormInputAndUploadDescriptor(introSlide, techDiffSlide, conclusionSlide, customSlides, musicFiles, videoFiles, pdfFiles, pptFiles, unknownFiles);
+  let [introSlide, lateSlide, techDiffSlide, conclusionSlide, customSlides] = CategorizeSlideFilesByKeywordForUpload(slideFiles);
+  repopulateFormInputAndUploadDescriptor(introSlide, lateSlide, techDiffSlide, conclusionSlide, customSlides, musicFiles, videoFiles, pdfFiles, pptFiles, unknownFiles);
 }
 
 function clearFormInputAndUploadDescriptor() {
@@ -2025,6 +2103,7 @@ function editSlideBtnClicked() {
   }
   // Update previews.
   updateEditSlideAssignmentPreviewElement(introSelect, modalIntroPreview, modalIntroCaption);
+  updateEditSlideAssignmentPreviewElement(lateSelect, modalLatePreview, modalLateCaption);
   updateEditSlideAssignmentPreviewElement(techDiffSelect, modalTechDiffPreview, modalTechDiffCaption);
   updateEditSlideAssignmentPreviewElement(conclusionSelect, modalConclusionPreview, modalConclusionCaption);
 }
@@ -2033,12 +2112,13 @@ function editSlideSaveBtnClicked() {
   // Sort files into categories.
   let [slideFiles, musicFiles, videoFiles, pdfFiles, pptFiles, unknownFiles] = SortFilesByExtension(batchSlideFileInput.files);
   // Categorize slides by slide type selects.
-  let [introSlide, techDiffSlide, conclusionSlide, customSlides] = CategorizeSlideFilesBySlideTypeSelects(slideFiles);
-  repopulateFormInputAndUploadDescriptor(introSlide, techDiffSlide, conclusionSlide, customSlides, musicFiles, videoFiles, pdfFiles, pptFiles, unknownFiles);
+  let [introSlide, lateSlide, techDiffSlide, conclusionSlide, customSlides] = CategorizeSlideFilesBySlideTypeSelects(slideFiles);
+  repopulateFormInputAndUploadDescriptor(introSlide, lateSlide, techDiffSlide, conclusionSlide, customSlides, musicFiles, videoFiles, pdfFiles, pptFiles, unknownFiles);
 }
 
 function CategorizeSlideFilesByKeywordForUpload(files) {
   let introSlide = undefined;
+  let lateSlide = undefined;
   let techDiffSlide = undefined;
   let conclusionSlide = undefined;
   let customSlides = [];
@@ -2061,6 +2141,9 @@ function CategorizeSlideFilesByKeywordForUpload(files) {
           case "intro":
             introSlide = file;
             break;
+          case "late":
+            lateSlide = file;
+            break;
           case "technicalDifficulty":
             techDiffSlide = file;
             break;
@@ -2076,11 +2159,12 @@ function CategorizeSlideFilesByKeywordForUpload(files) {
       customSlides.push(file);
     }
   }
-  return [introSlide, techDiffSlide, conclusionSlide, customSlides];
+  return [introSlide, lateSlide, techDiffSlide, conclusionSlide, customSlides];
 }
 
 function CategorizeSlideFilesBySlideTypeSelects(files) {
   let introSlide = undefined;
+  let lateSlide = undefined;
   let techDiffSlide = undefined;
   let conclusionSlide = undefined;
   let customSlides = [];
@@ -2103,6 +2187,9 @@ function CategorizeSlideFilesBySlideTypeSelects(files) {
           case "intro":
             introSlide = file;
             break;
+          case "late":
+            lateSlide = file;
+            break;
           case "technicalDifficulty":
             techDiffSlide = file;
             break;
@@ -2117,10 +2204,10 @@ function CategorizeSlideFilesBySlideTypeSelects(files) {
       customSlides.push(file);
     }
   }
-  return [introSlide, techDiffSlide, conclusionSlide, customSlides];
+  return [introSlide, lateSlide, techDiffSlide, conclusionSlide, customSlides];
 }
 
-function repopulateFormInputAndUploadDescriptor(introSlide, techDiffSlide, conclusionSlide, customSlides, musicFiles, videoFiles, pdfFiles, pptFiles, unknownFiles) {
+function repopulateFormInputAndUploadDescriptor(introSlide, lateSlide, techDiffSlide, conclusionSlide, customSlides, musicFiles, videoFiles, pdfFiles, pptFiles, unknownFiles) {
   clearFormInputAndUploadDescriptor();
   if (unknownFiles.length > 0) {
     // Print "Unknown file(s) file1, file2, file3, etc. will not be uploaded."
@@ -2137,6 +2224,11 @@ function repopulateFormInputAndUploadDescriptor(introSlide, techDiffSlide, concl
   if (introSlide) {
     pushFormInput(introSlide, "slide", ["intro"]);
     uploadDescriptor.innerHTML += `'${introSlide.name}' will be used as your Intro Slide.<br>`;
+  }
+  // Push late slide.
+  if (lateSlide) {
+    pushFormInput(lateSlide, "slide", ["late"]);
+    uploadDescriptor.innerHTML += `'${lateSlide.name}' will be used as your Late Slide.<br>`;
   }
   // Push tech diff slide.
   if (techDiffSlide) {
@@ -2290,6 +2382,7 @@ function uploadCustomSlideClicked() {
           if (input.assignTo !== []) {
             let assignTo2Route = {
               "intro": "/assignIntroSlide",
+              "late": "/assignLateSlide",
               "technicalDifficulty": "/assignTechnicalDifficultySlide",
               "conclusion": "/assignConclusionSlide"
             }
@@ -2341,6 +2434,10 @@ conclusionSelect.addEventListener("change", () => {
 
 introSelect.addEventListener("change", () => {
   updateEditSlideAssignmentPreviewElement(introSelect, modalIntroPreview, modalIntroCaption);
+});
+
+lateSelect.addEventListener("change", () => {
+  updateEditSlideAssignmentPreviewElement(lateSelect, modalLatePreview, modalLateCaption);
 });
 
 techDiffSelect.addEventListener("change", () => {
@@ -2683,8 +2780,9 @@ function appStatusReceived(json) {
   updateToggleOutputPreviewBtn(appStatus)
 
   StyleHelper.ActivateButtonHelper(pendingBtn, false);
-  StyleHelper.ActivateButtonHelper(technicalDiffBtn, false);
+  StyleHelper.ActivateButtonHelper(lateBtn, false);
   StyleHelper.ActivateButtonHelper(liveBtn, false);
+  StyleHelper.ActivateButtonHelper(technicalDiffBtn, false);
   StyleHelper.ActivateButtonHelper(archiveBtn, false);
 
   addParticipantSelectCheckEventListener(); // adds event listeners to each select checkbox
@@ -2721,34 +2819,12 @@ function appStatusReceived(json) {
     updateStreamActivityBarInfo(appStatus);
     if (appStatus.streaming) {
       updateStreamButtons();
-
-      if (appStatus.holdingSlide === "intro") {
-        pendingBtn.innerHTML = `Intro Slide <i class="bi bi-broadcast"></i>`;
-         StyleHelper.ActivateButtonHelper(pendingBtn, true);
-      } else if (appStatus.holdingSlide === "technicalDifficulties") {
-        technicalDiffBtn.innerHTML = `Techincal Difficulties <i class="bi bi-broadcast"></i>`;
-         StyleHelper.ActivateButtonHelper(technicalDiffBtn, true);
-      } else if (appStatus.holdingSlide === "none" || appStatus.isCustomSlide) {
-        liveBtn.innerHTML = `Live <i class="bi bi-broadcast"></i>`;
-         StyleHelper.ActivateButtonHelper(liveBtn, true);
-      } else if (appStatus.holdingSlide === "conclusion") {
-         StyleHelper.ActivateButtonHelper(archiveBtn, true);
-      }
     } else {
       resetStreamButtonsOnLeaveOrEnd();
+      meetingNoInputField.disabled = false;
+      joinMeetingBtn.disabled = false;
+      holdMusicFieldset.disabled = true;
+      //videoFieldsetBar.disabled = true;
     }
-
-    if (appStatus.secondClickEndsStream) {
-      archiveBtn.innerHTML = `End Stream <i class="bi bi-broadcast"></i>`;
-    } else {
-      archiveBtn.innerHTML = "Conclusion Slide";
-    }
-
-  } else {
-    resetStreamButtonsOnLeaveOrEnd();
-    meetingNoInputField.disabled = false;
-    joinMeetingBtn.disabled = false;
-    holdMusicFieldset.disabled = true;
-    //videoFieldsetBar.disabled = true;
   }
 }
