@@ -601,7 +601,9 @@ function updateGeneralStatBar() {
     statSessionTitle.innerHTML = `Session: ${appStatus.sessionTitle}`;
     statStreamKey.innerHTML = `Stream Key: ${appStatus.streamKey}`;
     statInMeeting.innerHTML = `In Meeting: ${appStatus.inMeeting ? appStatus.meetingId : "No"}`;
-    statOnAir.innerHTML = `On Air: ${appStatus.streaming}`;
+    statOnAir.innerHTML = `<i id="on-air-indicator-icon" class="bi bi-broadcast"></i> On Air`;
+    statOnAir.classList.add(appStatus.streaming ? "bg-success" : "bg-danger");
+    statOnAir.classList.remove(appStatus.streaming ? "bg-danger" : "bg-success");
     statRecording.innerHTML = `Recording: ${appStatus.recording ? "Active" : "Inactive"}`;
 
     let videoSources = [];
