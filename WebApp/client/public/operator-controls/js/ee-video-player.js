@@ -182,9 +182,14 @@ export class VideoPlayer extends EventTarget {
             _this.onRegistrationUrlReceived.call(_this, msgContents);
           }
           break;
-        case MessageTypes._DbLevelNotification:
-          if (_this.onDbLevelNotification){
-            _this.onDbLevelNotification.call(_this, msgContents);
+        case MessageTypes._ObsDbLevelNotification:
+          if (_this.onObsDbLevelNotification){
+            _this.onObsDbLevelNotification.call(_this, msgContents);
+          }
+          break;
+        case MessageTypes._ZoomReferenceDbLevelNotification:
+          if (_this.onZoomReferenceDbLevelNotification){
+            _this.onZoomReferenceDbLevelNotification.call(_this, msgContents);
           }
           break;
       }

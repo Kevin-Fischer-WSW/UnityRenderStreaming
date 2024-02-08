@@ -28,7 +28,8 @@ mainNotifications.addEventListener('setup', function () {
   myVideoPlayer.onVideoPlaybackTimeReceived = onVideoPlaybackTimeReceived;
   myVideoPlayer.onWrongPasswordNotification = onWrongPasswordNotification;
   myVideoPlayer.onRegistrationUrlReceived = onRegistrationUrlReceived;
-  myVideoPlayer.onDbLevelNotification = onDbLevelNotification;
+  myVideoPlayer.onObsDbLevelNotification = onObsDbLevelNotification;
+  myVideoPlayer.onZoomReferenceDbLevelNotification = onZoomReferenceDbLevelNotification;
   myVideoPlayer.signaling.addEventListener("message", async (e) => {
     onAlert(e.detail);
   });
@@ -321,12 +322,32 @@ let peakOutput = -80.0;
 let peakInput = -80.0;
 
 // => METHODS
-function onDbLevelNotification(data) {
+function onObsDbLevelNotification(data) {
   let split = data.split(",");
   let master = parseInt(split[0]);
   let zoom = parseInt(split[1]);
   if (master > peakOutput) peakOutput = master;
   if (zoom > peakInput) peakInput = zoom;
+}
+
+function onZoomReferenceDbLevelNotification(data) {
+  let split = data.split(",");
+  let zoom = parseInt(split[0]);
+  let mute = split[1] === "True";
+
+  if (zoom > peakInput) peakInput = zoom;
+
+  if (mute) {
+    // Make meters grey
+    inputGreenSegment.style.filter = "grayscale(100%)";
+    inputYellowSegment.style.filter = "grayscale(100%)";
+    inputRedSegment.style.filter = "grayscale(25%)";
+  } else {
+    // Make meters normal
+    inputGreenSegment.style.filter = "none";
+    inputYellowSegment.style.filter = "none";
+    inputRedSegment.style.filter = "none";
+  }
 }
 
 function updateDbLevels(){
