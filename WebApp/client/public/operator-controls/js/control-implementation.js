@@ -2817,10 +2817,12 @@ function appStatusReceived(json) {
       updateStreamButtons();
     } else {
       resetStreamButtonsOnLeaveOrEnd();
-      meetingNoInputField.disabled = false;
-      joinMeetingBtn.disabled = false;
-      holdMusicFieldset.disabled = true;
-      //videoFieldsetBar.disabled = true;
     }
+  } else{
+    resetStreamButtonsOnLeaveOrEnd();
+    meetingNoInputField.disabled = false;
+    joinMeetingBtn.disabled = false;
+    holdMusicFieldset.disabled = true;
+    //videoFieldsetBar.disabled = true;
   }
 }
