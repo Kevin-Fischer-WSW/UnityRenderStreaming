@@ -336,18 +336,6 @@ function onZoomReferenceDbLevelNotification(data) {
   let mute = split[1] === "True";
 
   if (zoom > peakInput) peakInput = zoom;
-
-  if (mute) {
-    // Make meters grey
-    inputGreenSegment.style.filter = "grayscale(100%)";
-    inputYellowSegment.style.filter = "grayscale(100%)";
-    inputRedSegment.style.filter = "grayscale(25%)";
-  } else {
-    // Make meters normal
-    inputGreenSegment.style.filter = "none";
-    inputYellowSegment.style.filter = "none";
-    inputRedSegment.style.filter = "none";
-  }
 }
 
 function updateDbLevels(){
@@ -623,8 +611,8 @@ function updateGeneralStatBar() {
     statStreamKey.innerHTML = `Stream Key: ${appStatus.streamKey}`;
     statInMeeting.innerHTML = `In Meeting: ${appStatus.inMeeting ? appStatus.meetingId : "No"}`;
     statOnAir.innerHTML = `<i id="on-air-indicator-icon" class="bi bi-broadcast"></i> On Air`;
-    statOnAir.classList.add(appStatus.streaming ? "bg-success" : "bg-danger");
-    statOnAir.classList.remove(appStatus.streaming ? "bg-danger" : "bg-success");
+    statOnAir.classList.add(appStatus.streaming ? "bg-success" : "bg-secondary");
+    statOnAir.classList.remove(appStatus.streaming ? "bg-secondary" : "bg-success");
     statRecording.innerHTML = `Recording: ${appStatus.recording ? "Active" : "Inactive"}`;
 
     let videoSources = [];
