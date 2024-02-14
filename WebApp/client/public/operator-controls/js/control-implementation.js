@@ -728,7 +728,7 @@ async function loadScene(sceneId) {
   v2api.put(`/scene/${sceneId}/load`).then((response) => {
     if (response.ok) {
       response.json().then((data) => {
-        if (v2api.checkErrorCode(0)) {
+        if (v2api.checkErrorCode(data, 0)) {
           result.success = true;
         } else if (v2api.checkErrorCode(16)) {
           Feedback.alertDanger("OBS failed to start the stream. Please check your settings and try again.");
