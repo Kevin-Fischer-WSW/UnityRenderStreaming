@@ -614,6 +614,7 @@ function updateGeneralStatBar() {
     statOnAir.classList.add(appStatus.streaming ? "bg-success" : "bg-secondary");
     statOnAir.classList.remove(appStatus.streaming ? "bg-secondary" : "bg-success");
     statRecording.innerHTML = `Recording: ${appStatus.recording ? "Active" : "Inactive"}`;
+    statScene.innerHTML = `Scene: ${appStatus.lastSceneLoaded}`;
 
     let videoSources = [];
     let audioSources = [];
