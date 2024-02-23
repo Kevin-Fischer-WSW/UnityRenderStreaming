@@ -1227,6 +1227,7 @@ let cropScreenSharePreview = document.getElementById("crop-screen-share-preview"
 let editStyleSelect = document.getElementById("edit-style-select");
 let layoutFieldset = document.getElementById("layout-fieldset");
 let layoutDropdown = document.getElementById("layout-dropdown");
+let lowerThirdStyleBtn = document.getElementById("lower-thirds-style-btn");
 let lowerThirdStyleDropdown = document.getElementById("lower-thirds-style-dropdown");
 let textSizeDropdown = document.getElementById("text-size-dropdown");
 let screenShareSizeDropdown = document.getElementById("screen-share-size-dropdown");
@@ -1235,9 +1236,48 @@ let cropScreenShareApplyBtn = document.getElementById("crop-screen-share-apply-b
 let cropScreenShareCloseBtn = document.getElementById("crop-screen-share-close-btn");
 
 // => PRIMITIVE AND OTHER TYPES
+let styleData = undefined;
 let cropWidget = new CropWidget(cropScreenSharePreview);
 
 // => METHODS
+function fetchStyleData() {
+  v2api.get("/styles").then((response) => {
+    if (response.ok && styleData === undefined) {
+      response.json().then((data) => {
+          styleData = data;
+          populateLowerThirdStyleDropdown();
+      });
+    }
+  });
+}
+
+function populateLowerThirdStyleDropdown() {
+  // Access the lower third category.
+  let lowerThirdCategory = styleData["Categories"]["lowerthirds"];
+  // Clear the lower third style dropdown.
+  lowerThirdStyleDropdown.innerHTML = "";
+  // Iterate through the lower third styles.
+  Object.keys(lowerThirdCategory["Types"]).forEach((lowerThirdType) => {
+    // Create a list item for the lower third style.
+    let lowerThirdTypeLi = document.createElement("li");
+    let lowerThirdTypeA = document.createElement("a");
+    lowerThirdTypeA.classList.add("dropdown-item");
+    lowerThirdTypeA.innerHTML = lowerThirdCategory["Types"][lowerThirdType]["Alias"];
+    lowerThirdTypeLi.appendChild(lowerThirdTypeA);
+    lowerThirdTypeLi.dataset.type = lowerThirdType;
+    lowerThirdStyleDropdown.appendChild(lowerThirdTypeLi);
+  });
+
+  setupDropdown(lowerThirdStyleDropdown, onLowerThirdStyleSelected);
+}
+
+function onLowerThirdStyleBtnPressed() {
+  if (styleData === undefined){
+    lowerThirdStyleDropdown.innerHTML = "<li>Loading...</li>";
+    fetchStyleData();
+  }
+}
+
 function editStyleSelectionChanged() {
   if (layout_editor) {
     layout_editor.destroy();
@@ -1252,6 +1292,7 @@ function editStyleSelectionChanged() {
 }
 
 function onEditStyleSelectClicked() {
+  // todo update to use new api
   // Tell user that the styles are being fetched.
   editStyleSelect.innerHTML = "<option>Loading...</option>";
   unityFetch("/getStylesAvailable").then(resp => {
@@ -1304,29 +1345,42 @@ function onCropScreenShareBtnClicked() {
   cropScreenSharePreview.src = "uapp/getScreenShareImage?t=" + Date.now();
 }
 
-function onLayoutSelected(elem) {
-  let preset = elem.dataset.preset ? elem.dataset.preset : "";
-  unityFetch(`/setStyle?title=${elem.dataset.title}&category=Layout&preset=${preset}`, { method: "PUT" });
+async function onLayoutSelected(elem) {
+  // Gather data from the selected layout. Values can be undefined.
+  let videosTop = elem.dataset.videosTop;
+  let videosLeft = elem.dataset.videosLeft;
+
+  // Convert to true, false, or null (if undefined).
+  let screenShareTop = videosTop === "false" ? true : videosTop === "true" ? false : null;
+  let screenShareLeft = videosLeft === "false" ? true : videosLeft === "true" ? false : null;
+
+  await v2api.put(`/style/layouts`, {
+    "PreferScreenShareTop" : screenShareTop,
+    "PreferScreenShareLeft" : screenShareLeft,
+  });
+  await v2api.put(`/style/layouts/${elem.dataset.type}/load`)
 }
 
 function onTextSizeSelected(elem) {
-  sendStringSubmitEvent(myVideoPlayer, OperatorControls._SetSizeOfLowerThird, elem.value.toString());
+  // Gather data from the selected layout. Values can be undefined.
+  let textSize = elem.dataset.value;
+
+  v2api.put(`/style/lowerthirds`, {
+    "DisplayOption" : textSize,
+  });
 }
 
 function onScreenShareSizeSelected(elem) {
+  // Gather data from the selected layout. Values can be undefined.
   let size = elem.dataset.value;
-  unityFetch(`/setScreenShareStyleSize?size=${size}`, { method: "PUT" })
-    .then(resp => {
-      if (resp.ok) {
-        console.log("screen share size applied");
-      } else {
-        Feedback.alertDanger(resp.statusText);
-      }
-    });
+
+  v2api.put(`/style/layouts`, {
+    "ScreenShareSize" : size,
+  });
 }
 
 function onLowerThirdStyleSelected(elem) {
-  unityFetch(`/setStyle?title=${elem.dataset.title}&category=Lower Third`, { method: "PUT" });
+  v2api.put(`/style/lowerthirds/${elem.dataset.type}/load`);
 }
 
 function setupDropdown(dropdown, func) {
@@ -1338,9 +1392,10 @@ function setupDropdown(dropdown, func) {
   }
 }
 
-function updateCurrentLayout(layout, preset) {
+function updateCurrentLayout(layout) {
   StyleHelper.IterateListAndSetItemBold(layoutDropdown, function (child) {
-    return child.dataset.title === layout && (child.dataset.preset ? child.dataset.preset : "") === preset;
+    // return child.dataset.type === layout;
+    return false; // todo: reimplement this
   });
 }
 
@@ -1367,6 +1422,7 @@ function updateCurrentTextSize(textSize)
 cropScreenShareBtn.addEventListener("click", onCropScreenShareBtnClicked);
 cropScreenShareApplyBtn.addEventListener("click", onCropScreenShareApplyBtnClicked);
 editStyleSelect.addEventListener("click", onEditStyleSelectClicked);
+lowerThirdStyleBtn.addEventListener("click", onLowerThirdStyleBtnPressed);
 
 cropScreenSharePreview.onload = function () {
   cropWidget.mainElement.style.display = "block";
@@ -1387,7 +1443,6 @@ cropWidget.initResizers();
 setupDropdown(layoutDropdown, onLayoutSelected);
 setupDropdown(textSizeDropdown, onTextSizeSelected);
 setupDropdown(screenShareSizeDropdown, onScreenShareSizeSelected)
-setupDropdown(lowerThirdStyleDropdown, onLowerThirdStyleSelected);
 
 /* LAYOUT TAB -SCHEMA EDITOR */
 // => DOM ELEMENTS
@@ -1404,12 +1459,13 @@ function onLayoutEditorChanged() {
     return;
   }
   if (validateSchema()) {
+    // todo: update to use new api
     unityPutJson(`/setStyleParameters?title=${layout_editor.options.schema.title}&category=${layout_editor.options.schema.category}`, layout_editor.getValue())
   }
 }
 
 function onReceiveStyleSchema(json) {
-
+  // todo: update to use new api
   if (layout_editor) {
     layout_editor.destroy();
   }
@@ -2780,7 +2836,7 @@ function appStatusReceived(json) {
   volumeRangeMaster.value = appStatus.masterVolume;
   masterVolumeLevel.innerHTML = getVolumeLevel(volumeRangeMaster.value);
 
-  updateCurrentLayout(appStatus.currentLayout, appStatus.currentLayoutPreset);
+  updateCurrentLayout(appStatus.currentLayout);
   updateCurrentTextSize(appStatus.lowerThirdDisplayOption);
   updateCurrentLowerThirdStyle(appStatus.currentLowerThirdStyle, appStatus.currentLowerThirdPreset);
   updateCurrentScreenShareStyleSize(appStatus.currentScreenShareStyleSize);
