@@ -21,7 +21,7 @@ Feedback.setDefaultParentElement(document.getElementById("alert-container"));
 mainNotifications.addEventListener('setup', function () {
   myVideoPlayer.onParticipantDataReceived = participantDataReceived;
   myVideoPlayer.onAppStatusReceived = appStatusReceived;
-  myVideoPlayer.onStyleValuesReceived = onReceiveStyleValues;
+  myVideoPlayer.onStyleUpdateNotification = onStyleUpdateNotification;
   myVideoPlayer.onLogMessageNotification = onLogMessageNotification;
   myVideoPlayer.onNewMediaNotification = onNewMediaNotification;
   myVideoPlayer.onMusicPlaybackTimeReceived = onMusicPlaybackTimeReceived;
@@ -1246,6 +1246,7 @@ function fetchStyleData() {
       response.json().then((data) => {
           styleData = data;
           populateLowerThirdStyleDropdown();
+          populateStyleEditorDropdown();
       });
     }
   });
@@ -1271,6 +1272,32 @@ function populateLowerThirdStyleDropdown() {
   setupDropdown(lowerThirdStyleDropdown, onLowerThirdStyleSelected);
 }
 
+function populateStyleEditorDropdown() {
+  // Clear the dropdown.
+  editStyleSelect.innerHTML = "";
+  // Iterate through the Categories.
+  Object.keys(styleData["Categories"]).forEach((category) => {
+    // Create an option for the category.
+    let categoryOption = document.createElement("option");
+    categoryOption.value = category;
+    categoryOption.dataset.category = category;
+    // todo make this bold. strong tag is not working.
+    categoryOption.innerHTML = `<strong>${styleData["Categories"][category]["Alias"]}</strong>`;
+    editStyleSelect.appendChild(categoryOption);
+
+    // Iterate through the Types.
+    Object.keys(styleData["Categories"][category]["Types"]).forEach((type) => {
+      // Create an option for the type.
+      let typeOption = document.createElement("option");
+      typeOption.value = type;
+      typeOption.dataset.type = type;
+      typeOption.dataset.category = category;
+      typeOption.innerHTML = styleData["Categories"][category]["Types"][type]["Alias"];
+      editStyleSelect.appendChild(typeOption);
+    });
+  });
+}
+
 function onLowerThirdStyleBtnPressed() {
   if (styleData === undefined){
     lowerThirdStyleDropdown.innerHTML = "<li>Loading...</li>";
@@ -1278,53 +1305,11 @@ function onLowerThirdStyleBtnPressed() {
   }
 }
 
-function editStyleSelectionChanged() {
-  if (layout_editor) {
-    layout_editor.destroy();
-  }
-  let style = editStyleSelect.options[editStyleSelect.selectedIndex];
-  let category = style.parentElement.label;
-  unityFetch(`/getStyle?category=${category}&title=${style.label}`).then(resp => {
-    if (resp.ok) {
-      resp.text().then(onReceiveStyleSchema);
-    }
-  });
-}
-
 function onEditStyleSelectClicked() {
-  // todo update to use new api
-  // Tell user that the styles are being fetched.
-  editStyleSelect.innerHTML = "<option>Loading...</option>";
-  unityFetch("/getStylesAvailable").then(resp => {
-    if (!resp.ok) {
-      editStyleSelect.innerHTML = "<option>Failed to load styles</option>";
-    } else {
-      resp.json().then(json => {
-        // Clear the select.
-        editStyleSelect.innerHTML = "";
-        // Iterate through the keys of the JSON object.
-        for (let category in json) {
-          // Create a new optgroup for the category.
-          let optgroup = document.createElement("optgroup");
-          optgroup.label = category;
-          // Iterate through the styles in the category.
-          for (let style of json[category]) {
-            // Create a new option for the style.
-            let option = document.createElement("option");
-            option.label = style;
-            // Add the option to the optgroup.
-            optgroup.appendChild(option);
-          }
-          // Add the optgroup to the select.
-          editStyleSelect.appendChild(optgroup);
-        }
-      });
-      // Add the event listener for when the user selects a style.
-      editStyleSelect.addEventListener("change", editStyleSelectionChanged);
-      // Available styles is static data, so we don't need to fetch it again.
-      editStyleSelect.removeEventListener("click", onEditStyleSelectClicked)
-    }
-  });
+  if (styleData === undefined){
+    editStyleSelect.innerHTML = "<option>Loading...</option>";
+    fetchStyleData();
+  }
 }
 
 function onCropScreenShareApplyBtnClicked() {
@@ -1401,7 +1386,7 @@ function updateCurrentLayout(layout) {
 
 function updateCurrentLowerThirdStyle(style, preset) {
   StyleHelper.IterateListAndSetItemBold(lowerThirdStyleDropdown, function (child) {
-    return child.dataset.title === style && (child.dataset.preset ? child.dataset.preset : "") === preset;
+    return false; // todo reimplement this
   });
 }
 
@@ -1414,7 +1399,7 @@ function updateCurrentScreenShareStyleSize(size) {
 function updateCurrentTextSize(textSize)
 {
   StyleHelper.IterateListAndSetItemBold(textSizeDropdown, function (child) {
-    return child.value === textSize;
+    return child.value === textSize; // todo reimplement this
   });
 }
 
@@ -1422,6 +1407,7 @@ function updateCurrentTextSize(textSize)
 cropScreenShareBtn.addEventListener("click", onCropScreenShareBtnClicked);
 cropScreenShareApplyBtn.addEventListener("click", onCropScreenShareApplyBtnClicked);
 editStyleSelect.addEventListener("click", onEditStyleSelectClicked);
+editStyleSelect.addEventListener("change", editStyleSelectionChanged);
 lowerThirdStyleBtn.addEventListener("click", onLowerThirdStyleBtnPressed);
 
 cropScreenSharePreview.onload = function () {
@@ -1449,52 +1435,161 @@ setupDropdown(screenShareSizeDropdown, onScreenShareSizeSelected)
 let layout_element = document.getElementById('layout-schema-editor');
 let layout_editor;
 
-// => PRIMITIVE AND OTHER TYPES
-let layoutEditorValuesSetInCB = false;
-
 // => METHODS
-function onLayoutEditorChanged() {
-  if (layoutEditorValuesSetInCB) {
-    layoutEditorValuesSetInCB = false;
-    return;
+
+function anyValuesSetToNull(data) {
+  for (let key in data) {
+    if (data[key] === null) {
+      return true;
+    }
   }
-  if (validateSchema()) {
-    // todo: update to use new api
-    unityPutJson(`/setStyleParameters?title=${layout_editor.options.schema.title}&category=${layout_editor.options.schema.category}`, layout_editor.getValue())
+  return false;
+}
+
+async function editStyleSelectionChanged() {
+  // Access the selected option.
+  let selectedOption = editStyleSelect.options[editStyleSelect.selectedIndex];
+  // Access the category and type.
+  let category = selectedOption.dataset.category;
+  let type = selectedOption.dataset.type;
+
+  await refreshStyleEditor(category, type);
+}
+
+async function refreshStyleEditor(category, type) {
+  // If type is undefined, then the category was selected.
+  if (type === undefined) {
+    // Access the schema for the category.
+    let schema = styleData["Categories"][category]["Schema"];
+
+    // Fetch the current style data.
+    let resp = await v2api.get(`/style/${category}`);
+    let style = await resp.json();
+
+    let anyNull = anyValuesSetToNull(style.Data);
+    if (anyNull === false) {
+      trimNullFromSchema(schema);
+    }
+    generateEditor(schema, style.Data);
+  } else {
+    // Access the schema for the type.
+    let schema = styleData["Categories"][category]["Types"][type]["Schema"];
+
+    // Fetch the current style data.
+    let resp = await v2api.get(`/style/${category}/${type}`);
+    let style = await resp.json();
+
+    let anyNull = anyValuesSetToNull(style.Data);
+    if (anyNull === false) {
+      trimNullFromSchema(schema);
+    }
+    generateEditor(schema, style.Data);
+  }
+
+  function generateEditor(schema, startval) {
+    if (layout_editor) {
+      layout_editor.destroy();
+    }
+
+    layout_editor = new JSONEditor(layout_element, {
+      schema: schema,
+      theme: 'bootstrap4',
+      startval: startval,
+    });
+
+    layout_editor.on('ready', () => {
+      // Now the api methods will be available
+      validateSchema();
+    });
+
+    // layout_editor emits a change event immediately unless we wait a bit.
+    setTimeout(() => {
+      layout_editor.on('change', onLayoutEditorChanged);
+    }, 1000);
+  }
+
+  function trimNullFromSchema(schema) {
+    // Iterate over the properties.
+    for (let property in schema.properties) {
+      // Access the property.
+      let prop = schema.properties[property];
+      // Get the list of types.
+      let types = prop.type;
+      // If the types is an array, then iterate over the types.
+      if (Array.isArray(types)) {
+        // Iterate over the types.
+        for (let i = 0; i < types.length; i++) {
+          // If the type is "null", then remove it.
+          if (types[i] === "null") {
+            types.splice(i, 1);
+            // Check if the types array is one element long.
+            if (types.length === 1) {
+              // Set the type to the first element.
+              prop.type = types[0];
+            }
+          }
+        }
+      }
+    }
   }
 }
 
-function onReceiveStyleSchema(json) {
-  // todo: update to use new api
-  if (layout_editor) {
-    layout_editor.destroy();
-  }
+async function onLayoutEditorChanged() {
+  editStyleSelect.disabled = true;
 
-  let parsedJSON = JSON.parse(json);
+  await saveStyle();
+  editStyleSelect.disabled = false;
+}
 
-  layout_editor = new JSONEditor(layout_element, {
-    schema: parsedJSON,
-    theme: 'bootstrap4',
-    startval: parsedJSON.startval,
-  });
-
-  layout_editor.on('ready', () => {
-    // Now the api methods will be available
-    validateSchema();
-  });
-
-  // layout_editor emits a change event immediately unless we wait a bit.
+async function saveStyle() {
+  layout_editor.disable();
+  layout_editor.off('change', onLayoutEditorChanged);
+  await performApiCalls();
+  layout_editor.enable();
   setTimeout(() => {
     layout_editor.on('change', onLayoutEditorChanged);
   }, 1000);
-}
 
-function onReceiveStyleValues(json) {
-  let data = JSON.parse(json);
-  // If the schema's title matches the received data's title, then set the value.
-  if (layout_editor.options.schema.title === data.title) {
-    layoutEditorValuesSetInCB = true;
-    layout_editor.setValue(data);
+  async function performApiCalls() {
+    if (validateSchema()) {
+      Feedback.alertInfo("Saving style...");
+
+      let data = layout_editor.getValue();
+      let category = editStyleSelect.options[editStyleSelect.selectedIndex].dataset.category;
+      let type = editStyleSelect.options[editStyleSelect.selectedIndex].dataset.type;
+
+      if (type === undefined) {
+        let resp1 = await v2api.put(`/style/${category}`, data);
+        if (resp1.ok === false) {
+          Feedback.alertDanger("Failed to save style");
+          return;
+        }
+
+        let resp2 = await v2api.get(`/style/${category}`);
+        if (resp2.ok === false) {
+          Feedback.alertDanger("Failed to retrieve style");
+          return;
+        }
+
+        let style = await resp2.json();
+        layout_editor.setValue(style.Data);
+      } else {
+        let resp1 = await v2api.put(`/style/${category}/${type}`, data);
+        if (resp1.ok === false) {
+          Feedback.alertDanger("Failed to save style");
+          return;
+        }
+
+        let resp2 = await v2api.get(`/style/${category}/${type}`);
+        if (resp2.ok === false) {
+          Feedback.alertDanger("Failed to retrieve style");
+          return;
+        }
+
+        let style = await resp2.json();
+        layout_editor.setValue(style.Data);
+      }
+    }
   }
 }
 
@@ -1509,6 +1604,30 @@ function validateSchema() {
   return true;
 }
 
+function onStyleUpdateNotification(msg) {
+  let split = msg.split(",");
+
+  // If the split is length 1, then a category was updated.
+  if (split.length === 1) {
+    let category = split[0];
+    let type = undefined;
+
+    // Refresh the editor if the selected style is in the same category.
+    if (editStyleSelect.options[editStyleSelect.selectedIndex].dataset.category === category) {
+      refreshStyleEditor(category, type);
+    }
+  } else if (split.length === 2) {
+    // If the split is length 2, then a type was updated.
+    let category = split[0];
+    let type = split[1];
+
+    // Refresh the editor if the selected style is in the same category and type.
+    if (editStyleSelect.options[editStyleSelect.selectedIndex].dataset.category === category &&
+      editStyleSelect.options[editStyleSelect.selectedIndex].dataset.type === type) {
+      refreshStyleEditor(category, type);
+    }
+  }
+}
 // => INIT(S)
 JSONEditor.defaults.options.disable_edit_json = true;
 JSONEditor.defaults.options.disable_properties = true;
