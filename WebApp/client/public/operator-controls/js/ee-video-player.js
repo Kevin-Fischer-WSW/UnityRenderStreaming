@@ -147,9 +147,9 @@ export class VideoPlayer extends EventTarget {
             _this.onAppStatusReceived.call(_this, msgContents);
           }
           break;
-        case MessageTypes._StyleValues:
-          if (_this.onStyleValuesReceived){
-            _this.onStyleValuesReceived.call(_this, msgContents);
+        case MessageTypes._StyleUpdateNotification:
+          if (_this.onStyleUpdateNotification){
+            _this.onStyleUpdateNotification.call(_this, msgContents);
           }
           break;
         case MessageTypes._LogMessageNotification:
