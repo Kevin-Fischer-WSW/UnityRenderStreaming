@@ -1377,16 +1377,25 @@ function setupDropdown(dropdown, func) {
   }
 }
 
-function updateCurrentLayout(layout) {
+function updateCurrentLayout(layoutType, preferScreenShareTop, preferScreenShareLeft) {
   StyleHelper.IterateListAndSetItemBold(layoutDropdown, function (child) {
-    // return child.dataset.type === layout;
-    return false; // todo: reimplement this
+    let b1 = child.dataset.type === layoutType;
+
+    switch (layoutType) {
+      case "hScreenShare":
+      case "vScreenShare":
+        let b2 = child.dataset.videosTop === (!preferScreenShareTop).toString();
+        let b3 = child.dataset.videosLeft === (!preferScreenShareLeft).toString();
+        return b1 && (b2 || b3);
+    }
+
+    return b1;
   });
 }
 
-function updateCurrentLowerThirdStyle(style, preset) {
+function updateCurrentLowerThirdStyle(styleType) {
   StyleHelper.IterateListAndSetItemBold(lowerThirdStyleDropdown, function (child) {
-    return false; // todo reimplement this
+    return child.dataset.type === styleType;
   });
 }
 
@@ -1399,7 +1408,7 @@ function updateCurrentScreenShareStyleSize(size) {
 function updateCurrentTextSize(textSize)
 {
   StyleHelper.IterateListAndSetItemBold(textSizeDropdown, function (child) {
-    return child.value === textSize; // todo reimplement this
+    return child.dataset.value === textSize; // todo reimplement this
   });
 }
 
@@ -2955,9 +2964,9 @@ function appStatusReceived(json) {
   volumeRangeMaster.value = appStatus.masterVolume;
   masterVolumeLevel.innerHTML = getVolumeLevel(volumeRangeMaster.value);
 
-  updateCurrentLayout(appStatus.currentLayout);
+  updateCurrentLayout(appStatus.currentLayout, appStatus.currentScreenSharePreferTop, appStatus.currentScreenSharePreferLeft);
   updateCurrentTextSize(appStatus.lowerThirdDisplayOption);
-  updateCurrentLowerThirdStyle(appStatus.currentLowerThirdStyle, appStatus.currentLowerThirdPreset);
+  updateCurrentLowerThirdStyle(appStatus.currentLowerThirdStyle);
   updateCurrentScreenShareStyleSize(appStatus.currentScreenShareStyleSize);
   if (appStatus.inMeeting || appStatus.meetingSimulated) {
     validateTracksInPlaylist(appStatus.playlist, appStatus.currentlyPlayingIndex);
