@@ -58,6 +58,10 @@ async function setup() {
   let muteInputSlider = document.getElementById('mute-input-slider');
   let muteOutputIcon = document.getElementById('mute-output-icon');
   let muteInputIcon = document.getElementById('mute-input-icon');
+
+  muteOutputButton.classList.remove("d-none");
+  muteInputButton.classList.remove("d-none");
+
   muteOutputButton.removeEventListener('click', function () { });
   muteOutputButton.addEventListener('click', function () {
     let elementPreviewVideo = document.getElementById('preview-video');
