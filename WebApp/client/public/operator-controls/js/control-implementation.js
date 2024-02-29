@@ -838,6 +838,11 @@ async function onJoinClick() {
   }
 }
 
+function onMeetingNumberInputClick() {
+  // Select all text in the input field when clicked
+  meetingNumberInput.select();
+}
+
 async function onLeaveClicked() {
   let resp = await v2api.put('/leaveMeeting');
   if (resp.ok) {
@@ -862,6 +867,7 @@ function onWrongPasswordNotification() {
 }
 
 // => EVENT LISTENERS
+meetingNumberInput.addEventListener('click', onMeetingNumberInputClick);
 joinMeetingBtn.addEventListener('click', onJoinClick);
 leaveMeetingBtn.addEventListener("click", onLeaveClicked);
 
