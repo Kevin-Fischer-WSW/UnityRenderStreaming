@@ -237,12 +237,14 @@
                   title="Reset app to default settings"><i class="bi bi-bootstrap-reboot fs-5"></i></button>
           <div class="form-check form-switch mt-2" title="Toggle to view advanced settings">
             <input class="form-check-input" type="checkbox" role="switch" id="advancedSettingsToggle">
-            <label class="form-check-label" for="advancedSettingsToggle">Advanced Settings</label>
+            <label class="form-check-label" for="advancedSettingsToggle">Advanced</label>
           </div>
           <button type="button" id="save-settings-btn" class="btn btn-secondary float-end" title="Save changed settings">Save
             changes</button>
           <button type="button" class="btn btn-secondary float-end" data-bs-dismiss="modal"
                   title="Close">Close</button>
+          <button id="logout" class="btn btn-secondary border-0 m-0" data-bs-toggle="modal" data-bs-target="#signout-modal"
+                  title="Logout"><i class="bi bi-box-arrow-right"></i></button>
         </div>
       </div>
     </div>
@@ -295,10 +297,7 @@
     </div>
   </div>
 
-  <!-- Sign out modal -->
   <div class="bg-secondary text-white rounded-bottom flex-shrink-0">
-    <button id="logout" class="btn border-0 m-0" data-bs-toggle="modal" data-bs-target="#signout-modal"
-            title="Logout"><i class="bi bi-box-arrow-right"></i></button>
     <button id="stream-settings" class="btn border-0 m-0" data-bs-toggle="modal" data-bs-target="#stream-pref-modal"
             title="Settings"><i class="bi bi-gear-fill"></i></button>
   </div>
