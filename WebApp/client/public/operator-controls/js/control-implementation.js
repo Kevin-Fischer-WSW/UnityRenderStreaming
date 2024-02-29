@@ -844,6 +844,10 @@ function onLeaveClicked() {
         console.log(response.statusText);
       }
     });
+
+function onMeetingNumberInputClick() {
+  // Select all text in the input field when clicked
+  meetingNumberInput.select();
 }
 
 function onRegistrationUrlReceived(url) {
@@ -858,6 +862,7 @@ function onWrongPasswordNotification() {
 }
 
 // => EVENT LISTENERS
+meetingNumberInput.addEventListener('click', onMeetingNumberInputClick);
 joinMeetingBtn.addEventListener('click', onJoinClick);
 leaveMeetingBtn.addEventListener("click", onLeaveClicked);
 
