@@ -822,28 +822,32 @@ let meetingNumberInput = document.getElementById("meeting-number-input");
 let meetingPasswordInput = document.getElementById("meeting-password-input");
 
 // => METHODS
-function onJoinClick() {
+async function onJoinClick() {
   // Meeting number can also be entered as a URI. This is helpful since query parameters can be passed along with the meeting number.
-  let meetingNumberUri = encodeURIComponent(meetingNumberInput.value)
-  unityFetch(`/joinMeeting?meetingId=${meetingNumberUri}&password=${meetingPasswordInput.value}`, { method: "PUT" })
-    .then(response => {
-      if (response.ok) {
-        console.log("Joined meeting");
-      } else {
-        console.log(response.statusText);
-      }
-    });
+  let resp = await v2api.put('/joinMeeting', {
+    MeetingId: meetingNumberInput.value,
+    Password: meetingPasswordInput.value
+  });
+  if (resp.ok) {
+    let data = await resp.json();
+    if (v2api.checkErrorCode(data, 0)) {
+      Feedback.alertSuccess("Meeting joined.");
+    } else {
+      console.error(data);
+    }
+  }
 }
 
-function onLeaveClicked() {
-  unityFetch(`/leaveMeeting`, { method: "PUT" })
-    .then(response => {
-      if (response.ok) {
-        console.log("Left meeting");
-      } else {
-        console.log(response.statusText);
-      }
-    });
+async function onLeaveClicked() {
+  let resp = await v2api.put('/leaveMeeting');
+  if (resp.ok) {
+    let data = await resp.json();
+    if (v2api.checkErrorCode(data, 0)) {
+      Feedback.alertSuccess("Meeting left.");
+    } else {
+      console.error(data);
+    }
+  }
 }
 
 function onRegistrationUrlReceived(url) {
