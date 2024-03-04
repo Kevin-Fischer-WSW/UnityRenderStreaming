@@ -2911,6 +2911,7 @@ recordingDownloadBtn.addEventListener("click", handleRecordingDownload);
 let navZoomTabBtn = document.getElementById("nav-zoom-tab");
 let navPartTabBtn = document.getElementById("nav-participants-tab");
 let navLayoutTabBtn = document.getElementById("nav-layout-tab");
+let navSceneTabBtn = document.getElementById("nav-scenes-tab");
 let navSlideTabBtn = document.getElementById("nav-slide-tab");
 let navMusicTabBtn = document.getElementById("nav-music-tab");
 let navVideoTabBtn = document.getElementById("nav-video-tab");
@@ -2919,15 +2920,40 @@ let navUploadTabBtn = document.getElementById("nav-upload-tab");
 let navRecordingTabBtn = document.getElementById("nav-recording-tab");
 
 // => EVENT LISTENERS
-navZoomTabBtn.addEventListener("click", () => { navZoomTabBtn.scrollIntoView(); });
-navPartTabBtn.addEventListener("click", () => { navPartTabBtn.scrollIntoView(); });
-navLayoutTabBtn.addEventListener("click", () => { navLayoutTabBtn.scrollIntoView(); });
-navSlideTabBtn.addEventListener("click", () => { onSlideTabClicked(); navSlideTabBtn.scrollIntoView(); });
-navMusicTabBtn.addEventListener("click", () => { onMusicTabClicked(); navSlideTabBtn.scrollIntoView(); });
-navVideoTabBtn.addEventListener("click", () => { onVideoTabClicked(); navVideoTabBtn.scrollIntoView(); });
-navLogTabBtn.addEventListener("click", () => { navLogTabBtn.scrollIntoView(); fetchLogs(); });
-navUploadTabBtn.addEventListener("click", () => { navUploadTabBtn.scrollIntoView(); });
-navRecordingTabBtn.addEventListener("click", () => { navRecordingTabBtn.scrollIntoView(); });
+navZoomTabBtn.addEventListener("click", () => {
+  navZoomTabBtn.scrollIntoView();
+});
+navPartTabBtn.addEventListener("click", () => {
+  navPartTabBtn.scrollIntoView();
+});
+navLayoutTabBtn.addEventListener("click", () => {
+  navLayoutTabBtn.scrollIntoView();
+});
+navSceneTabBtn.addEventListener("click", () => {
+  navSceneTabBtn.scrollIntoView();
+});
+navSlideTabBtn.addEventListener("click", () => {
+  onSlideTabClicked();
+  navSlideTabBtn.scrollIntoView();
+});
+navMusicTabBtn.addEventListener("click", () => {
+  onMusicTabClicked();
+  navSlideTabBtn.scrollIntoView();
+});
+navVideoTabBtn.addEventListener("click", () => {
+  onVideoTabClicked();
+  navVideoTabBtn.scrollIntoView();
+});
+navLogTabBtn.addEventListener("click", () => {
+  navLogTabBtn.scrollIntoView();
+  fetchLogs();
+});
+navUploadTabBtn.addEventListener("click", () => {
+  navUploadTabBtn.scrollIntoView();
+});
+navRecordingTabBtn.addEventListener("click", () => {
+  navRecordingTabBtn.scrollIntoView();
+});
 
 /* ADVANCED SETTINGS */
 // => DOM ELEMENTS
