@@ -9099,7 +9099,7 @@ button, input, optgroup, select, textarea {
   min-width: 20%;
   max-width: 100%; }
 
-#layout-schema-editor div h3 label, #layout-schema-editor div .h3 label {
+.je-object__title label {
   color: white; }
 
 input[type=range] {
