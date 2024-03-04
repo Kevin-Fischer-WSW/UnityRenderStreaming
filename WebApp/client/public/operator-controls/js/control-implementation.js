@@ -1254,9 +1254,10 @@ function fetchStyleData() {
   v2api.get("/styles").then((response) => {
     if (response.ok && styleData === undefined) {
       response.json().then((data) => {
-          styleData = data;
-          populateLowerThirdStyleDropdown();
-          populateStyleEditorDropdown();
+        styleData = data;
+        populateLowerThirdStyleDropdown();
+        populateStyleEditorDropdown();
+        populateSceneLayoutTypeSelectAndGenerateLayoutCategoryEditor();
       });
     }
   });
@@ -1651,6 +1652,133 @@ function onStyleUpdateNotification(msg) {
 JSONEditor.defaults.options.disable_edit_json = true;
 JSONEditor.defaults.options.disable_properties = true;
 
+/* SCENES TAB */
+
+// => DOM ELEMENTS
+let sceneFieldset = document.getElementById("scenes-fieldset");
+
+let sceneLayoutTypeSelect = document.getElementById("scene-layout-type-select");
+let sceneLayoutCategorySchemaElement = document.getElementById("scene-layout-category-schema-editor");
+let sceneLayoutTypeSchemaElement = document.getElementById("scene-layout-type-schema-editor");
+
+// => PRIMITIVE AND OTHER TYPES
+let layoutTypeSchemaEditor;
+let layoutCategorySchemaEditor;
+
+// => METHODS
+
+async function onSceneTabClicked() {
+  if (styleData === undefined) {
+    fetchStyleData();
+  }
+}
+
+function populateSceneLayoutTypeSelectAndGenerateLayoutCategoryEditor() {
+  // Access the layout category.
+  let layoutCategory = styleData["Categories"]["layouts"];
+  // Clear the dropdown.
+  sceneLayoutTypeSelect.innerHTML = "";
+  // Create an option for the default.
+  let defaultOption = document.createElement("option");
+  defaultOption.value = "Keep";
+  defaultOption.innerHTML = "Keep";
+  sceneLayoutTypeSelect.appendChild(defaultOption);
+  // Iterate through the layout types.
+  Object.keys(layoutCategory["Types"]).forEach((layoutType) => {
+    // Create an option for the layout type.
+    let layoutTypeOption = document.createElement("option");
+    layoutTypeOption.value = layoutType;
+    layoutTypeOption.innerHTML = layoutCategory["Types"][layoutType]["Alias"];
+    sceneLayoutTypeSelect.appendChild(layoutTypeOption);
+  });
+  // Generate the layout category editor.
+  generateSceneCategorySchemaEditor(layoutCategory["Schema"], layoutCategory["Data"]);
+  onSceneLayoutTypeSelectChanged();
+}
+
+async function refreshSceneLayoutTypeSchemaEditor(type) {
+  let layoutType = styleData["Categories"]["layouts"]["Types"][type];
+  // Fetch current layout type data.
+  let resp = await v2api.get(`/style/layouts/${type}`);
+  let layoutTypeData = await resp.json();
+  generateSceneTypeSchemaEditor(layoutType["Schema"], layoutTypeData["Data"]);
+}
+
+function onSceneLayoutTypeSelectChanged() {
+  let type = sceneLayoutTypeSelect.value;
+  if (type === "Keep") {
+    // Hide the layout type schema editor.
+    sceneLayoutTypeSchemaElement.classList.add("d-none");
+    sceneLayoutCategorySchemaElement.classList.add("d-none");
+    return;
+  } else {
+    // Hide the layout type schema editor.
+    sceneLayoutTypeSchemaElement.classList.remove("d-none");
+    sceneLayoutCategorySchemaElement.classList.remove("d-none");
+    refreshSceneLayoutTypeSchemaEditor(type);
+    return;
+  }
+}
+
+function generateSceneCategorySchemaEditor(schema, startval) {
+  if (layoutCategorySchemaEditor) {
+    layoutCategorySchemaEditor.destroy();
+  }
+
+  layoutCategorySchemaEditor = new JSONEditor(sceneLayoutCategorySchemaElement, {
+    schema: schema,
+    theme: 'bootstrap4',
+    startval: startval,
+  });
+
+  layoutCategorySchemaEditor.on('ready', () => {
+    // Now the api methods will be available
+    validateSceneCategorySchema();
+  });
+
+  function validateSceneCategorySchema() {
+    const err = layoutCategorySchemaEditor.validate();
+
+    if (err.length) {
+      console.log(err); //if the schema is invalid
+      return false;
+    }
+    return true;
+  }
+}
+
+function generateSceneTypeSchemaEditor(schema, startval) {
+  if (layoutTypeSchemaEditor) {
+    layoutTypeSchemaEditor.destroy();
+  }
+
+  layoutTypeSchemaEditor = new JSONEditor(sceneLayoutTypeSchemaElement, {
+    schema: schema,
+    theme: 'bootstrap4',
+    startval: startval,
+  });
+
+  layoutTypeSchemaEditor.on('ready', () => {
+    // Now the api methods will be available
+    validateSceneTypeSchema();
+  });
+
+  function validateSceneTypeSchema() {
+    const err = layoutTypeSchemaEditor.validate();
+
+    if (err.length) {
+      console.log(err); //if the schema is invalid
+      return false;
+    }
+    return true;
+  }
+}
+
+
+// => EVENT LISTENERS
+sceneLayoutTypeSelect.addEventListener("change", onSceneLayoutTypeSelectChanged);
+
+// => INIT(S)
 
 /* SLIDE TAB */
 // => DOM ELEMENTS
@@ -2930,6 +3058,7 @@ navLayoutTabBtn.addEventListener("click", () => {
   navLayoutTabBtn.scrollIntoView();
 });
 navSceneTabBtn.addEventListener("click", () => {
+  onSceneTabClicked();
   navSceneTabBtn.scrollIntoView();
 });
 navSlideTabBtn.addEventListener("click", () => {
