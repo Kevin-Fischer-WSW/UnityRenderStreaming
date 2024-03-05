@@ -1661,14 +1661,21 @@ let sceneLayoutTypeSelect = document.getElementById("scene-layout-type-select");
 let sceneLayoutCategorySchemaElement = document.getElementById("scene-layout-category-schema-editor");
 let sceneLayoutTypeSchemaElement = document.getElementById("scene-layout-type-schema-editor");
 
-// => PRIMITIVE AND OTHER TYPES
-let layoutTypeSchemaEditor;
-let layoutCategorySchemaEditor;
+let scenePlaylistAddBtn = document.getElementById("scene-playlist-add-btn");
+let scenePlaylistAddDropdown = document.getElementById("scene-playlist-add-dropdown");
+let scenePlaylistClearBtn = document.getElementById("scene-playlist-clear-btn");
+let scenePlaylistEditor = document.getElementById("scene-playlist-editor");
+let scenePlaylistKeepBtn = document.getElementById("scene-playlist-keep-btn");
+let scenePlaylistStatusText = document.getElementById("scene-playlist-status-text");
 
 let sceneSlidePreview = document.getElementById("scene-slide-preview");
 let sceneSelectSlideBtn = document.getElementById("scene-select-slide-btn");
 let sceneSelectSlideDropdown = document.getElementById("scene-select-slide-dropdown");
 let sceneClearSlideBtn = document.getElementById("scene-clear-slide-btn");
+
+// => PRIMITIVE AND OTHER TYPES
+let layoutTypeSchemaEditor;
+let layoutCategorySchemaEditor;
 
 // => METHODS
 
@@ -1676,6 +1683,55 @@ function onClearSlideBtnClicked() {
   sceneSlidePreview.src = "";
   sceneSlidePreview.alt = "Holding slide will be cleared.";
 }
+
+function onClearScenePlaylistBtnClicked() {
+  scenePlaylistStatusText.innerHTML = "The music player will stop playing.";
+  scenePlaylistEditor.innerHTML = "";
+}
+
+function onKeepScenePlaylistBtnClicked() {
+  scenePlaylistStatusText.innerHTML = "The music player will keep playing.";
+  scenePlaylistEditor.innerHTML = "";
+}
+
+async function onScenePlaylistAddBtnClicked() {
+  let resp = await fetch("/all_holding_music");
+  let data = await resp.json();
+  scenePlaylistAddDropdown.innerHTML = "";
+  for (let i = 0; i < data.length; i++) {
+    let music = data[i];
+    let musicLi = document.createElement("li");
+    let musicA = document.createElement("a");
+    musicA.classList.add("dropdown-item");
+    musicA.innerHTML = music;
+    musicLi.appendChild(musicA);
+    scenePlaylistAddDropdown.appendChild(musicLi);
+  }
+
+  setupDropdown(scenePlaylistAddDropdown, onScenePlaylistMusicSelected);
+}
+
+function onScenePlaylistMusicSelected(elem) {
+  scenePlaylistStatusText.innerHTML = "The music player will update its playlist.";
+  // Get the selected music.
+  let music = elem.innerText;
+  //Create a list item for the music.
+  let musicLi = document.createElement("li");
+  let musicSpan = document.createElement("span");
+  musicLi.innerText = music;
+  musicLi.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");
+  musicLi.appendChild(musicSpan);
+  musicSpan.classList.add("badge", "bg-danger", "badge-pill");
+  musicSpan.innerText = "Remove";
+  musicSpan.style.cursor = "pointer";
+  musicSpan.onclick = function () {
+    musicLi.remove();
+  }
+  musicLi.appendChild(musicSpan);
+
+  scenePlaylistEditor.appendChild(musicLi);
+}
+
 
 async function onSceneSelectSlideBtnClicked() {
   let resp = await unityFetch("/getHoldingSlides");
@@ -1822,6 +1878,9 @@ function generateSceneTypeSchemaEditor(schema, startval) {
 
 
 // => EVENT LISTENERS
+scenePlaylistKeepBtn.addEventListener("click", onKeepScenePlaylistBtnClicked);
+scenePlaylistAddBtn.addEventListener("click", onScenePlaylistAddBtnClicked);
+scenePlaylistClearBtn.addEventListener("click", onClearScenePlaylistBtnClicked);
 sceneClearSlideBtn.addEventListener("click", onClearSlideBtnClicked);
 sceneSelectSlideBtn.addEventListener("click", onSceneSelectSlideBtnClicked);
 sceneLayoutTypeSelect.addEventListener("change", onSceneLayoutTypeSelectChanged);
