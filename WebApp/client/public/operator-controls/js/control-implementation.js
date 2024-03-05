@@ -1665,7 +1665,53 @@ let sceneLayoutTypeSchemaElement = document.getElementById("scene-layout-type-sc
 let layoutTypeSchemaEditor;
 let layoutCategorySchemaEditor;
 
+let sceneSlidePreview = document.getElementById("scene-slide-preview");
+let sceneSelectSlideBtn = document.getElementById("scene-select-slide-btn");
+let sceneSelectSlideDropdown = document.getElementById("scene-select-slide-dropdown");
+let sceneClearSlideBtn = document.getElementById("scene-clear-slide-btn");
+
 // => METHODS
+
+function onClearSlideBtnClicked() {
+  sceneSlidePreview.src = "";
+  sceneSlidePreview.alt = "Holding slide will be cleared.";
+}
+
+async function onSceneSelectSlideBtnClicked() {
+  let resp = await unityFetch("/getHoldingSlides");
+  let data = await resp.json();
+  sceneSelectSlideDropdown.innerHTML = "";
+  // Add the default option.
+  let defaultOptionLi = document.createElement("li");
+  let defaultOptionA = document.createElement("a");
+  defaultOptionA.classList.add("dropdown-item");
+  defaultOptionA.innerHTML = "Keep";
+  defaultOptionLi.appendChild(defaultOptionA);
+  defaultOptionLi.dataset.url = "Keep";
+  sceneSelectSlideDropdown.appendChild(defaultOptionLi);
+  for (let i = 0; i < data.length; i++) {
+    let slide = data[i];
+    let holdingSlideLi = document.createElement("li");
+    let holdingSlideA = document.createElement("a");
+    holdingSlideA.classList.add("dropdown-item");
+    holdingSlideA.innerHTML = slide.name;
+    holdingSlideLi.appendChild(holdingSlideA);
+    holdingSlideLi.dataset.url = slide.url;
+    sceneSelectSlideDropdown.appendChild(holdingSlideLi);
+  }
+
+  setupDropdown(sceneSelectSlideDropdown, onSceneSlideSelected);
+}
+
+async function onSceneSlideSelected(elem) {
+  if (elem.dataset.url === "Keep") {
+    sceneSlidePreview.src = "";
+    sceneSlidePreview.alt = "Holding slide will be kept.";
+    return;
+  }
+  sceneSlidePreview.src = elem.dataset.url;
+  sceneSlidePreview.alt = elem.dataset.url;
+}
 
 async function onSceneTabClicked() {
   if (styleData === undefined) {
@@ -1776,6 +1822,8 @@ function generateSceneTypeSchemaEditor(schema, startval) {
 
 
 // => EVENT LISTENERS
+sceneClearSlideBtn.addEventListener("click", onClearSlideBtnClicked);
+sceneSelectSlideBtn.addEventListener("click", onSceneSelectSlideBtnClicked);
 sceneLayoutTypeSelect.addEventListener("change", onSceneLayoutTypeSelectChanged);
 
 // => INIT(S)
