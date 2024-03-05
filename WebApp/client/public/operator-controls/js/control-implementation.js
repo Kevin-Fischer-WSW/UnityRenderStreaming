@@ -1657,6 +1657,12 @@ JSONEditor.defaults.options.disable_properties = true;
 // => DOM ELEMENTS
 let sceneFieldset = document.getElementById("scenes-fieldset");
 
+let openSceneBtn = document.getElementById("open-scene-btn");
+let deleteSceneBtn = document.getElementById("delete-scene-btn");
+let openOrDeleteSceneDropdown = document.getElementById("open-scene-dropdown");
+let saveSceneBtn = document.getElementById("save-scene-btn");
+let saveAsSceneBtn = document.getElementById("save-as-scene-btn");
+
 let sceneLayoutTypeSelect = document.getElementById("scene-layout-type-select");
 let sceneLayoutCategorySchemaElement = document.getElementById("scene-layout-category-schema-editor");
 let sceneLayoutTypeSchemaElement = document.getElementById("scene-layout-type-schema-editor");
@@ -1678,6 +1684,72 @@ let layoutTypeSchemaEditor;
 let layoutCategorySchemaEditor;
 
 // => METHODS
+
+async function onOpenSceneBtnClicked() {
+  // Get a list of all the scenes.
+  let resp = await v2api.get("/scenes");
+  let data = await resp.json();
+  // Clear the dropdown.
+  openOrDeleteSceneDropdown.innerHTML = "";
+  // Iterate through keys.
+  Object.keys(data["Scenes"]).forEach((scene) => {
+    let sceneTitle = data["Scenes"][scene]["SceneTitle"];
+    // Create a list item for the scene.
+    let sceneLi = document.createElement("li");
+    let sceneA = document.createElement("a");
+    sceneA.classList.add("dropdown-item");
+    sceneA.innerHTML = sceneTitle;
+    sceneLi.appendChild(sceneA);
+    sceneLi.dataset.scene = scene;
+    openOrDeleteSceneDropdown.appendChild(sceneLi);
+  })
+
+  setupDropdown(openOrDeleteSceneDropdown, openOnSceneSelected);
+}
+
+async function onDeleteSceneBtnClicked() {
+  // Get a list of all the unprotected scenes.
+  let resp = await v2api.get("/scenes");
+  let data = await resp.json();
+  // Clear the dropdown.
+  openOrDeleteSceneDropdown.innerHTML = "";
+  // Iterate through keys.
+  Object.keys(data["Scenes"]).forEach((scene) => {
+    let isProtected = data["Scenes"][scene]["IsProtected"];
+    if (isProtected === false) {
+      let sceneTitle = data["Scenes"][scene]["SceneTitle"];
+      // Create a list item for the scene.
+      let sceneLi = document.createElement("li");
+      let sceneA = document.createElement("a");
+      sceneA.classList.add("dropdown-item");
+      sceneA.innerHTML = sceneTitle;
+      sceneLi.appendChild(sceneA);
+      sceneLi.dataset.scene = scene;
+      openOrDeleteSceneDropdown.appendChild(sceneLi);
+    }
+  });
+
+  setupDropdown(openOrDeleteSceneDropdown, deleteOnSceneSelected);
+}
+
+async function openOnSceneSelected(elem) {
+  let scene = elem.dataset.scene;
+  let resp = await v2api.get(`/scene/${scene}`);
+  let data = await resp.json();
+
+  // todo: update the scene editor with the data
+}
+
+async function deleteOnSceneSelected(elem) {
+  let scene = elem.dataset.scene;
+  let resp = await v2api.del(`/scene/${scene}`);
+  if (resp.ok) {
+    let data = await resp.json();
+    if (v2api.checkErrorCode(data, 0) === true) {
+      Feedback.alertSuccess("Success: Deleted scene " + scene);
+    }
+  }
+}
 
 function onClearSlideBtnClicked() {
   sceneSlidePreview.src = "";
@@ -1878,6 +1950,8 @@ function generateSceneTypeSchemaEditor(schema, startval) {
 
 
 // => EVENT LISTENERS
+openSceneBtn.addEventListener("click", onOpenSceneBtnClicked);
+deleteSceneBtn.addEventListener("click", onDeleteSceneBtnClicked);
 scenePlaylistKeepBtn.addEventListener("click", onKeepScenePlaylistBtnClicked);
 scenePlaylistAddBtn.addEventListener("click", onScenePlaylistAddBtnClicked);
 scenePlaylistClearBtn.addEventListener("click", onClearScenePlaylistBtnClicked);
