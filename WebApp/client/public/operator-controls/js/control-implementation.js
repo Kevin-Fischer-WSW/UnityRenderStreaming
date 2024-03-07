@@ -1876,6 +1876,7 @@ async function openScene(scene){
     onKeepScenePlaylistBtnClicked();
   } else {
     scenePlaylistEditor.innerHTML = "";
+    scenePlaylistStatusText.dataset.value = 0;
     // Update the playlist editor.
     for (let i = 0; i < playlist.length; i++) {
       addTrackToPlaylist(playlist[i]);
