@@ -640,16 +640,18 @@
       </div>
       <!-- Scenes controls -->
       <div class="tab-pane fade" id="nav-scenes" role="tabpanel" aria-labelledby="nav-scenes-tab">
-        <fieldset id="scenes-fieldset">
-          <legend class="title text-white mt-2">Create Or Update a Scene.</legend>
-          <!-- Button group to select "Open" "Save" "Save As" or "Delete" -->
-          <div class="btn-group w-100 mt-2" role="group" aria-label="Scene actions">
-            <button id="open-scene-btn" type="button" class="btn btn-secondary" data-bs-toggle="dropdown" title="Open Scene">Open</button>
-            <button id="delete-scene-btn" type="button" class="btn btn-secondary" data-bs-toggle="dropdown" title="Delete Scene">Delete</button>
-            <ul id="open-scene-dropdown" class="dropdown-menu" aria-labelledby="open-scene-btn"></ul>
-            <button id="save-scene-btn" type="button" class="btn btn-secondary" title="Save Scene">Save</button>
-            <button id="save-as-scene-btn" type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#save-scene-as-modal" title="Save Scene As">Save As</button>
-          </div>
+        <legend class="title text-white mt-2">Create or Update scenes</legend>
+        <!-- Current scene display -->
+        <div id="current-scene" class="text-white">Open a scene to begin editing.</div>
+        <!-- Button group to select "Open" "Save" "Save As" or "Delete" -->
+        <div class="btn-group w-100 mt-2" role="group" aria-label="Scene actions">
+          <button id="open-scene-btn" type="button" class="btn btn-secondary" data-bs-toggle="dropdown" title="Open Scene">Open</button>
+          <button id="delete-scene-btn" type="button" class="btn btn-secondary" data-bs-toggle="dropdown" title="Delete Scene">Delete</button>
+          <ul id="open-scene-dropdown" class="dropdown-menu" aria-labelledby="open-scene-btn"></ul>
+          <button id="save-scene-btn" type="button" class="btn btn-secondary" title="Save Scene">Save</button>
+          <button id="save-as-scene-btn" type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#save-scene-as-modal" title="Save Scene As">Save As</button>
+        </div>
+        <fieldset id="scenes-fieldset" class="d-none">
           <!-- Scene name input -->
           <div class="form-floating m-2">
             <input type="text" class="form-control" id="scene-name-input" placeholder="Scene Name">
@@ -684,21 +686,6 @@
             </div>
           </div>
 
-          <!-- Stream state drop down -->
-          <h6 class="text-white">Stream State</h6>
-          <select id="stream-state-select" class="form-select" aria-label="Stream state select">
-            <option selected value="Keep">Keep</option>
-            <option value="Start">Start</option>
-            <option value="Stop">Stop</option>
-          </select>
-          <!-- Record state drop down -->
-          <h6 class="text-white">Record State</h6>
-          <select id="record-state-select" class="form-select" aria-label="Record state select">
-            <option selected value="Keep">Keep</option>
-            <option value="StartOrResume">Start Or Resume</option>
-            <option value="Pause">Pause</option>
-            <option value="Stop">Stop</option>
-          </select>
           <!-- Display layout type select -->
           <h6 class="text-white">Layout</h6>
           <select id="scene-layout-type-select" class="form-select" aria-label="Display layout select">
@@ -718,15 +705,32 @@
               </div>
             </div>
           </div>
+
+          <fieldset id="scene-protected-fields">
+          <!-- Stream state drop down -->
+          <h6 class="text-white">Stream State</h6>
+          <select id="stream-state-select" class="form-select" aria-label="Stream state select">
+            <option value="0">Start</option>
+            <option value="1">Stop</option>
+            <option selected value="2">Keep</option>
+          </select>
+          <!-- Record state drop down -->
+          <h6 class="text-white">Record State</h6>
+          <select id="record-state-select" class="form-select" aria-label="Record state select">
+            <option value="0">Start Or Resume</option>
+            <option value="1">Pause</option>
+            <option value="2">Stop</option>
+            <option selected value="3">Keep</option>
+          </select>
           <!-- Zoom Audio select -->
           <h6 class="text-white">Zoom Audio</h6>
           <select id="zoom-audio-select" class="form-select" aria-label="Zoom audio select">
-            <option selected value="Keep">Keep</option>
-            <option value="Mute">Mute</option>
-            <option value="Unmute">Unmute</option>
+            <option value="0">Mute</option>
+            <option value="1">Unmute</option>
+            <option selected value="2">Keep</option>
           </select>
-
-        </fieldset>
+          </fieldset>
+          </fieldset>
       </div>
       <!-- Slide controls -->
       <div class="tab-pane fade" id="nav-slide" role="tabpanel" aria-labelledby="nav-slide-tab">

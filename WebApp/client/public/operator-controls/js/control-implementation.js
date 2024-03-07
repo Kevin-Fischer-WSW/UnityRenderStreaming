@@ -1656,12 +1656,17 @@ JSONEditor.defaults.options.disable_properties = true;
 
 // => DOM ELEMENTS
 let sceneFieldset = document.getElementById("scenes-fieldset");
+let sceneProtectedFieldset = document.getElementById("scene-protected-fields");
+let currentScene = document.getElementById("current-scene");
 
 let openSceneBtn = document.getElementById("open-scene-btn");
 let deleteSceneBtn = document.getElementById("delete-scene-btn");
 let openOrDeleteSceneDropdown = document.getElementById("open-scene-dropdown");
 let saveSceneBtn = document.getElementById("save-scene-btn");
-let saveAsSceneBtn = document.getElementById("save-as-scene-btn");
+let saveAsSceneBtn = document.getElementById("save-scene-as-btn");
+
+let sceneTitleInput = document.getElementById("scene-name-input");
+let sceneTitleSaveAsInput = document.getElementById("scene-name-save-as-input");
 
 let sceneLayoutTypeSelect = document.getElementById("scene-layout-type-select");
 let sceneLayoutCategorySchemaElement = document.getElementById("scene-layout-category-schema-editor");
@@ -1678,6 +1683,10 @@ let sceneSlidePreview = document.getElementById("scene-slide-preview");
 let sceneSelectSlideBtn = document.getElementById("scene-select-slide-btn");
 let sceneSelectSlideDropdown = document.getElementById("scene-select-slide-dropdown");
 let sceneClearSlideBtn = document.getElementById("scene-clear-slide-btn");
+
+let sceneStreamStateSelect = document.getElementById("stream-state-select");
+let sceneRecordStateSelect = document.getElementById("record-state-select");
+let sceneZoomAudioSelect = document.getElementById("zoom-audio-select");
 
 // => PRIMITIVE AND OTHER TYPES
 let layoutTypeSchemaEditor;
@@ -1732,12 +1741,157 @@ async function onDeleteSceneBtnClicked() {
   setupDropdown(openOrDeleteSceneDropdown, deleteOnSceneSelected);
 }
 
+async function onSaveSceneBtnClicked() {
+  let sceneId = currentScene.dataset.sceneId;
+  let sceneTitle = sceneTitleInput.value;
+  
+  if (sceneId === undefined || sceneId === "") {
+    Feedback.alertDanger("No scene is open");
+    return;
+  }
+  
+  try{
+    await saveScene(sceneId, sceneTitle);
+  } catch (e) {
+    console.error(e);
+    Feedback.alertDanger("Failed to save scene");
+  }
+}
+
+async function onSaveAsSceneBtnClicked() {
+  let sceneId = Date.now().toString();
+  let sceneTitle = sceneTitleSaveAsInput.value;
+  try {
+    await saveScene(sceneId, sceneTitle);
+  } catch (e) {
+    console.error(e);
+    Feedback.alertDanger("Failed to save scene");
+  }
+}
+
 async function openOnSceneSelected(elem) {
+  sceneFieldset.classList.remove("d-none");
   let scene = elem.dataset.scene;
+  await openScene(scene);
+}
+
+async function saveScene(sceneId, sceneTitle){
+  let displayLayoutType = sceneLayoutTypeSelect.value;
+
+  let layoutCategoryData = null;
+  let layoutTypeData = null;
+  if (displayLayoutType !== "Keep") {
+    if (layoutCategorySchemaEditor && layoutTypeSchemaEditor){
+      layoutCategoryData = layoutCategorySchemaEditor.getValue();
+      layoutTypeData = layoutTypeSchemaEditor.getValue();
+    }
+  }
+
+  let slide = sceneSlidePreview.dataset.url;
+  let playlist = [];
+  let music = 0;
+  let stream = sceneStreamStateSelect.value;
+  let record = sceneRecordStateSelect.value;
+  let zoomAudio = sceneZoomAudioSelect.value;
+
+  for (let i = 0; i < scenePlaylistEditor.children.length; i++) {
+    playlist.push(scenePlaylistEditor.children[i].dataset.value);
+  }
+
+  if (playlist.length === 0) {
+    music = parseInt(scenePlaylistStatusText.dataset.value);
+  }
+
+  let resp = await v2api.put(`/scene/${sceneId}`, {
+    "SceneId": sceneId,
+    "SceneTitle": sceneTitle,
+    "DisplayLayoutType": displayLayoutType,
+    "LayoutCategoryData": layoutCategoryData,
+    "LayoutTypeData": layoutTypeData,
+    "Slide": slide,
+    "Music": music,
+    "Playlist": playlist,
+    "Stream": parseInt(stream),
+    "Record": parseInt(record),
+    "ZoomAudio": parseInt(zoomAudio),
+    "HotbarEnabled": false,
+    "SecondClick": null,
+  });
+
+  let data = await resp.json();
+  if (v2api.checkErrorCode(data, 0) === true) {
+    Feedback.alertSuccess("Success: Saved scene " + sceneTitle);
+    await openScene(sceneId);
+  } else {
+    Feedback.alertDanger(`${data["ErrorMessage"]}<br>${data["ErrorResolution"]}`);
+  }
+}
+
+async function openScene(scene){
   let resp = await v2api.get(`/scene/${scene}`);
   let data = await resp.json();
 
-  // todo: update the scene editor with the data
+  // Get data from the response.
+  let isProtected = data["IsProtected"];
+  let sceneData = data["Scene"];
+  let sceneTitle = sceneData["SceneTitle"];
+  let displayLayoutType = sceneData["DisplayLayoutType"];
+  let stream = sceneData["Stream"];
+  let record = sceneData["Record"];
+  let slide = sceneData["Slide"];
+  let music = sceneData["Music"];
+  let playlist = sceneData["Playlist"];
+  let layoutCategoryData = sceneData["LayoutCategoryData"];
+  let layoutTypeData = sceneData["LayoutTypeData"];
+  let zoomAudio = sceneData["ZoomAudio"];
+
+  currentScene.innerHTML = `Open Scene: ${sceneTitle}`;
+  currentScene.dataset.sceneId = scene;
+
+      // Set the scene title.
+  sceneTitleInput.value = sceneTitle;
+
+  // Set the layout type.
+  sceneLayoutTypeSelect.value = displayLayoutType;
+  await updateSceneLayoutType(displayLayoutType);
+  setTimeout(() => {
+    // Set the layout category data.
+    if (layoutCategoryData && layoutCategorySchemaEditor) {
+      layoutCategorySchemaEditor.setValue(layoutCategoryData);
+    }
+
+    // Set the layout type data.
+    if (layoutTypeData && layoutTypeSchemaEditor) {
+      layoutTypeSchemaEditor.setValue(layoutTypeData);
+    }
+  }, 1000);
+
+  // Set the slide.
+  setSceneSlidePreview(slide);
+
+  // Set the music.
+  if (music === 1) {
+    onClearScenePlaylistBtnClicked();
+  } else if (music === 2) {
+    onKeepScenePlaylistBtnClicked();
+  } else {
+    scenePlaylistEditor.innerHTML = "";
+    // Update the playlist editor.
+    for (let i = 0; i < playlist.length; i++) {
+      addTrackToPlaylist(playlist[i]);
+    }
+  }
+
+  // Set the zoom audio.
+  sceneZoomAudioSelect.value = zoomAudio;
+
+  // Set the stream state.
+  sceneStreamStateSelect.value = stream;
+
+  // Set the record state.
+  sceneRecordStateSelect.value = record;
+
+  sceneProtectedFieldset.disabled = isProtected !== false;
 }
 
 async function deleteOnSceneSelected(elem) {
@@ -1752,16 +1906,17 @@ async function deleteOnSceneSelected(elem) {
 }
 
 function onClearSlideBtnClicked() {
-  sceneSlidePreview.src = "";
-  sceneSlidePreview.alt = "Holding slide will be cleared.";
+  setSceneSlidePreview("Clear");
 }
 
 function onClearScenePlaylistBtnClicked() {
+  scenePlaylistStatusText.dataset.value = 1;
   scenePlaylistStatusText.innerHTML = "The music player will stop playing.";
   scenePlaylistEditor.innerHTML = "";
 }
 
 function onKeepScenePlaylistBtnClicked() {
+  scenePlaylistStatusText.dataset.value = 2;
   scenePlaylistStatusText.innerHTML = "The music player will keep playing.";
   scenePlaylistEditor.innerHTML = "";
 }
@@ -1784,13 +1939,17 @@ async function onScenePlaylistAddBtnClicked() {
 }
 
 function onScenePlaylistMusicSelected(elem) {
+  addTrackToPlaylist(elem.innerText);
+}
+
+function addTrackToPlaylist(track) {
+  scenePlaylistStatusText.dataset.value = 0;
   scenePlaylistStatusText.innerHTML = "The music player will update its playlist.";
-  // Get the selected music.
-  let music = elem.innerText;
   //Create a list item for the music.
   let musicLi = document.createElement("li");
   let musicSpan = document.createElement("span");
-  musicLi.innerText = music;
+  musicLi.dataset.value = track;
+  musicLi.innerText = track;
   musicLi.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");
   musicLi.appendChild(musicSpan);
   musicSpan.classList.add("badge", "bg-danger", "badge-pill");
@@ -1798,12 +1957,15 @@ function onScenePlaylistMusicSelected(elem) {
   musicSpan.style.cursor = "pointer";
   musicSpan.onclick = function () {
     musicLi.remove();
+    // Check if all children have been removed.
+      if (scenePlaylistEditor.children.length === 0) {
+        onClearScenePlaylistBtnClicked();
+      }
   }
   musicLi.appendChild(musicSpan);
 
   scenePlaylistEditor.appendChild(musicLi);
 }
-
 
 async function onSceneSelectSlideBtnClicked() {
   let resp = await unityFetch("/getHoldingSlides");
@@ -1832,13 +1994,21 @@ async function onSceneSelectSlideBtnClicked() {
 }
 
 async function onSceneSlideSelected(elem) {
-  if (elem.dataset.url === "Keep") {
+  setSceneSlidePreview(elem.dataset.url);
+}
+
+function setSceneSlidePreview(url) {
+  sceneSlidePreview.dataset.url = url;
+  if (url === "Keep") {
     sceneSlidePreview.src = "";
     sceneSlidePreview.alt = "Holding slide will be kept.";
-    return;
+  } else if (url === "Clear") {
+    sceneSlidePreview.src = "";
+    sceneSlidePreview.alt = "Holding slide will be cleared.";
+  } else {
+    sceneSlidePreview.src = url;
+    sceneSlidePreview.alt = `Holding slide will be updated to ${url}.`;
   }
-  sceneSlidePreview.src = elem.dataset.url;
-  sceneSlidePreview.alt = elem.dataset.url;
 }
 
 async function onSceneTabClicked() {
@@ -1870,16 +2040,11 @@ function populateSceneLayoutTypeSelectAndGenerateLayoutCategoryEditor() {
   onSceneLayoutTypeSelectChanged();
 }
 
-async function refreshSceneLayoutTypeSchemaEditor(type) {
-  let layoutType = styleData["Categories"]["layouts"]["Types"][type];
-  // Fetch current layout type data.
-  let resp = await v2api.get(`/style/layouts/${type}`);
-  let layoutTypeData = await resp.json();
-  generateSceneTypeSchemaEditor(layoutType["Schema"], layoutTypeData["Data"]);
+async function onSceneLayoutTypeSelectChanged() {
+  await updateSceneLayoutType(sceneLayoutTypeSelect.value);
 }
 
-function onSceneLayoutTypeSelectChanged() {
-  let type = sceneLayoutTypeSelect.value;
+async function updateSceneLayoutType(type){
   if (type === "Keep") {
     // Hide the layout type schema editor.
     sceneLayoutTypeSchemaElement.classList.add("d-none");
@@ -1889,9 +2054,21 @@ function onSceneLayoutTypeSelectChanged() {
     // Hide the layout type schema editor.
     sceneLayoutTypeSchemaElement.classList.remove("d-none");
     sceneLayoutCategorySchemaElement.classList.remove("d-none");
-    refreshSceneLayoutTypeSchemaEditor(type);
+  }
+
+  if (styleData === undefined){
+    await fetchStyleData();
+  }
+  let layoutType = styleData["Categories"]["layouts"]["Types"][type];
+  if (layoutType === undefined) {
+    // If the layout type is undefined, then update the layout type to "Keep".
+    await updateSceneLayoutType("Keep");
     return;
   }
+  // Fetch current layout type data.
+  let resp = await v2api.get(`/style/layouts/${type}`);
+  let layoutTypeData = await resp.json();
+  generateSceneTypeSchemaEditor(layoutType["Schema"], layoutTypeData["Data"]);
 }
 
 function generateSceneCategorySchemaEditor(schema, startval) {
@@ -1952,6 +2129,8 @@ function generateSceneTypeSchemaEditor(schema, startval) {
 // => EVENT LISTENERS
 openSceneBtn.addEventListener("click", onOpenSceneBtnClicked);
 deleteSceneBtn.addEventListener("click", onDeleteSceneBtnClicked);
+saveSceneBtn.addEventListener("click", onSaveSceneBtnClicked);
+saveAsSceneBtn.addEventListener("click", onSaveAsSceneBtnClicked);
 scenePlaylistKeepBtn.addEventListener("click", onKeepScenePlaylistBtnClicked);
 scenePlaylistAddBtn.addEventListener("click", onScenePlaylistAddBtnClicked);
 scenePlaylistClearBtn.addEventListener("click", onClearScenePlaylistBtnClicked);
