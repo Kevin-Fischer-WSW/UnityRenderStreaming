@@ -640,7 +640,11 @@
       </div>
       <!-- Scenes controls -->
       <div class="tab-pane fade" id="nav-scenes" role="tabpanel" aria-labelledby="nav-scenes-tab">
-        <legend class="title text-white mt-2">Create or Update scenes</legend>
+        <h3 class="title text-white mt-2">Load Scene</h3>
+          <button id="load-custom-scene-btn" type="button" class="btn btn-secondary" data-bs-toggle="dropdown" title="Select a custom scene to load">Load Custom Scene</button>
+          <button id="load-scene-btn" type="button" class="btn btn-secondary" data-bs-toggle="dropdown" title="Select a scene to load">Load Scene</button>
+          <ul id="load-scene-dropdown" class="dropdown-menu" aria-labelledby="load-scene-btn"></ul>
+        <h3 class="title text-white mt-2">Create or Update scenes</h3>
         <!-- Current scene display -->
         <div id="current-scene" class="text-white">Open a scene to begin editing.</div>
         <!-- Button group to select "Open" "Save" "Save As" or "Delete" -->

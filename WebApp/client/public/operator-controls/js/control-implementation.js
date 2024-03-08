@@ -1655,6 +1655,10 @@ JSONEditor.defaults.options.disable_properties = true;
 /* SCENES TAB */
 
 // => DOM ELEMENTS
+let loadCustomSceneBtn = document.getElementById("load-custom-scene-btn");
+let loadSceneBtn = document.getElementById("load-scene-btn");
+let loadSceneDropdown = document.getElementById("load-scene-dropdown");
+
 let sceneFieldset = document.getElementById("scenes-fieldset");
 let sceneProtectedFieldset = document.getElementById("scene-protected-fields");
 let currentScene = document.getElementById("current-scene");
@@ -1693,6 +1697,67 @@ let layoutTypeSchemaEditor;
 let layoutCategorySchemaEditor;
 
 // => METHODS
+
+async function onLoadCustomSceneBtnClicked() {
+  // Get a list of all the custom scenes.
+  let resp = await v2api.get("/scenes");
+  let data = await resp.json();
+  // Clear the dropdown.
+  loadSceneDropdown.innerHTML = "";
+  // Iterate through keys.
+  Object.keys(data["Scenes"]).forEach((scene) => {
+    let isProtected = data["Scenes"][scene]["IsProtected"];
+    if (isProtected === false) {
+      let sceneTitle = data["Scenes"][scene]["SceneTitle"];
+      // Create a list item for the scene.
+      let sceneLi = document.createElement("li");
+      let sceneA = document.createElement("a");
+      sceneA.classList.add("dropdown-item");
+      sceneA.innerHTML = sceneTitle;
+      sceneLi.appendChild(sceneA);
+      sceneLi.dataset.scene = scene;
+      loadSceneDropdown.appendChild(sceneLi);
+    }
+  });
+  
+  setupDropdown(loadSceneDropdown, onLoadSceneSelected);
+}
+
+async function onLoadSceneBtnClicked() {
+  // Get a list of all the scenes.
+  let resp = await v2api.get("/scenes");
+  let data = await resp.json();
+  // Clear the dropdown.
+  loadSceneDropdown.innerHTML = "";
+  // Iterate through keys.
+  Object.keys(data["Scenes"]).forEach((scene) => {
+    let sceneTitle = data["Scenes"][scene]["SceneTitle"];
+    // Create a list item for the scene.
+    let sceneLi = document.createElement("li");
+    let sceneA = document.createElement("a");
+    sceneA.classList.add("dropdown-item");
+    sceneA.innerHTML = sceneTitle;
+    sceneLi.appendChild(sceneA);
+    sceneLi.dataset.scene = scene;
+    loadSceneDropdown.appendChild(sceneLi);
+  })
+  
+  setupDropdown(loadSceneDropdown, onLoadSceneSelected);
+}
+
+async function onLoadSceneSelected(elem) {
+  //Get the scene.
+  let scene = elem.dataset.scene;
+  //Perform the api call
+  let resp = await v2api.put(`/scene/${scene}/load`);
+  let data = await resp.json();
+
+  if (v2api.checkErrorCode(data, 0) === true) {
+    Feedback.alertSuccess("Success: Loaded scene " + elem.innerText);
+  } else {
+    Feedback.alertDanger(`${data["ErrorMessage"]}<br>${data["ErrorResolution"]}`);
+  }
+}
 
 async function onOpenSceneBtnClicked() {
   // Get a list of all the scenes.
@@ -1901,7 +1966,7 @@ async function deleteOnSceneSelected(elem) {
   if (resp.ok) {
     let data = await resp.json();
     if (v2api.checkErrorCode(data, 0) === true) {
-      Feedback.alertSuccess("Success: Deleted scene " + scene);
+      Feedback.alertSuccess("Success: Deleted scene " + elem.innerText);
     }
   }
 }
@@ -2128,6 +2193,8 @@ function generateSceneTypeSchemaEditor(schema, startval) {
 
 
 // => EVENT LISTENERS
+loadCustomSceneBtn.addEventListener("click", onLoadCustomSceneBtnClicked);
+loadSceneBtn.addEventListener("click", onLoadSceneBtnClicked);
 openSceneBtn.addEventListener("click", onOpenSceneBtnClicked);
 deleteSceneBtn.addEventListener("click", onDeleteSceneBtnClicked);
 saveSceneBtn.addEventListener("click", onSaveSceneBtnClicked);
