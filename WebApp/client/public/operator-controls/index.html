@@ -414,19 +414,28 @@
   </div>
 
   <!-- Stream control buttons -->
-  <div id="stream-btn-grp" class="container btn-group d-flex w-25 mt-2">
-    <button id="pending-btn" class="btn btn-lg text-black rounded" data-bs-toggle="modal"
-      data-bs-target="#stream-confirmation-modal" title="Begin live stream with introduction slide">Start
-      Stream</button>
-    <button id="late-btn" class="btn btn-lg text-black d-none"
-      title="Stream late slide">Late</button>
-    <button id="live-btn" class="btn btn-lg text-black d-none"
-      title="Go live with presenters&#013;Clear any presentation slide or video from output">Live</button>
-    <button id="technical-diff-btn" class="btn btn-lg text-black d-none" title="Stream tech diff slide">Technical
-      Difficulty</button>
-    <button id="archive-btn" class="btn btn-lg text-black d-none"
-      title="Stream conclusion slide&#013;Second click ends live stream">Conclusion Slide</button>
+  <div class="container-fluid d-flex mt-2">
+    <div class="flex-grow-1"></div>
+    <div id="stream-btn-grp" class="btn-group flex-grow-1">
+      <button id="pending-btn" class="btn btn-lg text-black rounded" data-bs-toggle="modal"
+              data-bs-target="#stream-confirmation-modal" title="Begin live stream with introduction slide">Start
+        Stream</button>
+      <button id="late-btn" class="btn btn-lg text-black d-none"
+              title="Stream late slide">Late</button>
+      <button id="live-btn" class="btn btn-lg text-black d-none"
+              title="Go live with presenters&#013;Clear any presentation slide or video from output">Live</button>
+      <button id="technical-diff-btn" class="btn btn-lg text-black d-none" title="Stream tech diff slide">Technical
+        Difficulty</button>
+      <button id="archive-btn" class="btn btn-lg text-black d-none"
+              title="Stream conclusion slide&#013;Second click ends live stream">Conclusion Slide</button>
+    </div>
+    <div class="btn-group flex-grow-0">
+        <button id="stream-control-load-scene-btn" class="btn btn-lg text-black ms-2 rounded" title="Loads a custom scene" data-bs-toggle="dropdown">Load Scene</button>
+        <ul id="stream-control-load-scene-dropdown" class="dropdown-menu" aria-labelledby="stream-control-load-scene-btn"></ul>
+    </div>
+    <div class="flex-grow-1"></div>
   </div>
+  
 
   <!-- Operator Control Tabs -->
   <div class="container mt-4">

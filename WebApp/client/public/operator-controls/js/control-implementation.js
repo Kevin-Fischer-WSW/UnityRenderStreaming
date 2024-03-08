@@ -667,7 +667,6 @@ function updateGeneralStatBar() {
 // => DOM ELEMENTS
 let previewIntroImg = document.getElementById("modal-img-preview");
 let previewIntroImgCaption = document.getElementById("modal-img-caption");
-let streamBtnGrp = document.getElementById("stream-btn-grp");
 
 let archiveBtn = document.getElementById("archive-btn");
 let lateBtn = document.getElementById("late-btn");
@@ -675,12 +674,15 @@ let liveBtn = document.getElementById("live-btn");
 let pendingBtn = document.getElementById("pending-btn");
 let streamConfBtn = document.getElementById("stream-confirmation-btn");
 let technicalDiffBtn = document.getElementById("technical-diff-btn");
+let streamControlLoadSceneBtn = document.getElementById("stream-control-load-scene-btn");
+let streamControlSceneDropdown = document.getElementById("stream-control-load-scene-dropdown");
 
 archiveBtn.addEventListener("click", onArchiveClick);
 liveBtn.addEventListener("click", onLiveClick);
 lateBtn.addEventListener("click", onLateClick);
 streamConfBtn.addEventListener("click", onPendingClick);
 technicalDiffBtn.addEventListener("click", onTechnicalDiff);
+streamControlLoadSceneBtn.addEventListener("click", onStreamControlLoadSceneBtnClicked);
 
 
 // => METHODS
@@ -713,6 +715,10 @@ function onPendingClick() {
       Feedback.alertSuccess("Success: Stream started.");
     }
   });
+}
+
+async function onStreamControlLoadSceneBtnClicked() {
+  await populateSceneDropdown(streamControlSceneDropdown, onLoadSceneSelected, true);
 }
 
 function onTechnicalDiff() {
@@ -758,7 +764,6 @@ async function loadScene(sceneId) {
 function resetStreamButtonsOnLeaveOrEnd() {
   if (pendingBtn.innerHTML === "Intro Slide") pendingBtn.innerHTML = "Start Stream";
   if (streamSettingsFieldset.disabled) streamSettingsFieldset.disabled = false;
-  if (streamBtnGrp.classList.contains("w-100")) streamBtnGrp.classList.remove("w-100");
   if (!pendingBtn.classList.contains("rounded")) pendingBtn.classList.add("rounded");
   if (!liveBtn.classList.contains("d-none")) liveBtn.classList.add("d-none");
   if (!lateBtn.classList.contains("d-none")) lateBtn.classList.add("d-none");
@@ -777,7 +782,6 @@ function updateStreamButtons() {
   lateBtn.innerHTML = "Late";
   technicalDiffBtn.innerHTML = "Technical Difficulties";
   archiveBtn.innerHTML = "Conclusion Slide";
-  streamBtnGrp.classList.add("w-100");
   pendingBtn.classList.remove("rounded");
   liveBtn.classList.remove("d-none");
   lateBtn.classList.remove("d-none");
@@ -1480,7 +1484,7 @@ async function refreshStyleEditor(category, type) {
   // If type is undefined, then the category was selected.
   if (type === undefined) {
     // Access the schema for the category.
-    let schema = styleData["Categories"][category]["Schema"];
+    let schemaCopy = JSON.parse(JSON.stringify(styleData["Categories"][category]["Schema"]));
 
     // Fetch the current style data.
     let resp = await v2api.get(`/style/${category}`);
@@ -1488,12 +1492,12 @@ async function refreshStyleEditor(category, type) {
 
     let anyNull = anyValuesSetToNull(style.Data);
     if (anyNull === false) {
-      trimNullFromSchema(schema);
+      trimNullFromSchema(schemaCopy);
     }
-    generateEditor(schema, style.Data);
+    generateEditor(schemaCopy, style.Data);
   } else {
     // Access the schema for the type.
-    let schema = styleData["Categories"][category]["Types"][type]["Schema"];
+    let schemaCopy = JSON.parse(JSON.stringify(styleData["Categories"][category]["Types"][type]["Schema"]));
 
     // Fetch the current style data.
     let resp = await v2api.get(`/style/${category}/${type}`);
@@ -1501,9 +1505,9 @@ async function refreshStyleEditor(category, type) {
 
     let anyNull = anyValuesSetToNull(style.Data);
     if (anyNull === false) {
-      trimNullFromSchema(schema);
+      trimNullFromSchema(schemaCopy);
     }
-    generateEditor(schema, style.Data);
+    generateEditor(schemaCopy, style.Data);
   }
 
   function generateEditor(schema, startval) {
@@ -1698,39 +1702,18 @@ let layoutCategorySchemaEditor;
 
 // => METHODS
 
-async function onLoadCustomSceneBtnClicked() {
-  // Get a list of all the custom scenes.
-  let resp = await v2api.get("/scenes");
-  let data = await resp.json();
-  // Clear the dropdown.
-  loadSceneDropdown.innerHTML = "";
-  // Iterate through keys.
-  Object.keys(data["Scenes"]).forEach((scene) => {
-    let isProtected = data["Scenes"][scene]["IsProtected"];
-    if (isProtected === false) {
-      let sceneTitle = data["Scenes"][scene]["SceneTitle"];
-      // Create a list item for the scene.
-      let sceneLi = document.createElement("li");
-      let sceneA = document.createElement("a");
-      sceneA.classList.add("dropdown-item");
-      sceneA.innerHTML = sceneTitle;
-      sceneLi.appendChild(sceneA);
-      sceneLi.dataset.scene = scene;
-      loadSceneDropdown.appendChild(sceneLi);
-    }
-  });
-  
-  setupDropdown(loadSceneDropdown, onLoadSceneSelected);
-}
-
-async function onLoadSceneBtnClicked() {
+async function populateSceneDropdown(dropdownElem, selectCallback, filterProtectedScenes){
   // Get a list of all the scenes.
   let resp = await v2api.get("/scenes");
   let data = await resp.json();
   // Clear the dropdown.
-  loadSceneDropdown.innerHTML = "";
+  dropdownElem.innerHTML = "";
   // Iterate through keys.
   Object.keys(data["Scenes"]).forEach((scene) => {
+    let isProtected = data["Scenes"][scene]["IsProtected"];
+    if (filterProtectedScenes === true && isProtected === true) {
+      return;
+    }
     let sceneTitle = data["Scenes"][scene]["SceneTitle"];
     // Create a list item for the scene.
     let sceneLi = document.createElement("li");
@@ -1739,10 +1722,18 @@ async function onLoadSceneBtnClicked() {
     sceneA.innerHTML = sceneTitle;
     sceneLi.appendChild(sceneA);
     sceneLi.dataset.scene = scene;
-    loadSceneDropdown.appendChild(sceneLi);
-  })
+    dropdownElem.appendChild(sceneLi);
+  });
   
-  setupDropdown(loadSceneDropdown, onLoadSceneSelected);
+  setupDropdown(dropdownElem, selectCallback);
+}
+
+async function onLoadCustomSceneBtnClicked() {
+  await populateSceneDropdown(loadSceneDropdown, onLoadSceneSelected, true);
+}
+
+async function onLoadSceneBtnClicked() {
+  await populateSceneDropdown(loadSceneDropdown, onLoadSceneSelected, false);
 }
 
 async function onLoadSceneSelected(elem) {
