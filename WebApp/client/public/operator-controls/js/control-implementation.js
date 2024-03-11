@@ -2417,7 +2417,9 @@ function convertSecondsToTimestamp(sec) {
 }
 
 function getVolumeLevel(value) {
-  return String(Number(Math.round(parseFloat(value) * 100))) + "%";
+  // Get db value from volume level.
+  let db = 20 * Math.log10(value);
+  return db.toFixed() + " dB";
 }
 
 /* AUDIO TAB */
