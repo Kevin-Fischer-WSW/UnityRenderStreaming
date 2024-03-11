@@ -751,7 +751,8 @@ async function loadScene(sceneId) {
         console.log(data);
         let errors = v2api.getErrorMessagesAndResolutions(data);
         for (let i = 0; i < errors.errorMessages.length; i++) {
-          Feedback.alertDanger(`${errors.errorMessages[i]} ${errors.resolutions[i]}`);
+          let resolution = errors.resolutions[i] === undefined ? "" : errors.resolutions[i];
+          Feedback.alertDanger(`${errors.errorMessages[i]} ${resolution}`);
         }
       }).catch((e) => {
         console.log(e);
@@ -3561,6 +3562,8 @@ function appStatusReceived(json) {
     meetingNoInputField.disabled = true;
     meetingNumberInput.value = appStatus.meetingId;
     joinMeetingBtn.disabled = true;
+    pendingBtn.disabled = false;
+    streamControlLoadSceneBtn.disabled = false;
     holdMusicFieldset.disabled = false;
     musicPlayStopBtn.innerHTML = appStatus.playingHoldingMusic ? '<i class="bi bi-stop"></i>' : '<i class="bi bi-play"></i>';
     currentlyPlayingSpan.innerHTML = currentlyPlayingSpan.title = appStatus.currentlyPlayingTrack;
@@ -3584,6 +3587,8 @@ function appStatusReceived(json) {
     meetingNoInputField.disabled = false;
     joinMeetingBtn.disabled = false;
     holdMusicFieldset.disabled = true;
+    pendingBtn.disabled = true;
+    streamControlLoadSceneBtn.disabled = true;
     //videoFieldsetBar.disabled = true;
   }
 }
