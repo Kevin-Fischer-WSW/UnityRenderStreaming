@@ -1436,7 +1436,9 @@ lowerThirdStyleBtn.addEventListener("click", onLowerThirdStyleBtnPressed);
 
 cropScreenSharePreview.onload = function () {
   cropWidget.mainElement.style.display = "block";
-  cropWidget.reset();
+  setTimeout(() => {
+    cropWidget.reset();
+  }, 100);
   cropScreenSharePreview.alt = "Screen share image";
   cropScreenShareApplyBtn.disabled = false;
 }

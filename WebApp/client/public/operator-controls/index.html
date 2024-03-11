@@ -615,7 +615,7 @@
           <!-- Screen share crop modal -->
           <div class="modal fade" id="screen-share-crop-modal" tabindex="-1" aria-labelledby="exampleModalLabel"
             aria-hidden="true">
-            <div class="modal-dialog">
+            <div class="modal-dialog mw-100">
               <div class="modal-content">
                 <div class="modal-header">
                   <h1 class="modal-title fs-5" id="exampleModalLabel">Crop screen share</h1>
@@ -623,8 +623,8 @@
                     title="Close"></button>
                 </div>
                 <div class="modal-body">
-                  <img id="crop-screen-share-preview" src="uapp/getScreenShareImage?t=0"
-                    alt="This is supposed to be a preview of the screen share texture" style="width: 100%">
+                  <img id="crop-screen-share-preview" class="d-flex justify-content-evenly w-100" src="uapp/getScreenShareImage?t=0"
+                    alt="This is supposed to be a preview of the screen share texture" style="image-rendering: pixelated">
                   <div id="crop-screen-share-preview-caption" class="figure-caption">Hold shift to unlock aspect ratio.</div>
 
                 </div>
