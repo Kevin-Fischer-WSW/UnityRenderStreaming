@@ -26,6 +26,16 @@ export function del(endpoint){
   })
 }
 
+export function post(endpoint, body){
+  return fetch(`/uapp/v2${endpoint}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  })
+}
+
 export function checkErrorCode(respData, code){
   if (respData.ErrorCode === code){
     return true;

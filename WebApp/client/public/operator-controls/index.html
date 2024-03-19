@@ -474,6 +474,9 @@
         <button class="nav-link d-none" id="nav-log-tab" data-bs-toggle="tab" data-bs-target="#nav-log" type="button"
           role="tab" aria-controls="nav-log" aria-selected="false" title="Application debug logs">Log
         </button>
+        <button class="nav-link" id="nav-slack-tab" data-bs-toggle="tab" data-bs-target="#nav-slack" type="button"
+                role="tab" aria-controls="nav-slack" aria-selected="false" title="Post messages to Slack automatically.">Slack
+        </button>
         <button class="nav-link" id="nav-upload-tab" data-bs-toggle="tab" data-bs-target="#nav-upload" type="button"
           role="tab" aria-controls="nav-upload" aria-selected="false" title="Upload files">Upload
         </button>
@@ -1002,6 +1005,23 @@
               <option selected value="none">None Selected</option>
             </select>
             <button id="log-download-btn" class="btn btn-secondary" type="button" title="Download">Download Log</button>
+          </div>
+        </fieldset>
+      </div>
+      <!-- Slack controls -->
+      <div class="tab-pane fade" id="nav-slack" role="tabpanel" aria-labelledby="nav-slack-tab">
+        <fieldset id="slack-fieldset">
+          <legend class="title text-white mt-2">Slack</legend>
+          <div class="input-group">
+            <label class="input-group-text" for="slack-channel-input">Channel</label>
+            <input id="slack-channel-input" list="slack-channel-datalist" type="text" class="form-control" 
+                   placeholder="Enter channel name or id." aria-label="Channel">
+            <datalist id="slack-channel-datalist">
+              <!-- Options will be generated from code -->
+            </datalist>
+            <button id="slack-set-channel-btn" class="btn btn-secondary" type="button" title="Set Channel">Set Channel</button>
+            <!-- Test Post Message -->
+            <button id="slack-test-post-message-btn" class="btn btn-secondary" type="button" title="Posts a message to the channel you assigned.">Test Channel</button>
           </div>
         </fieldset>
       </div>

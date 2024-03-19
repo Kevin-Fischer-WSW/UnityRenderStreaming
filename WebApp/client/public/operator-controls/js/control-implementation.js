@@ -2749,6 +2749,81 @@ volumeLevelVideo.innerHTML = getVolumeLevel(volumeRangeVideo.value);
 videoSwitchBtn.style.display = "none";
 
 
+/* SLACK TAB */
+// => DOM ELEMENTS
+
+let slackFieldset = document.getElementById("slack-fieldset");
+let slackChannelInput = document.getElementById("slack-channel-input");
+let slackChannelDatalist = document.getElementById("slack-channel-datalist");
+let slackSetChannelBtn = document.getElementById("slack-set-channel-btn");
+let slackTestPostMessageBtn = document.getElementById("slack-test-post-message-btn");
+
+// => PRIMITIVE AND OTHER TYPES
+let fetchingChannels = false;
+
+// => METHODS
+async function onSlackChannelInputChanged() {
+  if (slackChannelInput.value.length > 0) {
+    slackSetChannelBtn.disabled = false;
+  } else {
+    slackSetChannelBtn.disabled = true;
+  }
+
+  // Check if the datalist has been populated.
+  if (slackChannelDatalist.children.length === 0 && fetchingChannels === false) {
+    fetchingChannels = true;
+    // Fetch channels.
+    let resp = await v2api.get("/slack/channels");
+    let data = await resp.json();
+    if (v2api.checkErrorCode(data, 0) === true) {
+      slackChannelDatalist.innerHTML = "";
+      let channels = data.Channels;
+      for (let i = 0; i < channels.length; i++) {
+        let channel = channels[i];
+        let option = document.createElement("option");
+        option.value = channel.Name;
+        option.dataset.id = channel.ID;
+        slackChannelDatalist.appendChild(option);
+      }
+    }
+  }
+}
+
+async function onSlackSetChannelBtnClicked() {
+  let channel = slackChannelInput.value;
+
+  // Check if input matches regex for a slack channel id.
+  let id = "0";
+  if (channel.match("[A-Z0-9]{11}$")) {
+    id = channel;
+  } else {
+    let element = slackChannelDatalist.querySelector(`option[value="${channel}"]`);
+    if (element !== null) {
+      id = element.dataset.id;
+    }
+  }
+  let resp = await v2api.put("/slack/channel", {ChannelId: id});
+  let data = await resp.json();
+  if (v2api.checkErrorCode(data, 0) !== true) {
+    Feedback.alertDanger(`Failed to set channel. Error: ${data.Details}`);
+  } else {
+    Feedback.alertSuccess("Channel set.");
+  }
+}
+
+async function onSlackTestPostMessageBtnClicked() {
+  let resp = await v2api.post("/slack/postTestMessage");
+  let data = await resp.json();
+  if (v2api.checkErrorCode(data, 0) !== true) {
+    Feedback.alertDanger(`Failed to post message to Slack. Error: ${data.Details}`);
+  }
+}
+
+// => EVENT LISTENERS
+slackChannelInput.addEventListener("input", onSlackChannelInputChanged);
+slackSetChannelBtn.addEventListener("click", onSlackSetChannelBtnClicked);
+slackTestPostMessageBtn.addEventListener("click", onSlackTestPostMessageBtnClicked);
+
 /* UPLOAD TAB */
 // => DOM ELEMENTS
 let batchSlideFileInput = document.getElementById("batch-slide-file-input");
@@ -3468,6 +3543,7 @@ let navSlideTabBtn = document.getElementById("nav-slide-tab");
 let navMusicTabBtn = document.getElementById("nav-music-tab");
 let navVideoTabBtn = document.getElementById("nav-video-tab");
 let navLogTabBtn = document.getElementById("nav-log-tab");
+let navSlackTabBtn = document.getElementById("nav-slack-tab");
 let navUploadTabBtn = document.getElementById("nav-upload-tab");
 let navRecordingTabBtn = document.getElementById("nav-recording-tab");
 
@@ -3500,6 +3576,9 @@ navVideoTabBtn.addEventListener("click", () => {
 navLogTabBtn.addEventListener("click", () => {
   navLogTabBtn.scrollIntoView();
   fetchLogs();
+});
+navSlackTabBtn.addEventListener("click", () => {
+  navSlackTabBtn.scrollIntoView();
 });
 navUploadTabBtn.addEventListener("click", () => {
   navUploadTabBtn.scrollIntoView();
