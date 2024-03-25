@@ -2627,6 +2627,7 @@ let volumeRangeVideo = document.getElementById("volume-range-video");
 
 let videoClearBtn = document.getElementById("video-clear-btn");
 let videoPlayPauseBtn = document.getElementById("video-play-stop-btn");
+let videoLoopBtn = document.getElementById("video-loop-btn");
 let videoSwitchBtn = document.getElementById("video-btn-element");
 
 // => PRIMITIVE AND OTHER TYPES
@@ -2722,26 +2723,31 @@ videoProgress.addEventListener("input", function () {
   videoPlaybackTime.innerHTML = convertSecondsToTimestamp(videoProgress.value);
 });
 
-videoProgress.addEventListener("change", function () {
+videoProgress.addEventListener("change", async function () {
   setTimeout(function () {
     disableVideoProgressUpdates = false;
   }, 1000);
-  let str = videoProgress.value;
-  sendStringSubmitEvent(myVideoPlayer, OperatorControls._SeekVideoButton, str);
+  await v2api.put('/videoPlayer', {
+    SeekPosition: parseFloat(videoProgress.value)
+  })
 });
 
-videoPlayPauseBtn.addEventListener("click", function () {
-  if (videoPlayPauseBtn.innerHTML === '<i class="bi bi-play"></i>') {
-    sendClickEvent(myVideoPlayer, OperatorControls._PlayVideo);
-  } else {
-    sendClickEvent(myVideoPlayer, OperatorControls._PauseVideo);
-  }
+videoPlayPauseBtn.addEventListener("click", async function () {
+  await v2api.put('/videoPlayer', {
+    Play: !appStatus.playingVideo
+  })
 });
 
 volumeRangeVideo.addEventListener("input", function () {
   let str = volumeRangeVideo.value;
   volumeLevelVideo.innerHTML = getVolumeLevel(volumeRangeVideo.value);
   sendStringSubmitEvent(myVideoPlayer, OperatorControls._VolumeVideo, str);
+});
+
+videoLoopBtn.addEventListener("click", async function () {
+  await v2api.put('/videoPlayer', {
+    Loop: !appStatus.loopingVideo
+  })
 });
 
 // => INIT(S)
@@ -3655,6 +3661,9 @@ function appStatusReceived(json) {
     musicProgress.max = Math.round(appStatus.currentTrackDuration);
     videoProgress.max = Math.round(appStatus.currentVideoDuration);
     videoPlayPauseBtn.innerHTML = appStatus.playingVideo ? '<i class="bi bi-pause"></i>' : '<i class="bi bi-play"></i>';
+    videoLoopBtn.innerHTML = appStatus.loopingVideo ? 'Loop' : '<s>Loop</s>';
+    videoLoopBtn.classList.toggle("btn-primary", appStatus.loopingVideo);
+    videoLoopBtn.classList.toggle("btn-dark", !appStatus.loopingVideo);
 
     if (appStatus.streaming) {
       updateStreamButtons();

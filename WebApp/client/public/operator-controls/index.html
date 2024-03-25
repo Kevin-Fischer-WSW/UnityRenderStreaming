@@ -929,10 +929,13 @@
           <fieldset id="video-fieldset-bar">
             <!-- Video controls bar -->
             <div class="d-flex w-100 gap-5 mb-3">
-              <button id="video-play-stop-btn" type="button" class="btn btn-secondary" title="Play/Pause"><i
-                  class="bi bi-play"></i></button>
+              <div class="btn-group flex-grow-0">
+                <button id="video-play-stop-btn" type="button" class="btn btn-secondary" title="Play/Pause"><i
+                        class="bi bi-play"></i></button>
+                <button id="video-loop-btn" type="button" class="btn btn-primary" title="Loop/Unloop video.">Loop</button>
+              </div>
 
-              <div class="input-group w-75">
+              <div class="input-group flex-grow-1">
                 <div class="input-group-prepend">
                   <label class="text-white" for="video-progress">Progress</label>
                 </div>
