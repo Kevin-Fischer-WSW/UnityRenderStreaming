@@ -1689,11 +1689,13 @@ let scenePlaylistClearBtn = document.getElementById("scene-playlist-clear-btn");
 let scenePlaylistEditor = document.getElementById("scene-playlist-editor");
 let scenePlaylistKeepBtn = document.getElementById("scene-playlist-keep-btn");
 let scenePlaylistStatusText = document.getElementById("scene-playlist-status-text");
+let scenePlaylistLoopBtn = document.getElementById("scene-playlist-loop-btn");
 
 let sceneSlidePreview = document.getElementById("scene-slide-preview");
 let sceneSelectSlideBtn = document.getElementById("scene-select-slide-btn");
 let sceneSelectSlideDropdown = document.getElementById("scene-select-slide-dropdown");
 let sceneClearSlideBtn = document.getElementById("scene-clear-slide-btn");
+let sceneSlideLoopBtn = document.getElementById("scene-slide-loop-btn");
 
 let sceneStreamStateSelect = document.getElementById("stream-state-select");
 let sceneRecordStateSelect = document.getElementById("record-state-select");
@@ -1868,8 +1870,10 @@ async function saveScene(sceneId, sceneTitle){
     "LayoutCategoryData": layoutCategoryData,
     "LayoutTypeData": layoutTypeData,
     "Slide": slide,
+    "LoopVideo": sceneSlideLoopBtn.classList.contains("active") ? 0 : 1,
     "Music": music,
     "Playlist": playlist,
+    "LoopPlaylist": scenePlaylistLoopBtn.classList.contains("active") ? 0 : 1,
     "Stream": parseInt(stream),
     "Record": parseInt(record),
     "ZoomAudio": parseInt(zoomAudio),
@@ -1898,8 +1902,10 @@ async function openScene(scene){
   let stream = sceneData["Stream"];
   let record = sceneData["Record"];
   let slide = sceneData["Slide"];
+  let loopVideo = sceneData["LoopVideo"] === 0;
   let music = sceneData["Music"];
   let playlist = sceneData["Playlist"];
+  let loopPlaylist = sceneData["LoopPlaylist"] === 0;
   let layoutCategoryData = sceneData["LayoutCategoryData"];
   let layoutTypeData = sceneData["LayoutTypeData"];
   let zoomAudio = sceneData["ZoomAudio"];
@@ -1907,7 +1913,7 @@ async function openScene(scene){
   currentScene.innerHTML = `Open Scene: ${sceneTitle}`;
   currentScene.dataset.sceneId = scene;
 
-      // Set the scene title.
+  // Set the scene title.
   sceneTitleInput.value = sceneTitle;
 
   // Set the layout type.
@@ -1950,6 +1956,12 @@ async function openScene(scene){
 
   // Set the record state.
   sceneRecordStateSelect.value = record;
+  
+  // Set the loop video.
+  setSceneSlideLoopBtnActive(loopVideo);
+
+  // Set the loop playlist.
+  setScenePlaylistLoopBtnActive(loopPlaylist);
 
   sceneProtectedFieldset.disabled = isProtected !== false;
 }
@@ -1973,6 +1985,16 @@ function onClearScenePlaylistBtnClicked() {
   scenePlaylistStatusText.dataset.value = 1;
   scenePlaylistStatusText.innerHTML = "The music player will stop playing.";
   scenePlaylistEditor.innerHTML = "";
+}
+
+function onScenePlaylistLoopBtnClicked() {
+  let active = scenePlaylistLoopBtn.classList.contains("active");
+  setScenePlaylistLoopBtnActive(!active);
+}
+
+function setScenePlaylistLoopBtnActive(active) {
+  scenePlaylistLoopBtn.classList.toggle("active", active);
+  scenePlaylistLoopBtn.innerHTML = active ? `Loop Playlist` : `<s>Loop Playlist</s>`;
 }
 
 function onKeepScenePlaylistBtnClicked() {
@@ -2053,6 +2075,11 @@ async function onSceneSelectSlideBtnClicked() {
   setupDropdown(sceneSelectSlideDropdown, onSceneSlideSelected);
 }
 
+async function onSceneSlideLoopBtnClicked() {
+  let active = sceneSlideLoopBtn.classList.contains("active");
+  setSceneSlideLoopBtnActive(!active);
+}
+
 async function onSceneSlideSelected(elem) {
   setSceneSlidePreview(elem.dataset.url);
 }
@@ -2069,6 +2096,11 @@ function setSceneSlidePreview(url) {
     sceneSlidePreview.src = url;
     sceneSlidePreview.alt = `Holding slide will be updated to ${url}.`;
   }
+}
+
+function setSceneSlideLoopBtnActive(active) {
+  sceneSlideLoopBtn.classList.toggle("active", active);
+  sceneSlideLoopBtn.innerHTML = active ? `Loop Video Player` : `<s>Loop Video Player</s>`;
 }
 
 async function onSceneTabClicked() {
@@ -2196,8 +2228,10 @@ saveAsSceneBtn.addEventListener("click", onSaveAsSceneBtnClicked);
 scenePlaylistKeepBtn.addEventListener("click", onKeepScenePlaylistBtnClicked);
 scenePlaylistAddBtn.addEventListener("click", onScenePlaylistAddBtnClicked);
 scenePlaylistClearBtn.addEventListener("click", onClearScenePlaylistBtnClicked);
+scenePlaylistLoopBtn.addEventListener("click", onScenePlaylistLoopBtnClicked);
 sceneClearSlideBtn.addEventListener("click", onClearSlideBtnClicked);
 sceneSelectSlideBtn.addEventListener("click", onSceneSelectSlideBtnClicked);
+sceneSlideLoopBtn.addEventListener("click", onSceneSlideLoopBtnClicked);
 sceneLayoutTypeSelect.addEventListener("change", onSceneLayoutTypeSelectChanged);
 
 // => INIT(S)
