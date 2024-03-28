@@ -2521,6 +2521,7 @@ let volumeLevelMusic = document.getElementById("music-volume-level");
 let volumeRangeMusic = document.getElementById("volume-range-music");
 
 let musicPlayStopBtn = document.getElementById("music-play-stop-btn");
+let musicLoopBtn = document.getElementById("music-loop-btn");
 
 // => PRIMITIVE AND OTHER TYPES
 let disableMusicProgressUpdates = false;
@@ -2620,20 +2621,25 @@ musicProgress.addEventListener("input", function () {
   currentlyPlayingTrackTime.innerHTML = musicPlaybackTime.innerHTML = convertSecondsToTimestamp(musicProgress.value);
 });
 
-musicProgress.addEventListener("change", function () {
+musicProgress.addEventListener("change", async function () {
   setTimeout(function () {
     disableMusicProgressUpdates = false;
   }, 1000);
-  let str = musicProgress.value;
-  sendStringSubmitEvent(myVideoPlayer, OperatorControls._SeekMusicButton, str);
+  await v2api.put('/musicPlayer', {
+    SeekPosition: parseFloat(musicProgress.value)
+  });
 });
 
-musicPlayStopBtn.addEventListener("click", function () {
-  if (musicPlayStopBtn.innerHTML === `<i class="bi bi-play"></i>`) {
-    sendClickEvent(myVideoPlayer, OperatorControls._PlayHoldingMusic);
-  } else {
-    sendClickEvent(myVideoPlayer, OperatorControls._StopHoldingMusic);
-  }
+musicPlayStopBtn.addEventListener("click", async function () {
+  await v2api.put('/musicPlayer', {
+    Play: !appStatus.playingHoldingMusic
+  });
+});
+
+musicLoopBtn.addEventListener("click", async function () {
+  await v2api.put('/musicPlayer', {
+    Loop: !appStatus.loopingHoldingMusic
+  });
 });
 
 volumeRangeMusic.addEventListener("input", function () {
@@ -3688,6 +3694,9 @@ function appStatusReceived(json) {
     currentlyPlayingSpan.innerHTML = currentlyPlayingSpan.title = appStatus.currentlyPlayingTrack;
     volumeRangeMusic.value = appStatus.holdingMusicVolume;
     volumeLevelMusic.innerHTML = getVolumeLevel(volumeRangeMusic.value);
+    musicLoopBtn.innerHTML = appStatus.loopingHoldingMusic ? 'Loop' : '<s>Loop</s>';
+    musicLoopBtn.classList.toggle("btn-primary", appStatus.loopingHoldingMusic);
+    musicLoopBtn.classList.toggle("btn-dark", !appStatus.loopingHoldingMusic);
 
     //videoFieldsetBar.disabled = !jsonParsed.videoIsShowing;
     volumeRangeVideo.value = appStatus.currentVideoVolume;

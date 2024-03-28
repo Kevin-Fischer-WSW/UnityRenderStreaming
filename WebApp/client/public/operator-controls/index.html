@@ -856,8 +856,10 @@
           <legend class="title text-white mt-2">Music Controls</legend>
           <!-- Play/stop button and volume control -->
           <div class="d-flex w-100 gap-5 mb-3">
-            <button id="music-play-stop-btn" type="button" class="btn btn-secondary m-1" title="Play/Pause"><i
-                class="bi bi-play"></i></button>
+            <div class="btn-group flex-grow-0">
+              <button id="music-play-stop-btn" type="button" class="btn btn-secondary" title="Play/Pause"><i class="bi bi-play"></i></button>
+              <button id="music-loop-btn" type="button" class="btn btn-primary" title="Loop/Unloop music.">Loop</button>
+            </div>
             <div class="input-group w-75">
               <div class="input-group-prepend">
                 <label class="text-white" for="music-progress">Progress</label>
