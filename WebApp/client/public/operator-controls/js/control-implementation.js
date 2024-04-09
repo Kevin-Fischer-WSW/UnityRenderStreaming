@@ -144,6 +144,7 @@ function setupParticipantOnVidCtrl(node, idx) {
   let earEl = document.querySelector(`div#${node.id} .participant-on-vid-ear`);
   let renameEl = document.querySelector(`div#${node.id} a[target="action-rename"]`);
   let showLtEl = document.querySelector(`div#${node.id} a[target="action-show-lt"]`);
+  let maximizeEl = document.querySelector(`div#${node.id} a[target="action-maximize"]`);
 
   node.classList.remove("d-none");
 
@@ -214,6 +215,20 @@ function setupParticipantOnVidCtrl(node, idx) {
     let str = p.id.toString();
     sendStringSubmitEvent(myVideoPlayer, OperatorControls._ToggleParticipantLowerThird, str);
   })
+  
+  maximizeEl.addEventListener("click", async function (ev) {
+    ev.preventDefault();
+    let p = participantJsonParsed[idx];
+    if (appStatus.participantMaximized) {
+      await v2api.put('/previewPanel', {
+        ShowAllParticipants: true,
+      });
+    } else {
+      await v2api.put('/previewPanel', {
+        ExclusiveParticipantID: p.id,
+      });
+    }
+  });
 }
 
 function setupScreenShareOnVidCtrl() {
@@ -256,8 +271,10 @@ function validateParticipantOnVidCtrls() {
   }
   let validateCtrl = function (ctrl, data) {
     let earEl = ctrl.querySelector(`.participant-on-vid-ear`);
+    let maximizeEl = ctrl.querySelector(`a[target="action-maximize"]`);
     if (appStatus !== undefined){
       earEl.style.pointerEvents = appStatus.currentZoomAudioMethod === "mixed" ? "none" : "auto";
+      maximizeEl.innerHTML = appStatus.participantMaximized ? "Show hidden participants" : "Maximize";
     }
     ctrl.style.top = (100 * data.top) + "%";
     ctrl.style.left = (100 * data.left) + "%";
