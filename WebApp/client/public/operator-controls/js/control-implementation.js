@@ -687,7 +687,7 @@ streamControlLoadSceneBtn.addEventListener("click", onStreamControlLoadSceneBtnC
 
 // => METHODS
 function onArchiveClick() {
-  let sceneId = appStatus.holdingSlide !== "Conclusion" ? "outro" : "end";
+  let sceneId = appStatus.lastSceneLoaded === "Conclusion" && appStatus.isCustomSlide === false ? "end" : "outro";
   loadScene(sceneId).then((result) => {
     if (result.success && sceneId === "end") {
       Feedback.alertSuccess("Success: Stream ended.");
@@ -696,7 +696,7 @@ function onArchiveClick() {
 }
 
 function onLateClick() {
-  let sceneId = appStatus.holdingSlide !== "Late" ? "late" : "live";
+  let sceneId = appStatus.lastSceneLoaded !== "Late" ? "late" : "live";
   loadScene(sceneId).then((result) => {
     console.log(`Load late scene result: ${result}`);
   });
@@ -709,7 +709,7 @@ function onLiveClick() {
 }
 
 function onPendingClick() {
-  let sceneId = appStatus.holdingSlide !== "Intro" ? "intro" : "live";
+  let sceneId = appStatus.lastSceneLoaded !== "Intro" ? "intro" : "live";
   loadScene(sceneId).then((result) => {
     if (result.success && sceneId === "live") {
       Feedback.alertSuccess("Success: Stream started.");
@@ -722,7 +722,7 @@ async function onStreamControlLoadSceneBtnClicked() {
 }
 
 function onTechnicalDiff() {
-  let sceneId = appStatus.holdingSlide !== "TechnicalDifficulties" ? "techdiff" : "live";
+  let sceneId = appStatus.lastSceneLoaded !== "Tech Diff" ? "techdiff" : "live";
   loadScene(sceneId).then((result) => {
     console.log(`Load technical difficulties scene result: ${result}`);
   });
@@ -793,28 +793,23 @@ function updateStreamButtons() {
   intro_preview.removeAttribute("data-bs-toggle");
   intro_preview.addEventListener("click", onPendingClick);
 
-  if (appStatus.holdingSlide === "Intro") {
+  if (appStatus.lastSceneLoaded === "Intro") {
     pendingBtn.innerHTML = `Intro Slide <i class="bi bi-broadcast"></i>`;
     StyleHelper.ActivateButtonHelper(pendingBtn, true);
-  } else if (appStatus.holdingSlide === "Late") {
+  } else if (appStatus.lastSceneLoaded === "Late") {
     lateBtn.innerHTML = `Late <i class="bi bi-broadcast"></i>`;
     StyleHelper.ActivateButtonHelper(lateBtn, true);
-  } else if (appStatus.holdingSlide === "TechnicalDifficulties") {
+  } else if (appStatus.lastSceneLoaded === "Tech Diff") {
     technicalDiffBtn.innerHTML = `Technical Difficulties <i class="bi bi-broadcast"></i>`;
     StyleHelper.ActivateButtonHelper(technicalDiffBtn, true);
+  } else if (appStatus.lastSceneLoaded === "Conclusion" && appStatus.isCustomSlide === false) {
+    StyleHelper.ActivateButtonHelper(archiveBtn, true);
+    archiveBtn.innerHTML = `End Stream <i class="bi bi-broadcast"></i>`;
   } else if (appStatus.holdingSlide === "none" || appStatus.isCustomSlide) {
     liveBtn.innerHTML = `Live <i class="bi bi-broadcast"></i>`;
     StyleHelper.ActivateButtonHelper(liveBtn, true);
-  } else if (appStatus.holdingSlide === "Conclusion") {
-    StyleHelper.ActivateButtonHelper(archiveBtn, true);
   } else {
     resetStreamButtonsOnLeaveOrEnd();
-  }
-
-  if (appStatus.secondClickEndsStream) {
-    archiveBtn.innerHTML = `End Stream <i class="bi bi-broadcast"></i>`;
-  } else {
-    archiveBtn.innerHTML = "Conclusion Slide";
   }
 }
 
