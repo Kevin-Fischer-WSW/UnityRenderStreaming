@@ -17,6 +17,25 @@ export function get(endpoint){
   })
 }
 
+export function del(endpoint){
+  return fetch(`/uapp/v2${endpoint}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+}
+
+export function post(endpoint, body){
+  return fetch(`/uapp/v2${endpoint}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  })
+}
+
 export function checkErrorCode(respData, code){
   if (respData.ErrorCode === code){
     return true;

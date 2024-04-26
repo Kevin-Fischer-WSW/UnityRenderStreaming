@@ -54,10 +54,12 @@ function createUserInputFeedbackAlert(parent, message, type) {
     parent = defaultParentElement;
   }
   parent.appendChild(alert);
+  bootstrap.Alert.getOrCreateInstance(alert)
   // Remove alert after 5 seconds.
   setTimeout(() => {
-    // Remove alert from the DOM by pressing dismiss button.
-    alert.querySelector(".btn-close").click();
+    // Remove alert from the DOM.
+    let inst = bootstrap.Alert.getInstance(alert)
+    inst.close()
   }, 5000);
   // Remove alert from the active alerts list.
   alert.addEventListener("closed.bs.alert", function () {

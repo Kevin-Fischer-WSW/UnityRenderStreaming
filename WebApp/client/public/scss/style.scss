@@ -189,8 +189,18 @@ $body-bg: #616161;
   cursor: pointer;
 }
 
-#pending-btn:hover, #live-btn:hover, 
-#technical-diff-btn:hover, #archive-btn:hover {
+#stream-control-load-scene-btn {
+  background-color: #73ace3;
+  //border: 2px solid #3D3D3D;
+  height: 70px;
+  width: 150px;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+#pending-btn:hover, #late-btn:hover, #live-btn:hover, 
+#technical-diff-btn:hover, #archive-btn:hover,
+#stream-control-load-scene-btn:hover {
   font-size: 21px;
   transition: font-size .08s ease-in-out;
 }
@@ -873,7 +883,7 @@ button, input, optgroup, select, textarea {
   max-width: 100%;
 }
 
-#layout-schema-editor div h3 label {
+.je-object__title label{
   color: white;
 }
 

@@ -296,7 +296,37 @@
       </div>
     </div>
   </div>
+  
+  <!-- Save Scene As Modal -->
+  <div class="modal fade" id="save-scene-as-modal" tabindex="-1" aria-labelledby="save-scene-as-modal-label"
+       aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-light">
+          <h5 class="modal-title" id="save-scene-as-modal-label">Save Scene As</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" title="Close"></button>
+        </div>
 
+        <!-- Save Scene As modal body -->
+        <div class="modal-body">
+          <div class="form-floating">
+            <input type="text" class="form-control" id="scene-name-save-as-input" placeholder="Scene Name">
+            <label for="scene-name-save-as-input">Scene Name</label>
+          </div>
+          <!-- Save scene as alert container -->
+          <div id="scene-save-as-alerts" class="sticky-lg-bottom"></div>
+        </div>
+
+        <!-- Save Scene As modal footer -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" title="Close">Close</button>
+          <button id="save-scene-as-btn" type="button" class="btn btn-secondary" title="Save">Save</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  
   <div class="bg-secondary text-white rounded-bottom flex-shrink-0">
     <button id="stream-settings" class="btn border-0 m-0" data-bs-toggle="modal" data-bs-target="#stream-pref-modal"
             title="Settings"><i class="bi bi-gear-fill"></i></button>
@@ -336,6 +366,7 @@
               <li><a target="action-rename" class="dropdown-item" href="#" data-bs-toggle="modal"
                   data-bs-target="#rename-modal">Rename</a></li>
               <li><a target="action-show-lt" class="dropdown-item" href="#">Show/Hide lower third</a></li>
+              <li><a target="action-maximize" class="dropdown-item" href="#">Maximize</a></li>
             </ul>
 
             <div class="participant-on-vid-eye" title="Hide/Unhide participant"></div>
@@ -384,19 +415,28 @@
   </div>
 
   <!-- Stream control buttons -->
-  <div id="stream-btn-grp" class="container btn-group d-flex w-25 mt-2">
-    <button id="pending-btn" class="btn btn-lg text-black rounded" data-bs-toggle="modal"
-      data-bs-target="#stream-confirmation-modal" title="Begin live stream with introduction slide">Start
-      Stream</button>
-    <button id="late-btn" class="btn btn-lg text-black d-none"
-      title="Stream late slide">Late</button>
-    <button id="live-btn" class="btn btn-lg text-black d-none"
-      title="Go live with presenters&#013;Clear any presentation slide or video from output">Live</button>
-    <button id="technical-diff-btn" class="btn btn-lg text-black d-none" title="Stream tech diff slide">Technical
-      Difficulty</button>
-    <button id="archive-btn" class="btn btn-lg text-black d-none"
-      title="Stream conclusion slide&#013;Second click ends live stream">Conclusion Slide</button>
+  <div class="container-fluid d-flex mt-2">
+    <div class="flex-grow-1"></div>
+    <div id="stream-btn-grp" class="btn-group flex-grow-1">
+      <button id="pending-btn" class="btn btn-lg text-black rounded" data-bs-toggle="modal"
+              data-bs-target="#stream-confirmation-modal" title="Begin live stream with introduction slide">Start
+        Stream</button>
+      <button id="late-btn" class="btn btn-lg text-black d-none"
+              title="Stream late slide">Late</button>
+      <button id="live-btn" class="btn btn-lg text-black d-none"
+              title="Go live with presenters&#013;Clear any presentation slide or video from output">Live</button>
+      <button id="technical-diff-btn" class="btn btn-lg text-black d-none" title="Stream tech diff slide">Technical
+        Difficulty</button>
+      <button id="archive-btn" class="btn btn-lg text-black d-none"
+              title="Stream conclusion slide&#013;Second click ends live stream">Conclusion Slide</button>
+    </div>
+    <div class="btn-group flex-grow-0">
+        <button id="stream-control-load-scene-btn" class="btn btn-lg text-black ms-2 rounded" title="Loads a custom scene" data-bs-toggle="dropdown">Load Scene</button>
+        <ul id="stream-control-load-scene-dropdown" class="dropdown-menu" aria-labelledby="stream-control-load-scene-btn"></ul>
+    </div>
+    <div class="flex-grow-1"></div>
   </div>
+  
 
   <!-- Operator Control Tabs -->
   <div class="container mt-4">
@@ -412,6 +452,10 @@
         <button class="nav-link" id="nav-layout-tab" data-bs-toggle="tab" data-bs-target="#nav-layout"
           type="button" role="tab" aria-controls="nav-layout" aria-selected="false"
           title="Customize participant layout">Layout
+        </button>
+        <button class="nav-link" id="nav-scenes-tab" data-bs-toggle="tab" data-bs-target="#nav-scenes"
+                type="button" role="tab" aria-controls="nav-scenes" aria-selected="false"
+                title="Manage scenes.">Scenes
         </button>
         <button class="nav-link" id="nav-slide-tab" data-bs-toggle="tab" data-bs-target="#nav-slide" type="button"
           role="tab" aria-controls="nav-slide" aria-selected="false"
@@ -430,6 +474,9 @@
         </button>
         <button class="nav-link d-none" id="nav-log-tab" data-bs-toggle="tab" data-bs-target="#nav-log" type="button"
           role="tab" aria-controls="nav-log" aria-selected="false" title="Application debug logs">Log
+        </button>
+        <button class="nav-link" id="nav-slack-tab" data-bs-toggle="tab" data-bs-target="#nav-slack" type="button"
+                role="tab" aria-controls="nav-slack" aria-selected="false" title="Post messages to Slack automatically.">Slack
         </button>
         <button class="nav-link" id="nav-upload-tab" data-bs-toggle="tab" data-bs-target="#nav-upload" type="button"
           role="tab" aria-controls="nav-upload" aria-selected="false" title="Upload files">Upload
@@ -524,22 +571,18 @@
       <div class="tab-pane fade" id="nav-layout" role="tabpanel" aria-labelledby="nav-layout-tab">
         <fieldset id="layout-fieldset">
           <legend class="title text-white mt-2">Layout controls</legend>
+          <!-- Layout dropdown menu -->
           <button id="layout-btn" class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
             aria-expanded="false" title="Select layout">
             Layout
           </button>
-          <!-- Layout dropdown menu -->
           <ul id="layout-dropdown" class="dropdown-menu" aria-labelledby="layout-btn">
-            <li value="0" data-title="Default"><a class="dropdown-item">Videos Only</a></li>
-            <li value="1" data-title="Screen Share Horizontal" data-preset="Videos Left"><a class="dropdown-item">Screen
-                Share - Videos Left</a></li>
-            <li value="2" data-title="Screen Share Horizontal" data-preset="Videos Right"><a
-                class="dropdown-item">Screen Share - Videos Right</a></li>
-            <li value="3" data-title="Screen Share Vertical" data-preset="Videos Top"><a class="dropdown-item">Screen
-                Share - Videos Top</a></li>
-            <li value="4" data-title="Screen Share Vertical" data-preset="Videos Bottom"><a class="dropdown-item">Screen
-                Share - Videos Bottom</a></li>
-            <li value="5" data-title="Full Screen Screen Share"><a class="dropdown-item">Screen Share Only</a></li>
+            <li data-type="simple"><a class="dropdown-item">Videos Only</a></li>
+            <li data-type="hScreenShare" data-videos-left="true"><a class="dropdown-item">Screen Share - Videos Left</a></li>
+            <li data-type="hScreenShare" data-videos-left="false"><a class="dropdown-item">Screen Share - Videos Right</a></li>
+            <li data-type="vScreenShare" data-videos-top="true"><a class="dropdown-item">Screen Share - Videos Top</a></li>
+            <li data-type="vScreenShare" data-videos-top="false"><a class="dropdown-item">Screen Share - Videos Bottom</a></li>
+            <li data-type="fullScreenScreenShare"><a class="dropdown-item">Screen Share Only</a></li>
           </ul>
           <!-- Text size dropdown menu -->
           <button id="text-size-btn" class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
@@ -547,10 +590,10 @@
             Text Size
           </button>
           <ul id="text-size-dropdown" class="dropdown-menu" aria-labelledby="text-size-btn">
-            <li value="0"><a class="dropdown-item">Large</a></li>
-            <li value="1"><a class="dropdown-item">Medium</a></li>
-            <li value="2"><a class="dropdown-item">Small</a></li>
-            <li value="3"><a class="dropdown-item">Hidden</a></li>
+            <li data-value="Large"><a class="dropdown-item">Large</a></li>
+            <li data-value="Medium"><a class="dropdown-item">Medium</a></li>
+            <li data-value="Small"><a class="dropdown-item">Small</a></li>
+            <li data-value="None"><a class="dropdown-item">Hidden</a></li>
           </ul>
           <!-- Screen share size dropdown menu -->
           <button id="screen-share-size-btn" class="btn btn-secondary dropdown-toggle" type="button"
@@ -568,8 +611,7 @@
             Lower Thirds Style
           </button>
           <ul id="lower-thirds-style-dropdown" class="dropdown-menu" aria-labelledby="lower-thirds-style-btn">
-            <li value="0" data-title="Staggered"><a class="dropdown-item">Staggered</a></li>
-            <li value="1" data-title="Plain Zoom"><a class="dropdown-item">Classic Zoom</a></li>
+            <!-- Contents will be generated by JS -->
           </ul>
           <!-- Screen share crop button -->
           <button id="crop-screen-share-btn" class="btn btn-secondary" type="button" data-bs-toggle="modal"
@@ -577,7 +619,7 @@
           <!-- Screen share crop modal -->
           <div class="modal fade" id="screen-share-crop-modal" tabindex="-1" aria-labelledby="exampleModalLabel"
             aria-hidden="true">
-            <div class="modal-dialog">
+            <div class="modal-dialog mw-100">
               <div class="modal-content">
                 <div class="modal-header">
                   <h1 class="modal-title fs-5" id="exampleModalLabel">Crop screen share</h1>
@@ -585,8 +627,8 @@
                     title="Close"></button>
                 </div>
                 <div class="modal-body">
-                  <img id="crop-screen-share-preview" src="uapp/getScreenShareImage?t=0"
-                    alt="This is supposed to be a preview of the screen share texture" style="width: 100%">
+                  <img id="crop-screen-share-preview" class="d-flex justify-content-evenly w-100" src="uapp/getScreenShareImage?t=0"
+                    alt="This is supposed to be a preview of the screen share texture" style="image-rendering: pixelated">
                   <div id="crop-screen-share-preview-caption" class="figure-caption">Hold shift to unlock aspect ratio.</div>
 
                 </div>
@@ -604,10 +646,116 @@
           <select id="edit-style-select" class="form-select" aria-label="Slide select">
             <!-- Contents will be generated by JS -->
           </select>
-          <div id="layout-schema-editor">
+          <div id="layout-schema-editor" class="editor">
             <!-- Contents will be generated by JS -->
           </div>
         </fieldset>
+      </div>
+      <!-- Scenes controls -->
+      <div class="tab-pane fade" id="nav-scenes" role="tabpanel" aria-labelledby="nav-scenes-tab">
+        <h3 class="title text-white mt-2">Load Scene</h3>
+          <button id="load-custom-scene-btn" type="button" class="btn btn-secondary" data-bs-toggle="dropdown" title="Select a custom scene to load">Load Custom Scene</button>
+          <button id="load-scene-btn" type="button" class="btn btn-secondary" data-bs-toggle="dropdown" title="Select a scene to load">Load Scene</button>
+          <ul id="load-scene-dropdown" class="dropdown-menu" aria-labelledby="load-scene-btn"></ul>
+        <h3 class="title text-white mt-2">Create or Update scenes</h3>
+        <!-- Current scene display -->
+        <div id="current-scene" class="text-white">Open a scene to begin editing.</div>
+        <!-- Button group to select "Open" "Save" "Save As" or "Delete" -->
+        <div class="btn-group w-100 mt-2" role="group" aria-label="Scene actions">
+          <button id="open-scene-btn" type="button" class="btn btn-secondary" data-bs-toggle="dropdown" title="Open Scene">Open</button>
+          <button id="delete-scene-btn" type="button" class="btn btn-secondary" data-bs-toggle="dropdown" title="Delete Scene">Delete</button>
+          <ul id="open-scene-dropdown" class="dropdown-menu" aria-labelledby="open-scene-btn"></ul>
+          <button id="save-scene-btn" type="button" class="btn btn-secondary" title="Save Scene">Save</button>
+          <button id="save-as-scene-btn" type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#save-scene-as-modal" title="Save Scene As">Save As</button>
+        </div>
+        <fieldset id="scenes-fieldset" class="d-none">
+          <!-- Scene name input -->
+          <div class="form-floating m-2">
+            <input type="text" class="form-control" id="scene-name-input" placeholder="Scene Name">
+            <label for="scene-name-input">Scene Name</label>
+          </div>
+          <!-- Create two columns. First column will have a slide preview and a button to select the slide. Second column will have the playlist editor. -->
+          <div class="row mt-2">
+            <div class="col-6">
+              <img id="scene-slide-preview" class="w-100 bg-white rounded" src="..." alt="Holding slide will be kept." style="aspect-ratio: 16/9">
+              <div class="d-flex">
+                <button id="scene-select-slide-btn" class="btn btn-secondary mt-2 flex-grow-1" type="button"
+                        data-bs-toggle="dropdown" title="Select Slide">Select Slide</button>
+                <ul id="scene-select-slide-dropdown" class="dropdown-menu" aria-labelledby="scene-select-slide-dropdown"></ul>
+                <button id="scene-clear-slide-btn" class="btn btn-secondary mt-2 ms-1" type="button"
+                        title="Clear Slide">Clear Slide</button>
+              </div>
+              <div class="d-flex">
+                <button id="scene-slide-loop-btn" class="btn btn-secondary mt-2 flex-grow-1" type="button"
+                        title="Select Slide">Loop Video Player</button>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="w-100 bg-white rounded p-2" style="aspect-ratio: 16/9">
+                <div id="scene-playlist-status-text" class="text-center w-100">The music player will keep playing.</div>
+                <ul id="scene-playlist-editor" class="list-group list-group-flush"></ul>
+              </div>
+              <div class="d-flex">
+                <button id="scene-playlist-add-btn" class="btn btn-secondary mt-2 flex-grow-1" type="button"
+                        data-bs-toggle="dropdown" title="Add Track">Add Track</button>
+                <ul id="scene-playlist-add-dropdown" class="dropdown-menu" aria-labelledby="scene-playlist-add-dropdown"></ul>
+                <button id="scene-playlist-keep-btn" class="btn btn-secondary mt-2 ms-1" type="button"
+                        title="Keep Playlist">Keep Playlist</button>
+                <button id="scene-playlist-clear-btn" class="btn btn-secondary mt-2 ms-1" type="button"
+                        title="Clear Playlist">Clear Playlist</button>
+              </div>
+              <div class="d-flex">
+                <button id="scene-playlist-loop-btn" class="btn btn-secondary mt-2 flex-grow-1" type="button"
+                        title="Add Track">Loop Playlist</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Display layout type select -->
+          <h6 class="text-white">Layout</h6>
+          <select id="scene-layout-type-select" class="form-select" aria-label="Display layout select">
+            <!-- Contents will be generated by JS -->
+          </select>
+          <div class="row mt-2">
+            <div class="col-6">
+              <!-- Display layout category editor -->
+              <div id="scene-layout-category-schema-editor">
+                <!-- Contents will be generated by JS -->
+              </div>
+            </div>
+            <div class="col-6">
+              <!-- Display layout type editor -->
+              <div id="scene-layout-type-schema-editor">
+                <!-- Contents will be generated by JS -->
+              </div>
+            </div>
+          </div>
+
+          <fieldset id="scene-protected-fields">
+          <!-- Stream state drop down -->
+          <h6 class="text-white">Stream State</h6>
+          <select id="stream-state-select" class="form-select" aria-label="Stream state select">
+            <option value="0">Start</option>
+            <option value="1">Stop</option>
+            <option selected value="2">Keep</option>
+          </select>
+          <!-- Record state drop down -->
+          <h6 class="text-white">Record State</h6>
+          <select id="record-state-select" class="form-select" aria-label="Record state select">
+            <option value="0">Start Or Resume</option>
+            <option value="1">Pause</option>
+            <option value="2">Stop</option>
+            <option selected value="3">Keep</option>
+          </select>
+          <!-- Zoom Audio select -->
+          <h6 class="text-white">Zoom Audio</h6>
+          <select id="zoom-audio-select" class="form-select" aria-label="Zoom audio select">
+            <option value="0">Mute</option>
+            <option value="1">Unmute</option>
+            <option selected value="2">Keep</option>
+          </select>
+          </fieldset>
+          </fieldset>
       </div>
       <!-- Slide controls -->
       <div class="tab-pane fade" id="nav-slide" role="tabpanel" aria-labelledby="nav-slide-tab">
@@ -666,7 +814,13 @@
                   <div class="input-group-prepend">
                     <label class="text-white" for="volume-range-music">Zoom Volume Level</label>
                   </div>
-                  <input type="range" class="custom-range w-100" min="0" max="1" step="0.01" id="volume-range-zoom">
+                  <input type="range" class="custom-range w-100" min="0" max="1" step="0.001" id="volume-range-zoom">
+                  <div class="w-100 position-relative" style="height: 1.5em; pointer-events: none">
+                    <div class="position-absolute text-white" style="left: 56.3%">|</div>
+                    <div class="position-absolute text-white" style="left: 31.8%">|</div>
+                    <div class="position-absolute text-white" style="left: 10.3%">|</div>
+                    <div class="position-absolute text-white" style="left: 1.9%">|</div>
+                  </div>
                   <span id="zoom-volume-level" class="text-white"></span>
                 </div>
                 <button id="toggle-zoom-audio-mute-btn" class="btn btn-light mt-4" type="button" title="Mute/Unmute audio">
@@ -678,7 +832,13 @@
                   <div class="input-group-prepend">
                     <label class="text-white" for="volume-range-music">Master Volume Level</label>
                   </div>
-                  <input type="range" class="custom-range w-100" min="0" max="1" step="0.01" id="volume-range-master">
+                  <input type="range" class="custom-range w-100" min="0" max="1" step="0.001" id="volume-range-master">
+                  <div class="w-100 position-relative" style="height: 1.5em; pointer-events: none">
+                    <div class="position-absolute text-white" style="left: 56.3%">|</div>
+                    <div class="position-absolute text-white" style="left: 31.8%">|</div>
+                    <div class="position-absolute text-white" style="left: 10.3%">|</div>
+                    <div class="position-absolute text-white" style="left: 1.9%">|</div>
+                  </div>
                   <span id="master-volume-level" class="text-white"></span>
                 </div>
                 <button id="toggle-master-audio-mute-btn" class="btn btn-light mt-4" type="button" title="Mute/Unmute audio">
@@ -697,8 +857,10 @@
           <legend class="title text-white mt-2">Music Controls</legend>
           <!-- Play/stop button and volume control -->
           <div class="d-flex w-100 gap-5 mb-3">
-            <button id="music-play-stop-btn" type="button" class="btn btn-secondary m-1" title="Play/Pause"><i
-                class="bi bi-play"></i></button>
+            <div class="btn-group flex-grow-0">
+              <button id="music-play-stop-btn" type="button" class="btn btn-secondary" title="Play/Pause"><i class="bi bi-play"></i></button>
+              <button id="music-loop-btn" type="button" class="btn btn-primary" title="Loop/Unloop music.">Loop</button>
+            </div>
             <div class="input-group w-75">
               <div class="input-group-prepend">
                 <label class="text-white" for="music-progress">Progress</label>
@@ -778,10 +940,13 @@
           <fieldset id="video-fieldset-bar">
             <!-- Video controls bar -->
             <div class="d-flex w-100 gap-5 mb-3">
-              <button id="video-play-stop-btn" type="button" class="btn btn-secondary" title="Play/Pause"><i
-                  class="bi bi-play"></i></button>
+              <div class="btn-group flex-grow-0">
+                <button id="video-play-stop-btn" type="button" class="btn btn-secondary" title="Play/Pause"><i
+                        class="bi bi-play"></i></button>
+                <button id="video-loop-btn" type="button" class="btn btn-primary" title="Loop/Unloop video.">Loop</button>
+              </div>
 
-              <div class="input-group w-75">
+              <div class="input-group flex-grow-1">
                 <div class="input-group-prepend">
                   <label class="text-white" for="video-progress">Progress</label>
                 </div>
@@ -854,6 +1019,23 @@
               <option selected value="none">None Selected</option>
             </select>
             <button id="log-download-btn" class="btn btn-secondary" type="button" title="Download">Download Log</button>
+          </div>
+        </fieldset>
+      </div>
+      <!-- Slack controls -->
+      <div class="tab-pane fade" id="nav-slack" role="tabpanel" aria-labelledby="nav-slack-tab">
+        <fieldset id="slack-fieldset">
+          <legend class="title text-white mt-2">Slack</legend>
+          <div class="input-group">
+            <label class="input-group-text" for="slack-channel-input">Channel</label>
+            <input id="slack-channel-input" list="slack-channel-datalist" type="text" class="form-control" 
+                   placeholder="Enter channel name or id." aria-label="Channel">
+            <datalist id="slack-channel-datalist">
+              <!-- Options will be generated from code -->
+            </datalist>
+            <button id="slack-set-channel-btn" class="btn btn-secondary" type="button" title="Set Channel">Set Channel</button>
+            <!-- Test Post Message -->
+            <button id="slack-test-post-message-btn" class="btn btn-secondary" type="button" title="Posts a message to the channel you assigned.">Test Channel</button>
           </div>
         </fieldset>
       </div>

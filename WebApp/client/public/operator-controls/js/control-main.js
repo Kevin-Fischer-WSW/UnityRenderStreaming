@@ -96,10 +96,12 @@ async function setup() {
     ev.stopPropagation();
   })
   muteOutputSlider.addEventListener('input', function () {
+    let elementPreviewVideo = document.getElementById('preview-video');
     elementPreviewVideo.volume = muteOutputSlider.value / 100;
     muteInputSlider.value = muteOutputSlider.value;
   });
   muteInputSlider.addEventListener('input', function () {
+    let elementPreviewVideo = document.getElementById('preview-video');
     elementPreviewVideo.volume = muteInputSlider.value / 100;
     muteOutputSlider.value = muteInputSlider.value;
   });
