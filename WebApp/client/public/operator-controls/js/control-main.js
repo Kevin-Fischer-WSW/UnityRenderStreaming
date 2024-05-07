@@ -67,10 +67,9 @@ async function setup() {
     let elementPreviewVideo = document.getElementById('preview-video');
     elementPreviewVideo.muted = false;
     let audioTracks = myVideoPlayer.videoAudioTracks;
-    if (audioTracks.length !== 3) return;
-    // Toggle first and third audio track.
+    if (audioTracks.length !== 2) return;
+    // Toggle first audio track.
     audioTracks[0].enabled = !audioTracks[0].enabled;
-    audioTracks[2].enabled = audioTracks[0].enabled;
     muteOutputIcon.classList.add(audioTracks[0].enabled ? "bi-volume-up" : "bi-volume-mute")
     muteOutputIcon.classList.remove(audioTracks[0].enabled ? "bi-volume-mute" : "bi-volume-up")
     muteOutputSlider.classList.add(audioTracks[0].enabled ? "d-block" : "d-none")
@@ -84,7 +83,7 @@ async function setup() {
     let elementPreviewVideo = document.getElementById('preview-video');
     elementPreviewVideo.muted = false;
     let audioTracks = myVideoPlayer.videoAudioTracks;
-    if (audioTracks.length !== 3) return;
+    if (audioTracks.length !== 2) return;
     // Toggle second audio track.
     audioTracks[1].enabled = !audioTracks[1].enabled;
     muteInputIcon.classList.add(audioTracks[1].enabled ? "bi-volume-up" : "bi-volume-mute")
