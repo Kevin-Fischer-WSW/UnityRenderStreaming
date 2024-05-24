@@ -818,6 +818,7 @@
           <div class="container">
             <div class="row">
               <div class="col-sm">
+                <!-- Volume control for Zoom -->
                 <div class="input-group w-100">
                   <div class="input-group-prepend">
                     <label class="text-white" for="volume-range-music">Zoom Volume Level</label>
@@ -831,6 +832,7 @@
                   </div>
                   <span id="zoom-volume-level" class="text-white"></span>
                 </div>
+                <!-- Mute/Unmute button for Zoom -->
                 <button id="toggle-zoom-audio-mute-btn" class="btn btn-light mt-4" type="button" title="Mute/Unmute audio">
                   Mute
                 </button>
@@ -853,10 +855,77 @@
                   Mute
                 </button>
               </div>
-
+              <h2 class="title text-white">Compressor Controls</h2>
+              <div class="col-sm">
+                <!-- Threshold control for master compressor -->
+                <div class="input-group w-100">
+                  <div class="input-group-prepend">
+                    <label class="text-white" for="compressor-master-threshold">Master Threshold</label>
+                  </div>
+                  <input type="range" class="custom-range w-100" min="-60" max="0" step="1" id="compressor-master-threshold">
+                  <span id="compressor-master-threshold-level" class="text-white"></span>
+                </div>
+                <!-- Attack control for master compressor -->
+                <div class="input-group w-100">
+                  <div class="input-group-prepend">
+                    <label class="text-white" for="compressor-master-attack">Master Attack</label>
+                  </div>
+                  <input type="range" class="custom-range w-100" min="10" max="200" step="1" id="compressor-master-attack">
+                  <span id="compressor-master-attack-level" class="text-white"></span>
+                </div>
+                <!-- Release control for master compressor -->
+                <div class="input-group w-100">
+                  <div class="input-group-prepend">
+                    <label class="text-white" for="compressor-master-release">Master Release</label>
+                  </div>
+                  <input type="range" class="custom-range w-100" min="10" max="1000" step="1" id="compressor-master-release">
+                  <span id="compressor-master-release-level" class="text-white"></span>
+                </div>
+                <!-- Make up gain control for master compressor -->
+                <div class="input-group w-100">
+                  <div class="input-group-prepend">
+                    <label class="text-white" for="compressor-master-gain">Make up Gain</label>
+                  </div>
+                  <input type="range" class="custom-range w-100" min="0" max="30" step="1" id="compressor-master-gain">
+                  <span id="compressor-master-gain-level" class="text-white"></span>
+                </div>
+              </div>
+              <div class="col-sm">
+                <!-- Threshold control for zoom compressor -->
+                <div class="input-group w-100">
+                  <div class="input-group-prepend">
+                    <label class="text-white" for="compressor-zoom-threshold">Zoom Threshold</label>
+                  </div>
+                  <input type="range" class="custom-range w-100" min="-60" max="0" step="1" id="compressor-zoom-threshold">
+                  <span id="compressor-zoom-threshold-level" class="text-white"></span>
+                </div>
+                <!-- Attack control for zoom compressor -->
+                <div class="input-group w-100">
+                  <div class="input-group-prepend">
+                    <label class="text-white" for="compressor-zoom-attack">Zoom Attack</label>
+                  </div>
+                  <input type="range" class="custom-range w-100" min="10" max="200" step="1" id="compressor-zoom-attack">
+                  <span id="compressor-zoom-attack-level" class="text-white"></span>
+                </div>
+                <!-- Release control for zoom compressor -->
+                <div class="input-group w-100">
+                  <div class="input-group-prepend">
+                    <label class="text-white" for="compressor-zoom-release">Zoom Release</label>
+                  </div>
+                  <input type="range" class="custom-range w-100" min="10" max="1000" step="1" id="compressor-zoom-release">
+                  <span id="compressor-zoom-release-level" class="text-white"></span>
+                </div>
+                <!-- Make up gain control for zoom compressor -->
+                <div class="input-group w-100">
+                  <div class="input-group-prepend">
+                    <label class="text-white" for="compressor-zoom-gain">Zoom Make up Gain</label>
+                  </div>
+                  <input type="range" class="custom-range w-100" min="0" max="30" step="1" id="compressor-zoom-gain">
+                  <span id="compressor-zoom-gain-level" class="text-white"></span>
+                </div>
+              </div>
             </div>
           </div>
-
         </fieldset>
       </div>
       <!-- Hold Music controls -->
