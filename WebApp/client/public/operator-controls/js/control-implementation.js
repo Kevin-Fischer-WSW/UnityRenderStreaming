@@ -20,6 +20,7 @@ Feedback.setDefaultParentElement(document.getElementById("alert-container"));
 
 mainNotifications.addEventListener('setup', function () {
   myVideoPlayer.onParticipantDataReceived = participantDataReceived;
+  myVideoPlayer.onCompressorDataReceived = onCompressorDataReceived;
   myVideoPlayer.onAppStatusReceived = appStatusReceived;
   myVideoPlayer.onStyleUpdateNotification = onStyleUpdateNotification;
   myVideoPlayer.onLogMessageNotification = onLogMessageNotification;
@@ -2458,6 +2459,13 @@ slideSwitchBtn.style.display = "none";
 FetchAssignedHoldingSlidesAndUpdatePreviews(); // Update previews on load.
 
 /* HELPER METHODS - MUSIC & VIDEO*/
+function convertMilisecondsToTimestamp(ms) {  
+  let hh = Math.floor(ms / 3600000);
+  let mm = Math.floor(ms / 60000);
+  let ss = Math.floor(ms / 1000);
+  return `${hh < 10 ? "0" + hh : hh}:${mm < 10 ? "0" + mm : mm}:${ss < 10 ? "0" + ss : ss}`;
+}
+
 function convertSecondsToTimestamp(sec) {
   let hh = Math.floor(sec / 3600);
   let mm = Math.floor(sec / 60);
@@ -2498,32 +2506,65 @@ let compressorZoomReleaseLevel = document.getElementById("compressor-zoom-releas
 let compressorZoomGainLevel = document.getElementById("compressor-zoom-gain-level");
 
 // => METHODS
-function onToggleZoomAudioMuteClicked() {
-  if (appStatus.zoomAudioMuted) {
-    unityFetch(`/unmuteZoomAudio`, { method: "PUT" });
-  } else {
-    unityFetch(`/muteZoomAudio`, { method: "PUT" });
+function onCompressorDataReceived(data) {
+  let json = JSON.parse(data);
+  compressorMasterThreshold.value = json["masterCompressorData"]["compThreshold"];
+  compressorMasterAttack.value = json["masterCompressorData"]["compAttack"];
+  compressorMasterRelease.value = json["masterCompressorData"]["compRelease"];
+  compressorMasterGain.value = json["masterCompressorData"]["compMakeupGain"];
+  compressorZoomThreshold.value = json["zoomCompressorData"]["compThreshold"];
+  compressorZoomAttack.value = json["zoomCompressorData"]["compAttack"];
+  compressorZoomRelease.value = json["zoomCompressorData"]["compRelease"];
+  compressorZoomGain.value = json["zoomCompressorData"]["compMakeupGain"];
+  compressorMasterThresholdLevel.innerHTML = getVolumeLevel(json["masterCompressorData"]["compThreshold"]);
+  // todo: Make unit ms
+  compressorMasterAttackLevel.innerHTML = `${json["masterCompressorData"]["compAttack"]} ms`;
+  compressorMasterReleaseLevel.innerHTML = `${json["masterCompressorData"]["compRelease"]} ms`;
+  compressorMasterGainLevel.innerHTML = getVolumeLevel(json["masterCompressorData"]["compMakeupGain"]);
+  compressorZoomThresholdLevel.innerHTML = getVolumeLevel(json["zoomCompressorData"]["compThreshold"]);
+  compressorZoomAttackLevel.innerHTML = `${json["zoomCompressorData"]["compAttack"]} ms`;
+  compressorZoomReleaseLevel.innerHTML = `${json["zoomCompressorData"]["compRelease"]} ms`;
+  compressorZoomGainLevel.innerHTML = getVolumeLevel(json["zoomCompressorData"]["compMakeupGain"]);
+}
+
+async function onToggleZoomAudioMuteClicked() {
+  let resp = await v2api.put('/mixer/zoom', {
+    Mute : !appStatus.zoomAudioMuted
+  });
+  if (resp.ok !== true) {
+    let data = await resp.json();
+    Feedback.alertDanger(data.ErrorMessage);
   }
 }
 
-function onToggleMasterAudioMuteClicked() {
-  if (appStatus.masterAudioMuted) {
-    unityFetch(`/muteMasterAudio?mute=false`, { method: "PUT" });
-  } else {
-    unityFetch(`/muteMasterAudio?mute=true`, { method: "PUT" });
+async function onToggleMasterAudioMuteClicked() {
+  let resp = await v2api.put('/mixer/master', {
+    Mute : !appStatus.masterAudioMuted
+  });
+  if (resp.ok !== true) {
+    let data = await resp.json();
+    Feedback.alertDanger(data.ErrorMessage);
   }
 }
 
-function onVolumeRangeZoomChanged(){
-  // todo: change to v2api call.
-  let str = volumeRangeZoom.value;
-  sendStringSubmitEvent(myVideoPlayer, OperatorControls._SetZoomAudioVolume, str);
+async function onVolumeRangeZoomChanged(){
+  let resp = await v2api.put('/mixer/zoom', {
+    Volume : parseFloat(volumeRangeZoom.value)
+  });
+  if (resp.ok !== true) {
+    let data = await resp.json();
+    Feedback.alertDanger(data.ErrorMessage);
+  }
 }
 
-function onVolumeRangeMasterChanged(){
-  // todo: change to v2api call.
-  let str = volumeRangeMaster.value;
-  sendStringSubmitEvent(myVideoPlayer, OperatorControls._SetMasterAudioVolume, str);
+async function onVolumeRangeMasterChanged(){
+  let resp = await v2api.put('/mixer/master', {
+    Volume : parseFloat(volumeRangeMaster.value)
+  });
+  if (resp.ok !== true) {
+    let data = await resp.json();
+    Feedback.alertDanger(data.ErrorMessage);
+  }
 }
 
 async function onCompressorMasterThresholdChanged() {

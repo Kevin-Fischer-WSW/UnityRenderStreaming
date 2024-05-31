@@ -142,6 +142,11 @@ export class VideoPlayer extends EventTarget {
             _this.onParticipantDataReceived.call(_this, msgContents);
           }
           break;
+        case MessageTypes._CompressorData:
+          if (_this.onCompressorDataReceived) {
+            _this.onCompressorDataReceived.call(_this, msgContents);
+          }
+          break;
         case MessageTypes._AppStatus:
           if (_this.onAppStatusReceived) {
             _this.onAppStatusReceived.call(_this, msgContents);
