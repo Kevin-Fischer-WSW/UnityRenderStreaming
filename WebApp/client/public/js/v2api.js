@@ -41,7 +41,7 @@ export function checkErrorCode(respData, code){
     return true;
   } else if (respData.ErrorCode === 14){
     // Multiple responses returned from the server.
-    for (let i = 0; i < respData.Responses.count; i++) {
+    for (let i = 0; i < respData.Responses.length; i++) {
       if (respData.Responses[i].ErrorCode === code){
         return true;
       }
@@ -55,7 +55,7 @@ export function getErrorMessagesAndResolutions(respData){
   let resolutions = [];
   if (respData.ErrorCode === 14){
     // Multiple responses returned from the server.
-    for (let i = 0; i < respData.Responses.count; i++) {
+    for (let i = 0; i < respData.Responses.length; i++) {
       errorMessages.push(respData.Responses[i].ErrorMessage);
       resolutions.push(respData.Responses[i].Resolution);
     }
