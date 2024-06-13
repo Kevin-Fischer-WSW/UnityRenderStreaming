@@ -399,11 +399,23 @@ let participantToRename;
 
 // => EVENT LISTENERS
 //TODO ALERT IF ANY ERRORS
-renameButton.addEventListener("click", function () {
+renameButton.addEventListener("click", async function () {
   let p = participantJsonParsed[participantToRename];
-  let name = encodeURIComponent(participantName.value);
-  let title = encodeURIComponent(participantTitle.value);
-  unityFetch(`/setParticipantDisplayName?participantId=${p.id}&name=${name}&title=${title}`, { method: "PUT" });
+  let resp = await v2api.put(`/display/participant/${p.id}`, {
+    DisplayName: participantName.value,
+    Title: participantTitle.value,
+    IgnoreNameOverflow: false,
+    IgnoreTitleOverflow: false,
+  });
+  let data = await resp.json();
+  if (v2api.checkErrorCode(data, 18) || v2api.checkErrorCode(data, 19)) {
+    let errors = v2api.getErrorMessagesAndResolutions(data);
+    for (let i = 0; i < errors.errorMessages.length; i++) {
+      Feedback.alertDanger(errors.errorMessages[i]);
+    }
+  } else {
+    Feedback.alertSuccess("Participant renamed.");
+  }
 });
 
 renameModal.addEventListener('shown.bs.modal', function () {
