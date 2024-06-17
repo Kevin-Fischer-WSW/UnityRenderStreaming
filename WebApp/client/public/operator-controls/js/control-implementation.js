@@ -1687,7 +1687,6 @@ JSONEditor.defaults.options.disable_properties = true;
 
 // => DOM ELEMENTS
 let loadCustomSceneBtn = document.getElementById("load-custom-scene-btn");
-let loadSceneBtn = document.getElementById("load-scene-btn");
 let loadSceneDropdown = document.getElementById("load-scene-dropdown");
 
 let sceneFieldset = document.getElementById("scenes-fieldset");
@@ -1759,10 +1758,6 @@ async function populateSceneDropdown(dropdownElem, selectCallback, filterProtect
 
 async function onLoadCustomSceneBtnClicked() {
   await populateSceneDropdown(loadSceneDropdown, onLoadSceneSelected, true);
-}
-
-async function onLoadSceneBtnClicked() {
-  await populateSceneDropdown(loadSceneDropdown, onLoadSceneSelected, false);
 }
 
 async function onLoadSceneSelected(elem) {
@@ -2244,7 +2239,6 @@ function generateSceneTypeSchemaEditor(schema, startval) {
 
 // => EVENT LISTENERS
 loadCustomSceneBtn.addEventListener("click", onLoadCustomSceneBtnClicked);
-loadSceneBtn.addEventListener("click", onLoadSceneBtnClicked);
 openSceneBtn.addEventListener("click", onOpenSceneBtnClicked);
 deleteSceneBtn.addEventListener("click", onDeleteSceneBtnClicked);
 saveSceneBtn.addEventListener("click", onSaveSceneBtnClicked);
