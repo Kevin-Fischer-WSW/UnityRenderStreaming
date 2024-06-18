@@ -1693,11 +1693,14 @@ let sceneFieldset = document.getElementById("scenes-fieldset");
 let sceneProtectedFieldset = document.getElementById("scene-protected-fields");
 let currentScene = document.getElementById("current-scene");
 
+let newSceneBtn = document.getElementById("new-scene-btn");
+
 let openSceneBtn = document.getElementById("open-scene-btn");
 let deleteSceneBtn = document.getElementById("delete-scene-btn");
 let openOrDeleteSceneDropdown = document.getElementById("open-scene-dropdown");
 let saveSceneBtn = document.getElementById("save-scene-btn");
-let saveAsSceneBtn = document.getElementById("save-scene-as-btn");
+let saveSceneAsBtn = document.getElementById("save-as-scene-btn");
+let saveSceneAsModalBtn = document.getElementById("save-scene-as-modal-btn");
 
 let sceneTitleInput = document.getElementById("scene-name-input");
 let sceneTitleSaveAsInput = document.getElementById("scene-name-save-as-input");
@@ -1774,6 +1777,18 @@ async function onLoadSceneSelected(elem) {
   }
 }
 
+async function onNewSceneBtnClicked() {
+  await openScene("default");
+  sceneFieldset.classList.remove("d-none");
+  // Since the "default" scene is protected, we're going to manually re-enable the fieldset. 
+  sceneProtectedFieldset.disabled = false;
+  currentScene.innerHTML = `Open Scene: Untitled`;
+  // Set the scene id to the current time, so that if the user decides to save the scene, it will be saved as a new 
+  // scene.
+  currentScene.dataset.sceneId = Date.now().toString();
+  sceneTitleInput.value = "Untitled";
+}
+
 async function onOpenSceneBtnClicked() {
   // Get a list of all the scenes.
   let resp = await v2api.get("/scenes");
@@ -1838,7 +1853,11 @@ async function onSaveSceneBtnClicked() {
   }
 }
 
-async function onSaveAsSceneBtnClicked() {
+async function onSaveSceneAsBtnClicked() {
+  sceneTitleSaveAsInput.value = sceneTitleInput.value;
+}
+
+async function onSaveSceneAsModalBtnClicked() {
   let sceneId = Date.now().toString();
   let sceneTitle = sceneTitleSaveAsInput.value;
   try {
@@ -2239,10 +2258,12 @@ function generateSceneTypeSchemaEditor(schema, startval) {
 
 // => EVENT LISTENERS
 loadCustomSceneBtn.addEventListener("click", onLoadCustomSceneBtnClicked);
+newSceneBtn.addEventListener("click", onNewSceneBtnClicked);
 openSceneBtn.addEventListener("click", onOpenSceneBtnClicked);
 deleteSceneBtn.addEventListener("click", onDeleteSceneBtnClicked);
 saveSceneBtn.addEventListener("click", onSaveSceneBtnClicked);
-saveAsSceneBtn.addEventListener("click", onSaveAsSceneBtnClicked);
+saveSceneAsBtn.addEventListener("click", onSaveSceneAsBtnClicked);
+saveSceneAsModalBtn.addEventListener("click", onSaveSceneAsModalBtnClicked);
 scenePlaylistKeepBtn.addEventListener("click", onKeepScenePlaylistBtnClicked);
 scenePlaylistAddBtn.addEventListener("click", onScenePlaylistAddBtnClicked);
 scenePlaylistClearBtn.addEventListener("click", onClearScenePlaylistBtnClicked);

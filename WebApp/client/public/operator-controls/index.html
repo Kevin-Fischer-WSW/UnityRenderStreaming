@@ -320,7 +320,7 @@
         <!-- Save Scene As modal footer -->
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" title="Close">Close</button>
-          <button id="save-scene-as-btn" type="button" class="btn btn-secondary" title="Save">Save</button>
+          <button id="save-scene-as-modal-btn" type="button" class="btn btn-secondary" title="Save">Save</button>
         </div>
 
       </div>
@@ -666,9 +666,10 @@
           <ul id="load-scene-dropdown" class="dropdown-menu" aria-labelledby="load-scene-btn"></ul>
         <h3 class="title text-white mt-2">Create or Update scenes</h3>
         <!-- Current scene display -->
-        <div id="current-scene" class="text-white">Open a scene to begin editing.</div>
+        <div id="current-scene" class="text-white">Click "New", or open a scene to begin editing.</div>
         <!-- Button group to select "Open" "Save" "Save As" or "Delete" -->
         <div class="btn-group w-100 mt-2" role="group" aria-label="Scene actions">
+          <button id="new-scene-btn" type="button" class="btn btn-secondary" title="New Scene">New</button>
           <button id="open-scene-btn" type="button" class="btn btn-secondary" data-bs-toggle="dropdown" title="Open Scene">Open</button>
           <button id="delete-scene-btn" type="button" class="btn btn-secondary" data-bs-toggle="dropdown" title="Delete Scene">Delete</button>
           <ul id="open-scene-dropdown" class="dropdown-menu" aria-labelledby="open-scene-btn"></ul>
