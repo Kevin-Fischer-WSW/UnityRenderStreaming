@@ -320,7 +320,7 @@
         <!-- Save Scene As modal footer -->
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" title="Close">Close</button>
-          <button id="save-scene-as-btn" type="button" class="btn btn-secondary" title="Save">Save</button>
+          <button id="save-scene-as-modal-btn" type="button" class="btn btn-secondary" title="Save">Save</button>
         </div>
 
       </div>
@@ -389,10 +389,10 @@
             <div class="red-meter-segment"></div>
             <div class="yellow-meter-segment"></div>
             <div class="green-meter-segment"></div>
-            <div class="position-absolute text-white" style="border-top: solid white 1px; top: 6.25%">-5</div>
-            <div class="position-absolute text-white" style="border-top: solid white 1px; top: 12.5%">-10</div>
-            <div class="position-absolute text-white" style="border-top: solid white 1px; top: 25%">-20</div>
-            <div class="position-absolute text-white" style="border-top: solid white 1px; top: 50%">-40</div>
+            <div class="position-absolute text-white w-100" style="border-top: solid white 1px; top: 6.25%">-5</div>
+            <div class="position-absolute text-white w-100" style="border-top: solid white 1px; top: 12.5%">-10</div>
+            <div class="position-absolute text-white w-100" style="border-top: solid white 1px; top: 25%">-20</div>
+            <div class="position-absolute text-white w-100" style="border-top: solid white 1px; top: 50%">-40</div>
           </div>
         </div>
       </div>
@@ -413,10 +413,10 @@
           <div class="red-meter-segment"></div>
           <div class="yellow-meter-segment"></div>
           <div class="green-meter-segment"></div>
-          <div class="position-absolute text-white" style="border-top: solid white 1px; top: 6.25%">-5</div>
-          <div class="position-absolute text-white" style="border-top: solid white 1px; top: 12.5%">-10</div>
-          <div class="position-absolute text-white" style="border-top: solid white 1px; top: 25%">-20</div>
-          <div class="position-absolute text-white" style="border-top: solid white 1px; top: 50%">-40</div>
+          <div class="position-absolute text-white w-100" style="border-top: solid white 1px; top: 6.25%">-5</div>
+          <div class="position-absolute text-white w-100" style="border-top: solid white 1px; top: 12.5%">-10</div>
+          <div class="position-absolute text-white w-100" style="border-top: solid white 1px; top: 25%">-20</div>
+          <div class="position-absolute text-white w-100" style="border-top: solid white 1px; top: 50%">-40</div>
         </div>
       </div>
     </div>
@@ -663,13 +663,13 @@
       <div class="tab-pane fade" id="nav-scenes" role="tabpanel" aria-labelledby="nav-scenes-tab">
         <h3 class="title text-white mt-2">Load Scene</h3>
           <button id="load-custom-scene-btn" type="button" class="btn btn-secondary" data-bs-toggle="dropdown" title="Select a custom scene to load">Load Custom Scene</button>
-          <button id="load-scene-btn" type="button" class="btn btn-secondary" data-bs-toggle="dropdown" title="Select a scene to load">Load Scene</button>
           <ul id="load-scene-dropdown" class="dropdown-menu" aria-labelledby="load-scene-btn"></ul>
         <h3 class="title text-white mt-2">Create or Update scenes</h3>
         <!-- Current scene display -->
-        <div id="current-scene" class="text-white">Open a scene to begin editing.</div>
+        <div id="current-scene" class="text-white">Click "New", or open a scene to begin editing.</div>
         <!-- Button group to select "Open" "Save" "Save As" or "Delete" -->
         <div class="btn-group w-100 mt-2" role="group" aria-label="Scene actions">
+          <button id="new-scene-btn" type="button" class="btn btn-secondary" title="New Scene">New</button>
           <button id="open-scene-btn" type="button" class="btn btn-secondary" data-bs-toggle="dropdown" title="Open Scene">Open</button>
           <button id="delete-scene-btn" type="button" class="btn btn-secondary" data-bs-toggle="dropdown" title="Delete Scene">Delete</button>
           <ul id="open-scene-dropdown" class="dropdown-menu" aria-labelledby="open-scene-btn"></ul>

@@ -400,11 +400,23 @@ let participantToRename;
 
 // => EVENT LISTENERS
 //TODO ALERT IF ANY ERRORS
-renameButton.addEventListener("click", function () {
+renameButton.addEventListener("click", async function () {
   let p = participantJsonParsed[participantToRename];
-  let name = encodeURIComponent(participantName.value);
-  let title = encodeURIComponent(participantTitle.value);
-  unityFetch(`/setParticipantDisplayName?participantId=${p.id}&name=${name}&title=${title}`, { method: "PUT" });
+  let resp = await v2api.put(`/display/participant/${p.id}`, {
+    DisplayName: participantName.value,
+    Title: participantTitle.value,
+    IgnoreNameOverflow: false,
+    IgnoreTitleOverflow: false,
+  });
+  let data = await resp.json();
+  if (v2api.checkErrorCode(data, 18) || v2api.checkErrorCode(data, 19)) {
+    let errors = v2api.getErrorMessagesAndResolutions(data);
+    for (let i = 0; i < errors.errorMessages.length; i++) {
+      Feedback.alertDanger(errors.errorMessages[i]);
+    }
+  } else {
+    Feedback.alertSuccess("Participant renamed.");
+  }
 });
 
 renameModal.addEventListener('shown.bs.modal', function () {
@@ -1676,18 +1688,20 @@ JSONEditor.defaults.options.disable_properties = true;
 
 // => DOM ELEMENTS
 let loadCustomSceneBtn = document.getElementById("load-custom-scene-btn");
-let loadSceneBtn = document.getElementById("load-scene-btn");
 let loadSceneDropdown = document.getElementById("load-scene-dropdown");
 
 let sceneFieldset = document.getElementById("scenes-fieldset");
 let sceneProtectedFieldset = document.getElementById("scene-protected-fields");
 let currentScene = document.getElementById("current-scene");
 
+let newSceneBtn = document.getElementById("new-scene-btn");
+
 let openSceneBtn = document.getElementById("open-scene-btn");
 let deleteSceneBtn = document.getElementById("delete-scene-btn");
 let openOrDeleteSceneDropdown = document.getElementById("open-scene-dropdown");
 let saveSceneBtn = document.getElementById("save-scene-btn");
-let saveAsSceneBtn = document.getElementById("save-scene-as-btn");
+let saveSceneAsBtn = document.getElementById("save-as-scene-btn");
+let saveSceneAsModalBtn = document.getElementById("save-scene-as-modal-btn");
 
 let sceneTitleInput = document.getElementById("scene-name-input");
 let sceneTitleSaveAsInput = document.getElementById("scene-name-save-as-input");
@@ -1750,10 +1764,6 @@ async function onLoadCustomSceneBtnClicked() {
   await populateSceneDropdown(loadSceneDropdown, onLoadSceneSelected, true);
 }
 
-async function onLoadSceneBtnClicked() {
-  await populateSceneDropdown(loadSceneDropdown, onLoadSceneSelected, false);
-}
-
 async function onLoadSceneSelected(elem) {
   //Get the scene.
   let scene = elem.dataset.scene;
@@ -1766,6 +1776,18 @@ async function onLoadSceneSelected(elem) {
   } else {
     Feedback.alertDanger(`${data["ErrorMessage"]}<br>${data["ErrorResolution"]}`);
   }
+}
+
+async function onNewSceneBtnClicked() {
+  await openScene("default");
+  sceneFieldset.classList.remove("d-none");
+  // Since the "default" scene is protected, we're going to manually re-enable the fieldset. 
+  sceneProtectedFieldset.disabled = false;
+  currentScene.innerHTML = `Open Scene: Untitled`;
+  // Set the scene id to the current time, so that if the user decides to save the scene, it will be saved as a new 
+  // scene.
+  currentScene.dataset.sceneId = Date.now().toString();
+  sceneTitleInput.value = "Untitled";
 }
 
 async function onOpenSceneBtnClicked() {
@@ -1832,7 +1854,11 @@ async function onSaveSceneBtnClicked() {
   }
 }
 
-async function onSaveAsSceneBtnClicked() {
+async function onSaveSceneAsBtnClicked() {
+  sceneTitleSaveAsInput.value = sceneTitleInput.value;
+}
+
+async function onSaveSceneAsModalBtnClicked() {
   let sceneId = Date.now().toString();
   let sceneTitle = sceneTitleSaveAsInput.value;
   try {
@@ -2233,11 +2259,12 @@ function generateSceneTypeSchemaEditor(schema, startval) {
 
 // => EVENT LISTENERS
 loadCustomSceneBtn.addEventListener("click", onLoadCustomSceneBtnClicked);
-loadSceneBtn.addEventListener("click", onLoadSceneBtnClicked);
+newSceneBtn.addEventListener("click", onNewSceneBtnClicked);
 openSceneBtn.addEventListener("click", onOpenSceneBtnClicked);
 deleteSceneBtn.addEventListener("click", onDeleteSceneBtnClicked);
 saveSceneBtn.addEventListener("click", onSaveSceneBtnClicked);
-saveAsSceneBtn.addEventListener("click", onSaveAsSceneBtnClicked);
+saveSceneAsBtn.addEventListener("click", onSaveSceneAsBtnClicked);
+saveSceneAsModalBtn.addEventListener("click", onSaveSceneAsModalBtnClicked);
 scenePlaylistKeepBtn.addEventListener("click", onKeepScenePlaylistBtnClicked);
 scenePlaylistAddBtn.addEventListener("click", onScenePlaylistAddBtnClicked);
 scenePlaylistClearBtn.addEventListener("click", onClearScenePlaylistBtnClicked);
