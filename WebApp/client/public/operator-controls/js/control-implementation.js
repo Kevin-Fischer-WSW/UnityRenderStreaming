@@ -1686,9 +1686,6 @@ JSONEditor.defaults.options.disable_properties = true;
 /* SCENES TAB */
 
 // => DOM ELEMENTS
-let loadCustomSceneBtn = document.getElementById("load-custom-scene-btn");
-let loadSceneDropdown = document.getElementById("load-scene-dropdown");
-
 let sceneFieldset = document.getElementById("scenes-fieldset");
 let sceneProtectedFieldset = document.getElementById("scene-protected-fields");
 let currentScene = document.getElementById("current-scene");
@@ -1757,10 +1754,6 @@ async function populateSceneDropdown(dropdownElem, selectCallback, filterProtect
   });
   
   setupDropdown(dropdownElem, selectCallback);
-}
-
-async function onLoadCustomSceneBtnClicked() {
-  await populateSceneDropdown(loadSceneDropdown, onLoadSceneSelected, true);
 }
 
 async function onLoadSceneSelected(elem) {
@@ -2257,7 +2250,6 @@ function generateSceneTypeSchemaEditor(schema, startval) {
 
 
 // => EVENT LISTENERS
-loadCustomSceneBtn.addEventListener("click", onLoadCustomSceneBtnClicked);
 newSceneBtn.addEventListener("click", onNewSceneBtnClicked);
 openSceneBtn.addEventListener("click", onOpenSceneBtnClicked);
 deleteSceneBtn.addEventListener("click", onDeleteSceneBtnClicked);
