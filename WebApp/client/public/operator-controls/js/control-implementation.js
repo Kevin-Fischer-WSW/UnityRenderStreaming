@@ -393,13 +393,14 @@ let participantName = document.getElementById("participant-rename-name");
 let participantTitle = document.getElementById("participant-rename-title");
 let renameButton = document.getElementById("rename-btn");
 let renameModal = document.getElementById("rename-modal");
+let renameAlerts = document.getElementById("rename-alerts");
 
 // => PRIMITIVE AND OTHER TYPES
 let participantToRename;
 
-// => EVENT LISTENERS
-//TODO ALERT IF ANY ERRORS
-renameButton.addEventListener("click", async function () {
+// => METHODS
+
+async function onRenameButtonClicked(){
   let p = participantJsonParsed[participantToRename];
   let resp = await v2api.put(`/display/participant/${p.id}`, {
     DisplayName: participantName.value,
@@ -411,13 +412,15 @@ renameButton.addEventListener("click", async function () {
   if (v2api.checkErrorCode(data, 18) || v2api.checkErrorCode(data, 19)) {
     let errors = v2api.getErrorMessagesAndResolutions(data);
     for (let i = 0; i < errors.errorMessages.length; i++) {
-      Feedback.alertDanger(errors.errorMessages[i]);
+      Feedback.alertDanger(errors.errorMessages[i], renameAlerts);
     }
   } else {
-    Feedback.alertSuccess("Participant renamed.");
+    Feedback.alertSuccess("Participant renamed.", renameAlerts);
   }
-});
+}
 
+// => EVENT LISTENERS
+renameButton.addEventListener("click", onRenameButtonClicked);
 renameModal.addEventListener('shown.bs.modal', function () {
   renameModal.focus();
 });
