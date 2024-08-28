@@ -111,10 +111,10 @@
           <input id="participant-rename-name" type="text" class="form-control">
           <label for="participant-rename-title">Title</label>
           <input id="participant-rename-title" type="text" class="form-control">
+          <div id="rename-alerts" class="sticky-lg-bottom"></div>
         </div>
         <div class="modal-footer">
-          <button id="rename-btn" class="btn btn-secondary" type="button" data-bs-dismiss="modal"
-                  title="Rename">Rename</button>
+          <button id="rename-btn" class="btn btn-secondary" type="button" title="Rename">Rename</button>
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" title="Close">Close</button>
         </div>
       </div>
@@ -661,9 +661,6 @@
       </div>
       <!-- Scenes controls -->
       <div class="tab-pane fade" id="nav-scenes" role="tabpanel" aria-labelledby="nav-scenes-tab">
-        <h3 class="title text-white mt-2">Load Scene</h3>
-          <button id="load-custom-scene-btn" type="button" class="btn btn-secondary" data-bs-toggle="dropdown" title="Select a custom scene to load">Load Custom Scene</button>
-          <ul id="load-scene-dropdown" class="dropdown-menu" aria-labelledby="load-scene-btn"></ul>
         <h3 class="title text-white mt-2">Create or Update scenes</h3>
         <!-- Current scene display -->
         <div id="current-scene" class="text-white">Click "New", or open a scene to begin editing.</div>
@@ -803,10 +800,20 @@
               <button class="media-delete-btn btn btn-danger rounded-pill" type="button" title="Delete">
                 <i class="bi bi-trash"></i>
               </button>
-              <button class="media-left-btn btn btn-secondary" title="Display slide & unmute zoom audio"><i
-                class="bi bi-people-fill"></i><i class="bi bi-volume-up"></i></button>
-              <button class="media-right-btn btn btn-secondary" title="Display slide & mute zoom audio"><i
+              <button class="media-left-btn btn btn-secondary" title="Display slide & unmute zoom audio" type="button" data-bs-toggle="dropdown">
+                <i class="bi bi-people-fill"></i><i class="bi bi-volume-up"></i></button>
+              <ul class="media-left-dropdown dropdown-menu">
+                <li data-scene="intro"><a target="action-intro" class="dropdown-item">Go Intro</a></li>
+                <li data-scene="live"><a target="action-live" class="dropdown-item">Go Live</a></li>
+                <li data-scene="outro"><a target="action-conclusion" class="dropdown-item">Go Conclusion</a></li>
+              </ul>
+              <button class="media-right-btn btn btn-secondary" title="Display slide & mute zoom audio" type="button" data-bs-toggle="dropdown"><i
                 class="bi bi-people-fill"></i><i class="bi bi-volume-mute"></i></button>
+              <ul class="media-right-dropdown dropdown-menu">
+                <li data-scene="intro"><a target="action-intro" class="dropdown-item">Go Intro</a></li>
+                <li data-scene="live"><a target="action-live" class="dropdown-item">Go Live</a></li>
+                <li data-scene="outro"><a target="action-conclusion" class="dropdown-item">Go Conclusion</a></li>
+              </ul>
             </div>
           </div>
         </fieldset>
@@ -1075,10 +1082,20 @@
               <button class="media-delete-btn btn btn-danger rounded-pill" type="button" title="Delete">
                 <i class="bi bi-trash"></i>
               </button>
-              <button class="media-left-btn btn btn-secondary" title="Display slide & unmute zoom audio"><i
-                class="bi bi-people-fill"></i><i class="bi bi-volume-up"></i></button>
-              <button class="media-right-btn btn btn-secondary" title="Display slide & mute zoom audio"><i
-                class="bi bi-people-fill"></i><i class="bi bi-volume-mute"></i></button>
+              <button class="media-left-btn btn btn-secondary" title="Display slide & unmute zoom audio" type="button" data-bs-toggle="dropdown">
+                <i class="bi bi-people-fill"></i><i class="bi bi-volume-up"></i></button>
+              <ul class="media-left-dropdown dropdown-menu">
+                <li data-scene="intro"><a target="action-intro" class="dropdown-item">Go Intro</a></li>
+                <li data-scene="live"><a target="action-live" class="dropdown-item">Go Live</a></li>
+                <li data-scene="outro"><a target="action-conclusion" class="dropdown-item">Go Conclusion</a></li>
+              </ul>
+              <button class="media-right-btn btn btn-secondary" title="Display slide & mute zoom audio" type="button" data-bs-toggle="dropdown">
+                <i class="bi bi-people-fill"></i><i class="bi bi-volume-mute"></i></button>
+              <ul class="media-right-dropdown dropdown-menu">
+                <li data-scene="intro"><a target="action-intro" class="dropdown-item">Go Intro</a></li>
+                <li data-scene="live"><a target="action-live" class="dropdown-item">Go Live</a></li>
+                <li data-scene="outro"><a target="action-conclusion" class="dropdown-item">Go Conclusion</a></li>
+              </ul>
             </div>
           </div>
 

@@ -394,13 +394,14 @@ let participantName = document.getElementById("participant-rename-name");
 let participantTitle = document.getElementById("participant-rename-title");
 let renameButton = document.getElementById("rename-btn");
 let renameModal = document.getElementById("rename-modal");
+let renameAlerts = document.getElementById("rename-alerts");
 
 // => PRIMITIVE AND OTHER TYPES
 let participantToRename;
 
-// => EVENT LISTENERS
-//TODO ALERT IF ANY ERRORS
-renameButton.addEventListener("click", async function () {
+// => METHODS
+
+async function onRenameButtonClicked(){
   let p = participantJsonParsed[participantToRename];
   let resp = await v2api.put(`/display/participant/${p.id}`, {
     DisplayName: participantName.value,
@@ -412,13 +413,15 @@ renameButton.addEventListener("click", async function () {
   if (v2api.checkErrorCode(data, 18) || v2api.checkErrorCode(data, 19)) {
     let errors = v2api.getErrorMessagesAndResolutions(data);
     for (let i = 0; i < errors.errorMessages.length; i++) {
-      Feedback.alertDanger(errors.errorMessages[i]);
+      Feedback.alertDanger(errors.errorMessages[i], renameAlerts);
     }
   } else {
-    Feedback.alertSuccess("Participant renamed.");
+    Feedback.alertSuccess("Participant renamed.", renameAlerts);
   }
-});
+}
 
+// => EVENT LISTENERS
+renameButton.addEventListener("click", onRenameButtonClicked);
 renameModal.addEventListener('shown.bs.modal', function () {
   renameModal.focus();
 });
@@ -1687,9 +1690,6 @@ JSONEditor.defaults.options.disable_properties = true;
 /* SCENES TAB */
 
 // => DOM ELEMENTS
-let loadCustomSceneBtn = document.getElementById("load-custom-scene-btn");
-let loadSceneDropdown = document.getElementById("load-scene-dropdown");
-
 let sceneFieldset = document.getElementById("scenes-fieldset");
 let sceneProtectedFieldset = document.getElementById("scene-protected-fields");
 let currentScene = document.getElementById("current-scene");
@@ -1758,10 +1758,6 @@ async function populateSceneDropdown(dropdownElem, selectCallback, filterProtect
   });
   
   setupDropdown(dropdownElem, selectCallback);
-}
-
-async function onLoadCustomSceneBtnClicked() {
-  await populateSceneDropdown(loadSceneDropdown, onLoadSceneSelected, true);
 }
 
 async function onLoadSceneSelected(elem) {
@@ -2258,7 +2254,6 @@ function generateSceneTypeSchemaEditor(schema, startval) {
 
 
 // => EVENT LISTENERS
-loadCustomSceneBtn.addEventListener("click", onLoadCustomSceneBtnClicked);
 newSceneBtn.addEventListener("click", onNewSceneBtnClicked);
 openSceneBtn.addEventListener("click", onOpenSceneBtnClicked);
 deleteSceneBtn.addEventListener("click", onDeleteSceneBtnClicked);
@@ -2379,6 +2374,65 @@ function setupDeleteButton(owner, route, elementWithFilename, onDeleteConfirmed)
   });
 }
 
+// Slide switch button. Used in both the slide tab and the video tab.
+function setupSlideSwitchButton(switchBtn, onDeleteConfirmed) {
+  switchBtn.style.display = "flex";
+  let span = document.querySelector(`#${switchBtn.id} span`);
+  let img = document.querySelector(`#${switchBtn.id} img`);
+  let mute = document.querySelector(`#${switchBtn.id} .media-right-btn`);
+  let muteDropdown = document.querySelector(`#${switchBtn.id} .media-right-dropdown`);
+  let unmute = document.querySelector(`#${switchBtn.id} .media-left-btn`);
+  let unmuteDropdown = document.querySelector(`#${switchBtn.id} .media-left-dropdown`);
+
+  setupSlideSetAsOptionsButton(switchBtn);
+  setupDeleteButton(switchBtn, "/uapp/deleteHoldingSlide?url={0}", span, onDeleteConfirmed);
+
+  setupDropdown(muteDropdown, async function (elem) {
+    await handleDropdown(elem, 0)
+  })
+  setupDropdown(unmuteDropdown, async function (elem) {
+    await handleDropdown(elem, 1)
+  })
+
+  mute.addEventListener("click", () => {
+    let intro = muteDropdown.querySelector("li[data-scene='intro'] a")
+    intro.innerHTML = appStatus.lastSceneLoaded === "Intro" ? "Stay Intro" : "Go Intro";
+    let live = muteDropdown.querySelector("li[data-scene='live'] a")
+    live.innerHTML = appStatus.lastSceneLoaded === "Live" ? "Stay Live" : "Go Live";
+    let outro = muteDropdown.querySelector("li[data-scene='outro'] a")
+    outro.innerHTML = appStatus.lastSceneLoaded === "Conclusion" ? "Stay Conclusion" : "Go Conclusion"
+  });
+  unmute.addEventListener("click", () => {
+    let intro = unmuteDropdown.querySelector("li[data-scene='intro'] a")
+    intro.innerHTML = appStatus.lastSceneLoaded === "Intro" ? "Stay Intro" : "Go Intro";
+    let live = unmuteDropdown.querySelector("li[data-scene='live'] a")
+    live.innerHTML = appStatus.lastSceneLoaded === "Live" ? "Stay Live" : "Go Live";
+    let outro = unmuteDropdown.querySelector("li[data-scene='outro'] a")
+    outro.innerHTML = appStatus.lastSceneLoaded === "Conclusion" ? "Stay Conclusion" : "Go Conclusion"
+  });
+
+  async function handleDropdown(elem, zoomAudio){
+    let scene = elem.dataset.scene;
+    let resp = await v2api.put(`/scene/${scene}/load`, {
+      "SlideOverride" : img.alt,
+      "ZoomAudioOverride" : zoomAudio
+    })
+    let data = await resp.json();
+    if (v2api.checkErrorCode(data, 0)) {
+      let sceneToTitle = {
+        "intro" : "Intro",
+        "outro" : "Conclusion",
+        "live" : "Live"
+      }
+      Feedback.alertSuccess(`Video set. ${sceneToTitle[scene]} scene loaded.`);
+    }
+    else
+    {
+      Feedback.alertDanger(`Scene not loaded. ${data.ErrorMessage}`);
+    }
+  }
+}
+
 function setupSlideSetAsOptionsButton(owner) {
   let slideSetAsIntro = document.querySelector(`div#${owner.id} a[target="action-set-as-intro"]`);
   let slideSetAsLate = document.querySelector(`div#${owner.id} a[target="action-set-as-late"]`);
@@ -2425,43 +2479,8 @@ function setupSlideSetAsOptionsButton(owner) {
 }
 
 function validateSlideSwitchBtns(slides) {
-  let setupSlide = function (slide) {
-    slide.style.display = "flex";
-    let span = document.querySelector(`#${slide.id} span`);
-    let img = document.querySelector(`#${slide.id} img`);
-    let mute = document.querySelector(`#${slide.id} .media-right-btn`)
-    let unmute = document.querySelector(`#${slide.id} .media-left-btn`);
-
-    setupSlideSetAsOptionsButton(slide);
-    setupDeleteButton(slide, "/uapp/deleteHoldingSlide?url={0}", span, onSlideTabClicked);
-    mute.addEventListener("click", () => {
-      unityFetch("/muteZoomAudio", {method: "PUT"})
-        .then(response => {
-          if (response.ok) {
-            console.log("Zoom Audio Muted.");
-            setHoldingSlide(img);
-          }
-        })
-    });
-    unmute.addEventListener("click", () => {
-      unityFetch("/unmuteZoomAudio", {method: "PUT"})
-        .then(response => {
-          if (response.ok) {
-            console.log("Zoom Audio Unmuted.");
-            setHoldingSlide(img);
-          }
-        })
-    });
-    img.addEventListener("click", _ => mute.click());
-
-    function setHoldingSlide(img) {
-      unityFetch("/setHoldingSlide?url=" + img.alt, { method: "PUT" })
-        .then(response => {
-          if (response.ok) {
-            console.log("Slide set.");
-          }
-        });
-    }
+  let setupSlide = function (switchBtn) {
+    setupSlideSwitchButton(switchBtn, onSlideTabClicked);
   }
   let validateSlide = function (slide, slideInfo) {
     let img = document.querySelector(`#${slide.id} img`);
@@ -2880,42 +2899,8 @@ function UpdateVideoBrowsePreviewElement() {
 }
 
 function validateVideoSwitchBtns(videos) {
-  let setupVideoSwitchBtn = function (videoBtn) {
-    videoBtn.style.display = "flex";
-    let label = document.querySelector(`#${videoBtn.id} span`);
-    let img = document.querySelector(`#${videoBtn.id} img`);
-    let mute = document.querySelector(`#${videoBtn.id} .media-right-btn`)
-    let unmute = document.querySelector(`#${videoBtn.id} .media-left-btn`);
-    setupSlideSetAsOptionsButton(videoBtn);
-    setupDeleteButton(videoBtn, "/uapp/deleteVideo?url={0}", label, FetchAllUploadedMediaAndUpdateDash);
-    mute.addEventListener("click", () => {
-      unityFetch("/muteZoomAudio", {method: "PUT"})
-        .then(response => {
-          if (response.ok) {
-            console.log("Zoom Audio Muted.");
-            setHoldingSlide(img);
-          }
-        })
-    });
-    unmute.addEventListener("click", () => {
-      unityFetch("/unmuteZoomAudio", {method: "PUT"})
-        .then(response => {
-          if (response.ok) {
-            console.log("Zoom Audio Unmuted.");
-            setHoldingSlide(img);
-          }
-        })
-    });
-    img.addEventListener("click", _ => setHoldingSlide(img));
-
-    function setHoldingSlide(img) {
-      unityFetch("/setHoldingSlide?url=" + img.alt, { method: "PUT" })
-        .then(response => {
-          if (response.ok) {
-            console.log("Video set.");
-          }
-        });
-    }
+  let setupVideoSwitchBtn = function (switchBtn) {
+    setupSlideSwitchButton(switchBtn, onVideoTabClicked);
   }
   let validateVideoSwitchBtn = function (video, slideInfo) {
     let img = document.querySelector(`#${video.id} img`);
