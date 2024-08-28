@@ -2534,6 +2534,8 @@ let zoomVolumeLevel = document.getElementById("zoom-volume-level");
 let masterVolumeLevel = document.getElementById("master-volume-level");
 let toggleZoomAudioMuteBtn = document.getElementById("toggle-zoom-audio-mute-btn");
 let toggleMasterAudioMuteBtn = document.getElementById("toggle-master-audio-mute-btn");
+let compressorMasterResetBtn = document.getElementById("compressor-master-reset-btn");
+let compressorZoomResetBtn = document.getElementById("compressor-zoom-reset-btn");
 let compressorMasterThreshold = document.getElementById("compressor-master-threshold");
 let compressorMasterAttack = document.getElementById("compressor-master-attack");
 let compressorMasterRelease = document.getElementById("compressor-master-release");
@@ -2562,15 +2564,40 @@ function onCompressorDataReceived(data) {
   compressorZoomAttack.value = json["zoomCompressorData"]["compAttack"];
   compressorZoomRelease.value = json["zoomCompressorData"]["compRelease"];
   compressorZoomGain.value = json["zoomCompressorData"]["compMakeupGain"];
-  compressorMasterThresholdLevel.innerHTML = getVolumeLevel(json["masterCompressorData"]["compThreshold"]);
-  // todo: Make unit ms
+  compressorMasterThresholdLevel.innerHTML = `${json["masterCompressorData"]["compThreshold"]} db`;
   compressorMasterAttackLevel.innerHTML = `${json["masterCompressorData"]["compAttack"]} ms`;
   compressorMasterReleaseLevel.innerHTML = `${json["masterCompressorData"]["compRelease"]} ms`;
-  compressorMasterGainLevel.innerHTML = getVolumeLevel(json["masterCompressorData"]["compMakeupGain"]);
-  compressorZoomThresholdLevel.innerHTML = getVolumeLevel(json["zoomCompressorData"]["compThreshold"]);
+  compressorMasterGainLevel.innerHTML = `${json["masterCompressorData"]["compMakeupGain"]} db`;
+  compressorZoomThresholdLevel.innerHTML = `${json["zoomCompressorData"]["compThreshold"]} db`;
   compressorZoomAttackLevel.innerHTML = `${json["zoomCompressorData"]["compAttack"]} ms`;
   compressorZoomReleaseLevel.innerHTML = `${json["zoomCompressorData"]["compRelease"]} ms`;
-  compressorZoomGainLevel.innerHTML = getVolumeLevel(json["zoomCompressorData"]["compMakeupGain"]);
+  compressorZoomGainLevel.innerHTML = `${json["zoomCompressorData"]["compMakeupGain"]} db`;
+}
+
+async function onCompressorMasterResetBtnClicked() {
+  let resp = await v2api.put('/mixer/master', {
+    CompressorThreshold : 0,
+    CompressorAttack : 50,
+    CompressorRelease : 50,
+    CompressorMakeUpGain : 0
+  });
+  if (resp.ok !== true) {
+    let data = await resp.json();
+    Feedback.alertDanger(data.ErrorMessage);
+  }
+}
+
+async function onCompressorZoomResetBtnClicked() {
+  let resp = await v2api.put('/mixer/zoom', {
+    CompressorThreshold : 0,
+    CompressorAttack : 50,
+    CompressorRelease : 50,
+    CompressorMakeUpGain : 0
+  });
+  if (resp.ok !== true) {
+    let data = await resp.json();
+    Feedback.alertDanger(data.ErrorMessage);
+  }
 }
 
 async function onToggleZoomAudioMuteClicked() {
@@ -2691,6 +2718,8 @@ toggleZoomAudioMuteBtn.addEventListener("click", onToggleZoomAudioMuteClicked);
 volumeRangeZoom.addEventListener("input", onVolumeRangeZoomChanged);
 toggleMasterAudioMuteBtn.addEventListener("click", onToggleMasterAudioMuteClicked);
 volumeRangeMaster.addEventListener("input", onVolumeRangeMasterChanged);
+compressorMasterResetBtn.addEventListener("click", onCompressorMasterResetBtnClicked);
+compressorZoomResetBtn.addEventListener("click", onCompressorZoomResetBtnClicked);
 compressorMasterThreshold.addEventListener("input", onCompressorMasterThresholdChanged);
 compressorMasterAttack.addEventListener("input", onCompressorMasterAttackChanged);
 compressorMasterRelease.addEventListener("input", onCompressorMasterReleaseChanged);
