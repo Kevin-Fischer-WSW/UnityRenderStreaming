@@ -2554,24 +2554,42 @@ let compressorZoomReleaseLevel = document.getElementById("compressor-zoom-releas
 let compressorZoomGainLevel = document.getElementById("compressor-zoom-gain-level");
 
 // => METHODS
+async function onAudioTabClicked()
+{
+  let resp = await v2api.get('/mixer/master')
+  let data =  await resp.json();
+  updateMasterCompressorControls(data["Mixer"]);
+  resp = await v2api.get('/mixer/zoom')
+  data = await resp.json();
+  updateZoomCompressorControls(data["Mixer"]);
+}
+
 function onCompressorDataReceived(data) {
   let json = JSON.parse(data);
-  compressorMasterThreshold.value = json["masterCompressorData"]["compThreshold"];
-  compressorMasterAttack.value = json["masterCompressorData"]["compAttack"];
-  compressorMasterRelease.value = json["masterCompressorData"]["compRelease"];
-  compressorMasterGain.value = json["masterCompressorData"]["compMakeupGain"];
-  compressorZoomThreshold.value = json["zoomCompressorData"]["compThreshold"];
-  compressorZoomAttack.value = json["zoomCompressorData"]["compAttack"];
-  compressorZoomRelease.value = json["zoomCompressorData"]["compRelease"];
-  compressorZoomGain.value = json["zoomCompressorData"]["compMakeupGain"];
-  compressorMasterThresholdLevel.innerHTML = `${json["masterCompressorData"]["compThreshold"]} db`;
-  compressorMasterAttackLevel.innerHTML = `${json["masterCompressorData"]["compAttack"]} ms`;
-  compressorMasterReleaseLevel.innerHTML = `${json["masterCompressorData"]["compRelease"]} ms`;
-  compressorMasterGainLevel.innerHTML = `${json["masterCompressorData"]["compMakeupGain"]} db`;
-  compressorZoomThresholdLevel.innerHTML = `${json["zoomCompressorData"]["compThreshold"]} db`;
-  compressorZoomAttackLevel.innerHTML = `${json["zoomCompressorData"]["compAttack"]} ms`;
-  compressorZoomReleaseLevel.innerHTML = `${json["zoomCompressorData"]["compRelease"]} ms`;
-  compressorZoomGainLevel.innerHTML = `${json["zoomCompressorData"]["compMakeupGain"]} db`;
+  updateMasterCompressorControls(json["masterCompressorData"])
+  updateZoomCompressorControls(json["zoomCompressorData"])
+}
+
+function updateMasterCompressorControls(data) {
+  compressorMasterThreshold.value = data["Threshold"];
+  compressorMasterAttack.value = data["Attack"];
+  compressorMasterRelease.value = data["Release"];
+  compressorMasterGain.value = data["MakeupGain"];
+  compressorMasterThresholdLevel.innerHTML = `${data["Threshold"]} db`;
+  compressorMasterAttackLevel.innerHTML = `${data["Attack"]} ms`;
+  compressorMasterReleaseLevel.innerHTML = `${data["Release"]} ms`;
+  compressorMasterGainLevel.innerHTML = `${data["MakeupGain"]} db`;
+}
+
+function updateZoomCompressorControls(data) {
+  compressorZoomThreshold.value = data["Threshold"];
+  compressorZoomAttack.value = data["Attack"];
+  compressorZoomRelease.value = data["Release"];
+  compressorZoomGain.value = data["MakeupGain"];
+  compressorZoomThresholdLevel.innerHTML = `${data["Threshold"]} db`;
+  compressorZoomAttackLevel.innerHTML = `${data["Attack"]} ms`;
+  compressorZoomReleaseLevel.innerHTML = `${data["Release"]} ms`;
+  compressorZoomGainLevel.innerHTML = `${data["MakeupGain"]} db`;
 }
 
 async function onCompressorMasterResetBtnClicked() {
@@ -3779,6 +3797,7 @@ let navPartTabBtn = document.getElementById("nav-participants-tab");
 let navLayoutTabBtn = document.getElementById("nav-layout-tab");
 let navSceneTabBtn = document.getElementById("nav-scenes-tab");
 let navSlideTabBtn = document.getElementById("nav-slide-tab");
+let navAudioTabBtn = document.getElementById("nav-audio-tab");
 let navMusicTabBtn = document.getElementById("nav-music-tab");
 let navVideoTabBtn = document.getElementById("nav-video-tab");
 let navLogTabBtn = document.getElementById("nav-log-tab");
@@ -3803,6 +3822,10 @@ navSceneTabBtn.addEventListener("click", () => {
 navSlideTabBtn.addEventListener("click", () => {
   onSlideTabClicked();
   navSlideTabBtn.scrollIntoView();
+});
+navAudioTabBtn.addEventListener("click", () => {
+  onAudioTabClicked();
+  navAudioTabBtn.scrollIntoView();
 });
 navMusicTabBtn.addEventListener("click", () => {
   onMusicTabClicked();
