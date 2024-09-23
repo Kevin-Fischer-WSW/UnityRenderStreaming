@@ -471,7 +471,6 @@ let streamAuthSettings = document.getElementById("stream-auth-settings");
 let streamPrefModal = document.getElementById("stream-pref-modal");
 let streamPrefAlerts = document.getElementById("stream-pref-alerts");
 let streamSettingsFieldset = document.getElementById("stream-settings-fieldset");
-let streamingApp = document.getElementById("serverAppSelect");
 let streamingServerAdd = document.getElementById("serverAddressSelect");
 let uname = document.getElementById("username-input");
 
@@ -512,6 +511,7 @@ async function saveSettings() {
 }
 
 async function saveStreamPref() {
+  // Send the stream service settings to the server.
   saveStreamPrefFlag = false;
   if (streamKeySelect.value === "custom" && streamKeyInput.value === "") {
     Feedback.alertDanger("You must provide a value for stream key.", streamPrefAlerts);
@@ -526,20 +526,35 @@ async function saveStreamPref() {
     return;
   }
   let streamKey = streamKeySelect.value === "custom" ? streamKeyInput.value : streamKeySelect.value;
-  let resp = await unityFetch("/setStreamServiceSettings?" +
-    "serverUrl=" + `rtmp://${streamingServerAdd.value}/${streamingApp.value}/` +
-    "&streamKey=" + streamKey +
-    "&username=" + uname.value +
-    "&password=" + pwd.value,
-    { method: "PUT" });
+  let resp = await v2api.put('/streamService/settings', {
+    Server: streamingServerAdd.value,
+    Key: streamKey,
+    Username: uname.value,
+    Password: pwd.value,
+  });
   if (!resp.ok) {
-    Feedback.alertDanger(resp.statusText, streamPrefAlerts);
+    let data = await resp.json();
+    Feedback.alertDanger(v2api.getErrorMessagesAndResolutions(data), streamPrefAlerts);
   }
   await updateSettings();
 }
 
 async function updateSettings() {
-  let resp = await fetch("/streamkeys");
+  // Update the modal's values from the server.
+  // Update the list of server addresses.
+  let resp = await v2api.get('/streamService/addresses');
+  if (!resp.ok) {
+    Feedback.alertDanger("Could not get stream service servers.", streamPrefAlerts);
+  } else {
+    let data = await resp.json();
+    streamingServerAdd.innerHTML = "";
+    for (let i = 0; i < data.Addresses.length; i++) {
+      let serverOption = SelectHelper.createOption(data.Addresses[i].Server, data.Addresses[i].Moniker, data.Addresses[i].Server);
+      streamingServerAdd.appendChild(serverOption);
+    }
+  }
+  // Update the stream key select.
+  resp = await fetch("/streamkeys");
   let data = await resp.json();
   streamKeySelect.innerHTML = "";
   for (let i = 0; i < data.streamkeys.length; i++) {
@@ -548,21 +563,21 @@ async function updateSettings() {
   }
   let customOption = SelectHelper.createOption("custom", "Custom")
   streamKeySelect.appendChild(customOption);
-  resp = await unityFetch("/getStreamServiceSettings");
+  // Update the stream service settings, including server, key, username, and password.
+  resp = await v2api.get('/streamService/settings');
   if (!resp.ok) {
     Feedback.alertDanger("Could not get stream service settings.", streamPrefAlerts);
   } else {
     let data = await resp.json();
-    let url = data.streamServiceSettings.server.split("/");
-    streamingServerAdd.value = url[2];
-    streamingApp.value = url[3];
-    let hasOption = SelectHelper.selectHasOption(streamKeySelect, data.streamServiceSettings.key);
-    streamKeySelect.value = hasOption ? data.streamServiceSettings.key : "custom";
-    streamKeyInput.value = data.streamServiceSettings.key;
+    streamingServerAdd.value = data.Server;
+    // Show the custom stream key input if the key is not in the list
+    let hasOption = SelectHelper.selectHasOption(streamKeySelect, data.Key);
+    streamKeySelect.value = hasOption ? data.Key : "custom";
+    streamKeyInput.value = data.Key;
     streamKeyInput.parentElement.style.display = hasOption ? "none" : "block";
-    uname.value = data.streamServiceSettings.username;
-    pwd.value = data.streamServiceSettings.password;
-    boardData.innerHTML = url[3] === "none" ? "" : data.streamServiceSettings.server + data.streamServiceSettings.key;
+    uname.value = data.Username;
+    pwd.value = data.Password;
+    boardData.innerHTML = data.FullServerAddress;
   }
   resp = await unityFetch("/getAutomationSettings");
   if (resp.ok) {
@@ -590,7 +605,6 @@ function onStreamKeySelectChanged() {
 // => EVENT LISTENERS
 pwd.addEventListener("input", flagStreamPrefChange);
 saveSettingsBtn.addEventListener("click", saveSettings);
-streamingApp.addEventListener("input", flagStreamPrefChange);
 streamKeyInput.addEventListener("input", flagStreamPrefChange);
 streamKeySelect.addEventListener("change", onStreamKeySelectChanged);
 streamingServerAdd.addEventListener("input", flagStreamPrefChange);
