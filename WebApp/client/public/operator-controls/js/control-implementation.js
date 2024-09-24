@@ -213,8 +213,9 @@ function setupParticipantOnVidCtrl(node, idx) {
   showLtEl.addEventListener("click", function (ev) {
     ev.preventDefault();
     let p = participantJsonParsed[idx];
-    let str = p.id.toString();
-    sendStringSubmitEvent(myVideoPlayer, OperatorControls._ToggleParticipantLowerThird, str);
+    v2api.put(`/display/participant/${p.id}`, {
+      ShowLowerThird: !p.lowerThirdShowing,
+    });
   })
   
   maximizeEl.addEventListener("click", async function (ev) {
@@ -1055,11 +1056,15 @@ function onDeleteGroupBtnClicked() {
 }
 
 function onHideAllLowerThirdsClick() {
-  sendClickEvent(myVideoPlayer, OperatorControls._HideAllLowerThirds);
+  v2api.put('/display/participant/all', {
+    ShowLowerThird: false
+  });
 }
 
 function onShowAllLowerThirdsClick() {
-  sendClickEvent(myVideoPlayer, OperatorControls._ShowAllLowerThirds);
+  v2api.put('/display/participant/all', {
+    ShowLowerThird: true
+  });
 }
 
 function onParticipantGroupSelectChanged() {
@@ -1154,8 +1159,9 @@ function setupParticipantInputGroup(node) {
 
   lowerThirdBtn.addEventListener("click", function () {
     let p = participantJsonParsed[idx];
-    let str = p.id.toString();
-    sendStringSubmitEvent(myVideoPlayer, OperatorControls._ToggleParticipantLowerThird, str);
+    v2api.put(`/display/participant/${p.id}`, {
+      ShowLowerThird: !p.lowerThirdShowing,
+    });
   })
 
   renameBtn.addEventListener("click", function () {
