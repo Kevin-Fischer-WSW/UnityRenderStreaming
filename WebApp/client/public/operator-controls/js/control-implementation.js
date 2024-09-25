@@ -476,6 +476,7 @@ let streamingServerAdd = document.getElementById("serverAddressSelect");
 let uname = document.getElementById("username-input");
 
 let autoShowCheckbox = document.getElementById("auto-show-checkbox");
+let autoShowLtCheckbox = document.getElementById("auto-show-lt-checkbox");
 let autoMuteCheckbox = document.getElementById("auto-mute-checkbox");
 let autoShowScreenShareCheckbox = document.getElementById("auto-show-screen-share-checkbox");
 
@@ -504,9 +505,12 @@ async function saveSettings() {
     await saveStreamPref();
   }
 
-  unityFetch(`/enableOutputVideoByDefault?enable=${autoShowCheckbox.checked}`, {method: "PUT"});
-  unityFetch(`/enableOutputAudioByDefault?enable=${!autoMuteCheckbox.checked}`, {method: "PUT"});
-  unityFetch(`/enableOutputScreenShareByDefault?enable=${autoShowScreenShareCheckbox.checked}`, {method: "PUT"});
+  v2api.put('/automation', {
+    AutoShowParticipantEnabled : autoShowCheckbox.checked,
+    AutoShowLowerThirdEnabled : autoShowLtCheckbox.checked,
+    AutoMuteParticipantEnabled : autoMuteCheckbox.checked,
+    AutoShowScreenShareEnabled : autoShowScreenShareCheckbox.checked,
+  });
   await updateSettings();
   Feedback.alertSuccess("Settings saved.", streamPrefAlerts);
 }
@@ -580,12 +584,13 @@ async function updateSettings() {
     pwd.value = data.Password;
     boardData.innerHTML = data.FullServerAddress;
   }
-  resp = await unityFetch("/getAutomationSettings");
+  resp = await v2api.get('/automation');
   if (resp.ok) {
     let data = await resp.json();
-    autoShowCheckbox.checked = data.autoShowParticipantEnabled;
-    autoMuteCheckbox.checked = data.autoMuteParticipantEnabled;
-    autoShowScreenShareCheckbox.checked = data.autoShowScreenShareEnabled;
+    autoShowCheckbox.checked = data.AutoShowParticipantEnabled;
+    autoShowLtCheckbox.checked = data.AutoShowLowerThirdEnabled;
+    autoMuteCheckbox.checked = data.AutoMuteParticipantEnabled;
+    autoShowScreenShareCheckbox.checked = data.AutoShowScreenShareEnabled;
   }
 }
 
@@ -1059,11 +1064,17 @@ function onHideAllLowerThirdsClick() {
   v2api.put('/display/participant/all', {
     ShowLowerThird: false
   });
+  v2api.put('/automation', {
+    AutoShowLowerThirdEnabled: false
+  });
 }
 
 function onShowAllLowerThirdsClick() {
   v2api.put('/display/participant/all', {
     ShowLowerThird: true
+  });
+  v2api.put('/automation', {
+    AutoShowLowerThirdEnabled: true
   });
 }
 
