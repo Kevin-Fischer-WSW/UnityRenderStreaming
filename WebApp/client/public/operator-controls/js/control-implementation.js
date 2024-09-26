@@ -3041,6 +3041,7 @@ videoSwitchBtn.style.display = "none";
 // => DOM ELEMENTS
 
 let slackFieldset = document.getElementById("slack-fieldset");
+let slackUsernameInput = document.getElementById("slack-username-input");
 let slackChannelInput = document.getElementById("slack-channel-input");
 let slackChannelDatalist = document.getElementById("slack-channel-datalist");
 let slackSetChannelBtn = document.getElementById("slack-set-channel-btn");
@@ -3050,6 +3051,18 @@ let slackTestPostMessageBtn = document.getElementById("slack-test-post-message-b
 let fetchingChannels = false;
 
 // => METHODS
+async function onSlackTabClicked() {
+  let resp = v2api.get("/slack/customUsername")
+  let data = await resp.json();
+  if (v2api.checkErrorCode(data, 0) === true) {
+    slackUsernameInput.value = data.CustomUsername;
+  }
+}
+
+function onSlackUsernameInputChanged() {
+  v2api.put("/slack/customUsername", {CustomUsername: slackUsernameInput.value});
+}
+
 async function onSlackChannelInputChanged() {
   if (slackChannelInput.value.length > 0) {
     slackSetChannelBtn.disabled = false;
@@ -3108,6 +3121,7 @@ async function onSlackTestPostMessageBtnClicked() {
 }
 
 // => EVENT LISTENERS
+slackUsernameInput.addEventListener("change", onSlackUsernameInputChanged);
 slackChannelInput.addEventListener("input", onSlackChannelInputChanged);
 slackSetChannelBtn.addEventListener("click", onSlackSetChannelBtnClicked);
 slackTestPostMessageBtn.addEventListener("click", onSlackTestPostMessageBtnClicked);
@@ -3871,6 +3885,7 @@ navLogTabBtn.addEventListener("click", () => {
   fetchLogs();
 });
 navSlackTabBtn.addEventListener("click", () => {
+  onSlackTabClicked();
   navSlackTabBtn.scrollIntoView();
 });
 navUploadTabBtn.addEventListener("click", () => {

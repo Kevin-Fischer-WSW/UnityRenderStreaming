@@ -1133,6 +1133,12 @@
       <div class="tab-pane fade" id="nav-slack" role="tabpanel" aria-labelledby="nav-slack-tab">
         <fieldset id="slack-fieldset">
           <legend class="title text-white mt-2">Slack</legend>
+          <!-- Custom username input -->
+          <div class="form-floating m-2">
+            <input type="text" class="form-control" id="slack-username-input" placeholder="Username">
+            <label for="slack-username-input">Username</label>
+          </div>
+          <!-- Slack Channel Input -->
           <div class="input-group">
             <label class="input-group-text" for="slack-channel-input">Channel</label>
             <input id="slack-channel-input" list="slack-channel-datalist" type="text" class="form-control" 
