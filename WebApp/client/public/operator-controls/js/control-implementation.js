@@ -103,32 +103,6 @@ signOutModal.addEventListener('shown.bs.modal', function () {
   signOutModal.focus();
 })
 
-/* EXTEND (TEMPORARY) */
-document.body.addEventListener("click", function () {
-
-  setTimeout(async function () {
-    let result = await extend();
-    if (!result.valid && result.exception === undefined) {
-      alert("Your session has expired! You're being redirected...");
-      window.location = window.location.origin;
-    }
-  }, 700)
-});
-
-async function extend() {
-  try {
-    let resp = await fetch("/extend");
-    if (resp.ok) {
-      return await resp.json();
-    } else {
-      return {valid: false};
-    }
-  }
-  catch (e) {
-    return {valid: false, exception: e};
-  }
-}
-
 /* PARTICIPANT ACTIONS ON VIDEO ELEMENT */
 // => DOM ELEMENTS
 let participantOnVidCtrlOg = document.getElementById("participant-on-vid-ctrl-og");

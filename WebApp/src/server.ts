@@ -195,15 +195,6 @@ export const createServer = (config: Options): express.Application => {
     })
   });
 
-  // todo Use a different method to extend the session
-  app.get('/extend', (req, res) => {
-    if (req.session.authorized) {
-      res.status(200).json({valid:true})
-    } else {
-      res.status(401).json({valid:false})
-    }
-  });
-
   function ValidatePathExists(res, filePath) {
     if (!fs.existsSync(filePath)) {
       let message = `File ${filePath} does not exist on server`;
