@@ -136,9 +136,12 @@ function setupParticipantOnVidCtrl(node, idx) {
     if (currentlyDraggedPov !== node) {
       let currentIdx = participantOnVidCtrls.indexOf(currentlyDraggedPov);
       let droppedIdx = participantOnVidCtrls.indexOf(node);
-      let p1 = participantJsonParsed[currentIdx].id;
-      let p2 = participantJsonParsed[droppedIdx].id;
-      unityFetch(`/swapParticipants?participantId1=${p1}&participantId2=${p2}`, { method: "PUT" });
+      let p1id = participantJsonParsed[currentIdx].id;
+      let p2rank = participantJsonParsed[droppedIdx].rank;
+      v2api.put(`/display/participant/${p1id}`, {
+        "Rank" : p2rank,
+        "RankCollisionResolutionStrategy" : 0,
+      });
     }
   }
 
@@ -1130,9 +1133,12 @@ function setupParticipantInputGroup(node) {
           droppedIdx = i;
         }
       }
-      let p1 = participantJsonParsed[currentIdx].id;
-      let p2 = participantJsonParsed[droppedIdx].id;
-      unityFetch(`/swapParticipants?participantId1=${p1}&participantId2=${p2}`, { method: "PUT" });
+      let p1id = participantJsonParsed[currentIdx].id;
+      let p2rank = participantJsonParsed[droppedIdx].rank;
+      v2api.put(`/display/participant/${p1id}`, {
+        "Rank" : p2rank,
+        "RankCollisionResolutionStrategy" : 0,
+      });
     }
   }
 
