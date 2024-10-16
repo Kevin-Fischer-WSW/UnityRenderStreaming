@@ -1438,7 +1438,6 @@ function updateCurrentLayout(layoutType, preferScreenShareTop, preferScreenShare
 
     switch (layoutType) {
       case "hScreenShare":
-      case "hV2ScreenShare":
       case "vScreenShare":
         let b2 = child.dataset.videosTop === (!preferScreenShareTop).toString();
         let b3 = child.dataset.videosLeft === (!preferScreenShareLeft).toString();
