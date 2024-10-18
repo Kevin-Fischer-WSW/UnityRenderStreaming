@@ -35,7 +35,9 @@ window.document.oncontextmenu = function () {
 
 window.addEventListener('resize', function () {
   // error: receiver is not initialized the first time loading the page.
-  myVideoPlayer.resizeVideo();
+  if (myVideoPlayer){
+    myVideoPlayer.resizeVideo();
+  }
 }, true);
 
 window.addEventListener('beforeunload', async () => {
