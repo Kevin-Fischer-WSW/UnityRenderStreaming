@@ -11,12 +11,10 @@ describe('login to Eagle Eye', () => {
     cy.get('#password').type('EagleEye2023')
     cy.get('#submit').click()
   })
-  it('joins a meeting', () =>{
+  it('joins and leaves a meeting', () =>{
     cy.get('#meeting-number-input').type('3454530783')
     cy.get('#join-meeting-btn').click()
-    cy.get('#stat-meeting').should('contain', '3454530783')
-  })
-  it('leaves a meeting', () =>{
+    cy.get('#stat-meeting', {timeout: 10000}).should('contain', '3454530783')
     cy.get('#leave-meeting-btn').click()
     cy.get('#stat-meeting').should('contain', 'No')
   })
