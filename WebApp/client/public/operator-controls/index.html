@@ -246,6 +246,27 @@
       </div>
     </div>
   </div>
+  
+  <!-- Zoom Notifications Modal -->
+  <div class="modal fade" id="zoom-notifications-modal" tabindex="-1" aria-labelledby="zoom-notifications-modal-label"
+       aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header bg-light">
+          <h5 class="modal-title" id="zoom-notifications-modal-label">Zoom Notifications</h5>
+          <button type="button" id="zoom-notifications-clear-all" class="btn btn-secondary m-2" aria-label="Clear All" title="Clear All">Clear All</button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" title="Close"></button>
+        </div>
+
+        <!-- Zoom Notifications Modal Body -->
+        <div class="modal-body">
+          <div id="zoom-notifications-list" class="list-group">
+            <!-- Notifications will be generated and placed here. -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Reboot confirmation Modal -->
   <div class="modal fade" id="reboot-confirmation-modal" tabindex="-1">
@@ -324,10 +345,7 @@
     </div>
   </div>
   
-  <div class="bg-secondary text-white rounded-bottom flex-shrink-0">
-    <button id="stream-settings" class="btn border-0 m-0" data-bs-toggle="modal" data-bs-target="#stream-pref-modal"
-            title="Settings"><i class="bi bi-gear-fill"></i></button>
-  </div>
+  
 
   <!-- Title -->
   <div class="w-100 mb-2">
@@ -343,6 +361,12 @@
         <div id="stat-audio" class="flex-grow-1 border-start  ms-1 me-1 ps-1">Audio: </div>
         <div id="stat-video" class="flex-grow-1 border-start  ms-1 me-1 ps-1">Video: </div>
         <div id="stat-scene" class="flex-grow-1 border-start  ms-1 me-1 ps-1">Scene: </div>
+      </div>
+      <div class="bg-secondary rounded-bottom flex-shrink-0">
+        <button id="zoom-notifications" class="btn btn-secondary border-0 m-0" data-bs-toggle="modal" data-bs-target="#zoom-notifications-modal"
+                title="Notifications"><i class="bi bi-bell-fill"></i><span id="zoom-notification-number">0</span></button>
+        <button id="stream-settings" class="btn btn-secondary border-0 m-0" data-bs-toggle="modal" data-bs-target="#stream-pref-modal"
+                title="Settings"><i class="bi bi-gear-fill"></i></button>
       </div>
     </div>
   </div>

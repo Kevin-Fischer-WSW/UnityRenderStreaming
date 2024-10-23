@@ -197,6 +197,11 @@ export class VideoPlayer extends EventTarget {
             _this.onZoomReferenceDbLevelNotification.call(_this, msgContents);
           }
           break;
+        case MessageTypes._NewZoomParticipant:
+          if (_this.onNewZoomParticipant){
+            _this.onNewZoomParticipant.call(_this, msgContents);
+          }
+          break;
       }
     };
   }

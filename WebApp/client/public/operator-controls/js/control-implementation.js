@@ -31,6 +31,7 @@ mainNotifications.addEventListener('setup', function () {
   myVideoPlayer.onRegistrationUrlReceived = onRegistrationUrlReceived;
   myVideoPlayer.onObsDbLevelNotification = onObsDbLevelNotification;
   myVideoPlayer.onZoomReferenceDbLevelNotification = onZoomReferenceDbLevelNotification;
+  myVideoPlayer.onNewZoomParticipant = onNewZoomParticipant;
   myVideoPlayer.signaling.addEventListener("message", async (e) => {
     onAlert(e.detail);
   });
@@ -334,6 +335,14 @@ function onZoomReferenceDbLevelNotification(data) {
   if (zoom > peakInput) peakInput = zoom;
 }
 
+function onNewZoomParticipant(data){
+  let split = data.split(",");
+  let participantName = split[0];
+  let joined = split[1] === "True";
+  
+  addZoomNotification(participantName, joined);
+}
+
 function updateDbLevels(){
   let masterFill = 1.0 - peakOutput / -80.0;
   let zoomFill = 1.0 - peakInput / -80.0;
@@ -622,6 +631,34 @@ clipboard.on('success', function (e) {
 streamPrefModal.addEventListener('shown.bs.modal', function () {
   streamingServerAdd.focus();
 })
+
+/* ZOOM NOTIFICATIONS MODAL */
+
+// => DOM ELEMENTS
+let zoomNotificationsClearAllBtn = document.getElementById("zoom-notifications-clear-all");
+let zoomNotificationsList = document.getElementById("zoom-notifications-list");
+let zoomNotificationNumber = document.getElementById("zoom-notification-number");
+
+// => PRIMITIVE AND OTHER TYPES
+let notificationCount = 0;
+
+// => METHODS
+function clearAllZoomNotifications() {
+  notificationCount = 0;
+  zoomNotificationNumber.innerHTML = notificationCount.toString();
+  zoomNotificationsList.innerHTML = "";
+}
+
+function addZoomNotification(name, joined) {
+  let message = `<b>${name}</b> has ${joined ? "joined" : "left"} the Zoom meeting.`
+  notificationCount++;
+  zoomNotificationNumber.innerHTML = notificationCount.toString();
+  Feedback.alertInfo(message);
+  zoomNotificationsList.innerHTML += `<div class="list-group-item list-group-item-info">${message}</div>`
+}
+
+// => EVENT LISTENERS
+zoomNotificationsClearAllBtn.addEventListener("click", clearAllZoomNotifications); 
 
 /* GENERAL STATUS BAR */
 // => DOM ELEMENTS
