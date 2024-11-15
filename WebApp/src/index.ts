@@ -23,6 +23,7 @@ export class RenderStreaming {
           .option('-s, --secure', 'Enable HTTPS (you need server.key and server.cert)', process.env.SECURE || false)
           .option('-k, --keyfile <path>', 'https key file (default server.key)', process.env.KEYFILE || 'server.key')
           .option('-c, --certfile <path>', 'https cert file (default server.cert)', process.env.CERTFILE || 'server.cert')
+          .option('-ca, --cafile <path>', 'https ca-bundle file (default server.ca-bundle)', process.env.CABUNDLE || 'server.ca-bundle')
           .option('-w, --websocket', 'Enable Websocket Signaling', process.env.WEBSOCKET || false)
           .option('-m, --mode <type>', 'Choose Communication mode public or private (default public)', process.env.MODE || 'public')
           .option('-l, --logging <type>', 'Choose http logging type combined, dev, short, tiny or none.(default dev)', process.env.LOGGING || 'dev')
@@ -39,6 +40,7 @@ export class RenderStreaming {
           secure: option.secure == undefined ? false : option.secure,
           keyfile: option.keyfile,
           certfile: option.certfile,
+          cafile: option.cafile,
           websocket: option.websocket == undefined ? false : option.websocket,
           mode: option.mode,
           logging: option.logging,
@@ -68,6 +70,7 @@ export class RenderStreaming {
       this.server = https.createServer({
         key: fs.readFileSync(options.keyfile),
         cert: fs.readFileSync(options.certfile),
+        ca: fs.readFileSync(options.cafile),
       }, this.app).listen(this.options.port, () => {
         const { port } = this.server.address() as AddressInfo;
         const addresses = this.getIPAddress();

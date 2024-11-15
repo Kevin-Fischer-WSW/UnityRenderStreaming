@@ -1,6 +1,7 @@
 export default interface Options {
   secure?: boolean;
   port?: number;
+  cafile?: string;
   keyfile?: string;
   certfile?: string;
   websocket?: boolean;
