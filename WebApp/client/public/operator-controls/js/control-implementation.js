@@ -417,6 +417,7 @@ renameModal.addEventListener('shown.bs.modal', function () {
 // => DOM ELEMENTS
 let meetingNoInput = document.getElementById("meeting-number-input");
 let meetingNoInputField = document.getElementById("meeting-number-input-field");
+let zoomSdkSpeaker = document.getElementById("zoom-sdk-speaker");
 
 // => EVENTS LISTENERS
 meetingNoInput.addEventListener("change", () => {
@@ -3938,6 +3939,8 @@ function appStatusReceived(json) {
   if (appStatus.sessionTitle && appStatus.sessionTitle !== ""){
     document.title = appStatus.sessionTitle;
   }
+  
+  zoomSdkSpeaker.innerText = `Zoom SDK Speaker: ${appStatus.dummySpeakerDeviceName}`
 
   updateGeneralStatBar();
   updateToggleOutputPreviewBtn(appStatus)
