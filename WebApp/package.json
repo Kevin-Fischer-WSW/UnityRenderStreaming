@@ -24,7 +24,7 @@
     "bootstrap": "^5.2.2",
     "clipboard": "^2.0.11",
     "debug": "~4.3.4",
-    "express": "~4.18.1",
+    "express": "^4.21.1",
     "express-session": "^1.17.3",
     "fluent-ffmpeg": "^2.1.2",
     "formidable": "^2.0.1",
