@@ -1326,6 +1326,8 @@ let screenShareSizeDropdown = document.getElementById("screen-share-size-dropdow
 let cropScreenShareBtn = document.getElementById("crop-screen-share-btn");
 let cropScreenShareApplyBtn = document.getElementById("crop-screen-share-apply-btn");
 let cropScreenShareCloseBtn = document.getElementById("crop-screen-share-close-btn");
+let revertStyleBtn = document.getElementById("revert-style-btn");
+let revertAllStylesBtn = document.getElementById("revert-all-styles-btn");
 
 // => PRIMITIVE AND OTHER TYPES
 let styleData = undefined;
@@ -1403,6 +1405,47 @@ function onEditStyleSelectClicked() {
     editStyleSelect.innerHTML = "<option>Loading...</option>";
     fetchStyleData();
   }
+}
+
+function onRevertStyleBtnClicked() {
+  let selectedOption = editStyleSelect.options[editStyleSelect.selectedIndex];
+  if (selectedOption === undefined) {
+      Feedback.alertDanger("No style selected.");
+  }
+  let category = selectedOption.dataset.category;
+  let type = selectedOption.dataset.type;
+  if (type === undefined && category === undefined) {
+      Feedback.alertDanger("Cannot revert style(s) because type and category are not defined.");
+  } else if (type === undefined) {
+    // Reverting category data.
+    v2api.put(`/style/${category}/revert`).then((response) => {
+      if (response.ok) {
+        Feedback.alertSuccess(`Reverted category ${category}.`);
+      } else {
+        Feedback.alertDanger(`Failed to revert category ${category}.`);
+      }
+    });
+  }
+  else {
+      // Reverting type data.
+      v2api.put(`/style/${category}/${type}/revert`).then((response) => {
+          if (response.ok) {
+              Feedback.alertSuccess(`Reverted type ${type} in category ${category}.`);
+          } else {
+              Feedback.alertDanger(`Failed to revert type ${type} in category ${category}.`);
+          }
+      });
+  }
+}
+
+function onRevertAllStylesBtnClicked() {
+    v2api.put(`/styles/revert`).then((response) => {
+        if (response.ok) {
+            Feedback.alertSuccess("Reverted all styles.");
+        } else {
+            Feedback.alertDanger("Failed to revert all styles.");
+        }
+    });
 }
 
 function onCropScreenShareApplyBtnClicked() {
@@ -1511,6 +1554,8 @@ cropScreenShareApplyBtn.addEventListener("click", onCropScreenShareApplyBtnClick
 editStyleSelect.addEventListener("click", onEditStyleSelectClicked);
 editStyleSelect.addEventListener("change", editStyleSelectionChanged);
 lowerThirdStyleBtn.addEventListener("click", onLowerThirdStyleBtnPressed);
+revertStyleBtn.addEventListener("click", onRevertStyleBtnClicked)
+revertAllStylesBtn.addEventListener("click", onRevertAllStylesBtnClicked);
 
 cropScreenSharePreview.onload = function () {
   cropWidget.mainElement.style.display = "block";
