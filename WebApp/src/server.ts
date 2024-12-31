@@ -12,6 +12,7 @@ import * as Ffmpeg  from 'fluent-ffmpeg';
 import {FfprobeData} from "fluent-ffmpeg";
 import {execSync} from "child_process";
 import * as streamkey from './streamkey';
+import * as AdmZip from 'adm-zip';
 
 declare module 'express-session' {
   export interface SessionData {
@@ -514,6 +515,29 @@ export const createServer = (config: Options): express.Application => {
           res.status(500).end();
         }
       });
+  });
+  
+  app.get('/download_zoomsdk_logs', (req, res) => {
+    let zoomSdkAppData = path.join(process.env.APPDATA,"ZoomSdk")
+
+    try{
+      let zip = new AdmZip();
+      zip.addLocalFolder(zoomSdkAppData, "ZoomSdk");
+      zip.writeZip("./zoomsdk.zip")
+      res.attachment("./zoomsdk.zip");
+      res.download(
+          "./zoomsdk.zip",
+          "zoomsdk.zip", // Remember to include file extension
+          (err) => {
+            if (err) {
+              console.log(err);
+              res.status(500).end();
+            }
+          });
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({message: "Zoom sdk logs not archived. Error: ".concat(err)});
+    }
   });
 
   app.get('/streamkeys', (req, res) => {

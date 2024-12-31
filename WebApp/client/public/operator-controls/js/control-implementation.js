@@ -3686,8 +3686,8 @@ configDownloadBtn.addEventListener("click", function () {
 /* LOG TAB */
 // => DOM ELEMENTS
 let listLogFileOptions = document.getElementById("list-all-log-files");
-
 let logDownloadBtn = document.getElementById("log-download-btn");
+let zoomSdkLogsDownloadBtn = document.getElementById("zoomsdk-logs-download-btn")
 
 // => METHODS
 function downloadLog() {
@@ -3727,6 +3727,15 @@ function downloadLog() {
   }
 }
 
+function downloadZoomSdkAppdata(){
+  fetch("/download_zoomsdk_logs").then(resp => {
+    if (resp.ok){
+      Feedback.alertSuccess("Getting zoom sdk logs");
+    } else{
+      Feedback.alertDanger("Could not get zoom sdk logs");
+    }
+  });
+}
 function fetchLogs() {
   unityFetch("/getLog")
     .then(resp => resp.text())
@@ -3778,6 +3787,7 @@ function onLogMessageNotification() {
 // => EVENT LISTENERS
 listLogFileOptions.addEventListener("click", listAvailableLogs);
 logDownloadBtn.addEventListener("click", onLogDownloadClicked);
+zoomSdkLogsDownloadBtn.addEventListener("click", downloadZoomSdkAppdata);
 
 /* RECORDING TAB */
 // => DOM ELEMENTS
