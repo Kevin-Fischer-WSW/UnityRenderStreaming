@@ -3688,6 +3688,7 @@ configDownloadBtn.addEventListener("click", function () {
 let listLogFileOptions = document.getElementById("list-all-log-files");
 let logDownloadBtn = document.getElementById("log-download-btn");
 let zoomSdkLogsDownloadBtn = document.getElementById("zoomsdk-logs-download-btn")
+let getEc2InstanceIdBtn = document.getElementById("ec2-instance-id-btn");
 
 // => METHODS
 function downloadLog() {
@@ -3784,10 +3785,24 @@ function onLogMessageNotification() {
   }
 }
 
+async function getEc2InstanceId() {
+  let resp = await v2api.get("/ec2id");
+  let data = await resp.json();
+  if (v2api.checkErrorCode(data, 0) === true) {
+    navigator.clipboard.writeText(data.Details).then(function () {
+      Feedback.alertSuccess("EC2 Instance ID copied to clipboard.");
+    }).catch(function () {
+      Feedback.alertDanger("Could not copy ec2 instance id to clipboard.");
+    });
+  } else {
+    Feedback.alertDanger("Could not get ec2 instance id");
+  }
+}
 // => EVENT LISTENERS
 listLogFileOptions.addEventListener("click", listAvailableLogs);
 logDownloadBtn.addEventListener("click", onLogDownloadClicked);
 zoomSdkLogsDownloadBtn.addEventListener("click", downloadZoomSdkAppdata);
+getEc2InstanceIdBtn.addEventListener("click", getEc2InstanceId);
 
 /* RECORDING TAB */
 // => DOM ELEMENTS
