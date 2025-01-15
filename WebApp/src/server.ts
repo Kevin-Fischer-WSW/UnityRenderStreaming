@@ -525,7 +525,7 @@ export const createServer = (config: Options): express.Application => {
       zip.addLocalFolder(zoomSdkAppData, "ZoomSdk");
       zip.writeZip("./zoomsdk.zip")
       res.attachment("./zoomsdk.zip");
-      res.download(
+      res.status(200).download(
           "./zoomsdk.zip",
           "zoomsdk.zip", // Remember to include file extension
           (err) => {

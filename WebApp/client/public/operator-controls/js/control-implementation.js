@@ -3697,7 +3697,7 @@ function downloadLog() {
   client.open("GET", "/download_log/" + fname);
   client.responseType = "blob";
   client.send();
-
+  
   // starts the download.
   client.onload = function (e) {
     if (this.readyState == 4 && this.status == 200) {
@@ -3728,15 +3728,6 @@ function downloadLog() {
   }
 }
 
-function downloadZoomSdkAppdata(){
-  fetch("/download_zoomsdk_logs").then(resp => {
-    if (resp.ok){
-      Feedback.alertSuccess("Getting zoom sdk logs");
-    } else{
-      Feedback.alertDanger("Could not get zoom sdk logs");
-    }
-  });
-}
 function fetchLogs() {
   unityFetch("/getLog")
     .then(resp => resp.text())
@@ -3801,7 +3792,6 @@ async function getEc2InstanceId() {
 // => EVENT LISTENERS
 listLogFileOptions.addEventListener("click", listAvailableLogs);
 logDownloadBtn.addEventListener("click", onLogDownloadClicked);
-zoomSdkLogsDownloadBtn.addEventListener("click", downloadZoomSdkAppdata);
 getEc2InstanceIdBtn.addEventListener("click", getEc2InstanceId);
 
 /* RECORDING TAB */
